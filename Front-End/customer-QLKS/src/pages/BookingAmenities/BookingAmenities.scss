@@ -1,0 +1,126 @@
+.booking-amenities {
+  padding: 30px 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+  
+  &__header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+  
+  &__back-btn {
+    margin-right: 20px;
+    margin-bottom: 10px;
+  }
+  
+  &__title {
+    margin-bottom: 10px !important;
+  }
+  
+  &__selected {
+    margin-bottom: 20px;
+  }
+  
+  &__selected-card {
+    background-color: #f6ffed;
+    border-color: #b7eb8f;
+  }
+  
+  &__selected-header {
+    display: flex;
+    align-items: center;
+    font-size: 16px;
+    margin-bottom: 10px;
+  }
+  
+  &__cart-icon {
+    font-size: 20px;
+    margin-right: 10px;
+    color: #52c41a;
+  }
+  
+  &__selected-total {
+    font-size: 18px;
+    font-weight: 600;
+    color: #f5222d;
+  }
+  
+  &__list {
+    margin-top: 20px;
+  }
+  
+  &__item {
+    transition: all 0.3s;
+    border: 2px solid transparent;
+    
+    &--selected {
+      border-color: #1890ff;
+      background-color: #e6f7ff;
+    }
+    
+    &:hover {
+      border-color: #40a9ff;
+    }
+  }
+  
+  &__item-content {
+    display: flex;
+    flex-direction: column;
+    position: relative;
+  }
+  
+  &__item-image {
+    text-align: center;
+    margin-bottom: 10px;
+    
+    img {
+      max-height: 100px;
+      object-fit: contain;
+    }
+  }
+  
+  &__item-info {
+    flex: 1;
+  }
+  
+  &__item-name {
+    font-size: 16px;
+    font-weight: 500;
+    margin-bottom: 5px;
+  }
+  
+  &__item-price {
+    color: #f5222d;
+    font-weight: 500;
+  }
+  
+  &__item-checkbox {
+    position: absolute;
+    top: 0;
+    right: 0;
+  }
+  
+  &__footer {
+    margin-top: 30px;
+    text-align: center;
+  }
+  
+  &__confirm-btn {
+    min-width: 200px;
+  }
+}
+
+@media (max-width: 768px) {
+  .booking-amenities {
+    &__header {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    
+    &__back-btn {
+      margin-bottom: 15px;
+    }
+  }
+}

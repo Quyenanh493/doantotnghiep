@@ -23,7 +23,9 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.BOOLEAN,
       defaultValue: true
     },
-    hotelType: DataTypes.STRING
+    hotelType: DataTypes.STRING,
+    hotelImage: DataTypes.STRING,
+    description: DataTypes.STRING,
   }, {
     sequelize,
     modelName: 'Hotel',

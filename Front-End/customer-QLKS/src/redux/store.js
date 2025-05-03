@@ -1,11 +1,11 @@
 import { configureStore } from '@reduxjs/toolkit';
 import searchReducer from './search/searchSlice';
+import bookingReducer from './booking/bookingSlice';
 
-// Thêm các reducer khác ở đây nếu bạn có
 const store = configureStore({
   reducer: {
     search: searchReducer,
-    // các reducer khác...
+    booking: bookingReducer
   }
 });
 

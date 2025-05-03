@@ -37,36 +37,47 @@ function Register({ visible, onCancel, onRegisterSuccess }) {
       // Gửi dữ liệu đăng ký với URL ảnh
       const response = await registerCustomer(submitValues);
       
-      // Kiểm tra cấu trúc dữ liệu mới
-      if (response && response.EC === 0 && response.DT) {
+      console.log('Register response:', response);
+      
+      // Kiểm tra cấu trúc dữ liệu mới - Sửa điều kiện kiểm tra
+      if (response && response.EC === 0) {
+        // Nếu có dữ liệu token trong response
+        if (response.DT && response.DT.accessToken) {
+          // Lưu token vào cookie
+          setCookie("accessToken", response.DT.accessToken, 1);
+          setCookie("refreshToken", response.DT.refreshToken, 1);
+          setCookie("role", response.DT.accountType, 1);
+          
+          // Lưu thông tin người dùng vào localStorage
+          const userData = response.DT.userData || {};
+          localStorage.setItem('user', JSON.stringify(userData));
+          
+          // Gọi callback để cập nhật trạng thái đăng nhập
+          if (onRegisterSuccess) onRegisterSuccess(userData);
+        }
+        
+        // Đóng modal đăng ký
+        if (onCancel) onCancel();
+        
+        // Hiển thị thông báo thành công
         notiApi.success({
           message: 'Đăng ký thành công',
           description: response.EM || 'Tài khoản của bạn đã được tạo thành công.',
         });
         
-        // Lưu token vào cookie
-        setCookie("accessToken", response.DT.accessToken, 1);
-        setCookie("refreshToken", response.DT.refreshToken, 1);
-        setCookie("role", response.DT.accountType, 1);
-        
-        // Lưu thông tin người dùng vào localStorage
-        const userData = response.DT.userData || {};
-        localStorage.setItem('user', JSON.stringify(userData));
-        
-        // Gọi callback để cập nhật trạng thái đăng nhập
-        if (onRegisterSuccess) onRegisterSuccess(userData);
-        
+        // Reset form và state
         form.resetFields();
         setImageUrl('');
         setUploadedImageUrl('');
-        if (onCancel) onCancel();
       } else {
+        // Hiển thị thông báo lỗi từ API
         notiApi.error({
           message: 'Đăng ký thất bại',
           description: response?.EM || 'Có lỗi xảy ra khi đăng ký.',
         });
       }
     } catch (error) {
+      console.error('Register error:', error);
       notiApi.error({
         message: 'Đăng ký thất bại',
         description: error.response?.data?.message || 'Có lỗi xảy ra khi đăng ký.',
@@ -144,7 +155,7 @@ function Register({ visible, onCancel, onRegisterSuccess }) {
   
   return (
     <Modal
-      title={<h2 className="register-title">ĐĂNG KÝ</h2>}
+      title={<h2 className="register-title">ĐĂNG KÝY</h2>}
       open={visible}
       onCancel={onCancel}
       footer={null}
@@ -320,7 +331,7 @@ function Register({ visible, onCancel, onRegisterSuccess }) {
             className="register-button"
             loading={loading}
           >
-            ĐĂNG KÝ
+            ĐĂNG KÝY
           </Button>
         </Form.Item>
       </Form>

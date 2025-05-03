@@ -8,6 +8,7 @@ import dayjs from 'dayjs';
 import { useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { resetSearch } from '../../redux/search/searchSlice'; 
+import { getCookie } from '../../helper/cookie';
 
 const { RangePicker } = DatePicker;
 const { Option } = Select;
@@ -165,7 +166,7 @@ function Room() {
         values.roomType || null,
         totalGuests
       );
-      console.log('Dữ liệu trả về từ API:', response); // Thêm dòng debug thu
+      console.log('Dữ liệu trả về từ API:', response); 
       
       if (response && response.DT) {
         setRooms(response.DT);
@@ -201,7 +202,7 @@ function Room() {
 
   const handleBookNow = (roomId) => {
     // Kiểm tra xem người dùng đã đăng nhập chưa
-    const token = localStorage.getItem('accessToken');
+    const token = getCookie('accessToken');
     if (!token) {
       notiApi.warning({
         message: 'Yêu cầu đăng nhập',
@@ -220,7 +221,7 @@ function Room() {
     }
     
     // Chuyển hướng đến trang đặt phòng với thông tin đã chọn
-    navigate(`/booking/${roomId}`, {
+    navigate(`/booking-confirmation`, {
       state: {
         dateIn: selectedDates[0].format('YYYY-MM-DD'),
         dateOut: selectedDates[1].format('YYYY-MM-DD'),

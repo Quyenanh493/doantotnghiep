@@ -6,7 +6,13 @@ module.exports = (sequelize, DataTypes) => {
   class Room extends Model {
     static associate(models) {
       Room.belongsTo(models.Hotel, { foreignKey: 'hotelId' });
-      Room.hasMany(models.RoomAmenities, { foreignKey: 'roomID' });
+      Room.belongsToMany(models.Amenities, {
+        through: models.RoomAmenities,
+        foreignKey: 'roomId',
+        otherKey: 'amenitiesId',
+        as: 'Amenities'
+      });
+      
       Room.hasMany(models.FactBookingDetail, { foreignKey: 'roomId' });
       Room.hasMany(models.RoomAvailability, { foreignKey: 'roomId' });
     }
@@ -27,10 +33,12 @@ module.exports = (sequelize, DataTypes) => {
     roomName: DataTypes.STRING,
     roomType: DataTypes.STRING,
     roomStatus: DataTypes.STRING,
-    equipmentAndMinibar: DataTypes.STRING,
     maxCustomer: DataTypes.INTEGER,
+    maxRoom: DataTypes.INTEGER,
     price: DataTypes.DECIMAL(10, 2),
-    roomImage: DataTypes.STRING
+    roomImage: DataTypes.STRING,
+    roomStar: DataTypes.INTEGER,
+    description: DataTypes.STRING,
   }, {
     sequelize,
     modelName: 'Room',

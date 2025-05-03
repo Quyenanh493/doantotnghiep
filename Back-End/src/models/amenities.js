@@ -4,7 +4,12 @@ const { Model } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
   class Amenities extends Model {
     static associate(models) {
-      Amenities.hasMany(models.RoomAmenities, { foreignKey: 'amenitiesId' });
+      Amenities.belongsToMany(models.Room, {
+        through: models.RoomAmenities, // Bảng trung gian
+        foreignKey: 'amenitiesId',
+        otherKey: 'roomId',
+        as: 'Rooms', // Alias dùng trong include
+      });
       Amenities.hasMany(models.FactBookingDetailAmenities, { foreignKey: 'amenitiesId' });
     }
   }

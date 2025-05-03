@@ -25,13 +25,17 @@ export const getRoomById = async (roomId) => {
 // Tìm kiếm phòng trống theo ngày, loại phòng và số lượng khách
 export const searchAvailableRooms = async (dateIn, dateOut, roomType, guestCount) => {
   try {
-    const params = { dateIn, dateOut };
+    // Tạo object chứa các tham số tìm kiếm
+    const requestData = { dateIn, dateOut };
     
     // Thêm các tham số tùy chọn nếu có
-    if (roomType) params.roomType = roomType;
-    if (guestCount) params.guestCount = guestCount;
+    if (roomType) requestData.roomType = roomType;
+    if (guestCount) requestData.totalGuests = guestCount;
     
-    const response = await request.get('/room-availabilities/search', { params });
+    console.log('Dữ liệu gửi đi:', requestData);
+    
+    // Gửi request với các tham số trực tiếp trong body
+    const response = await request.post('/room-availabilities/search', requestData);
     return response;
   } catch (error) {
     console.error('Lỗi khi tìm kiếm phòng trống:', error);

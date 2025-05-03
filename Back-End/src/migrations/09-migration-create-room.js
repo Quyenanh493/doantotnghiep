@@ -27,10 +27,10 @@ module.exports = {
       roomStatus: {
         type: Sequelize.STRING
       },
-      equipmentAndMinibar: {
-        type: Sequelize.STRING
-      },
       maxCustomer: {
+        type: Sequelize.INTEGER
+      },
+      maxRoom: {
         type: Sequelize.INTEGER
       },
       price: {
@@ -38,6 +38,12 @@ module.exports = {
       },
       roomImage: {
         type: Sequelize.STRING
+      },
+      roomStar: {
+        type: Sequelize.INTEGER
+      },
+      description: {
+        type: Sequelize.TEXT
       },
       createdAt: {
         allowNull: false,

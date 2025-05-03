@@ -25,6 +25,12 @@ module.exports = {
       hotelType: {
         type: Sequelize.STRING
       },
+      hotelImage: {
+        type: Sequelize.STRING
+      },
+      description: {
+        type: Sequelize.STRING
+      },
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE

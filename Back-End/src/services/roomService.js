@@ -7,11 +7,14 @@ const roomService = {
             const rooms = await db.Room.findAll({
                 include: [
                     {
-                        model: db.RoomAmenities,
-                        include: [db.Amenities]
+                        model: db.Amenities, // Sử dụng alias đã khai báo trong Room
+                        as: 'Amenities', // Khớp với alias trong mô hình Room
+                        through: { attributes: [] }, // Không lấy dữ liệu từ bảng trung gian RoomAmenities
+                        required: false
                     },
                     {
-                        model: db.Hotel
+                        model: db.Hotel,
+                        required: false
                     }
                 ]
             });
@@ -33,14 +36,25 @@ const roomService = {
     // Lấy phòng theo ID với các tiện nghi liên quan
     getRoomById: async (roomId) => {
         try {
+            if (!Number.isInteger(parseInt(roomId))) {
+                return {
+                    EM: 'ID phòng không hợp lệ',
+                    EC: 1,
+                    DT: []
+                };
+            }
+
             const room = await db.Room.findByPk(roomId, {
                 include: [
                     {
-                        model: db.RoomAmenities,
-                        include: [db.Amenities]
+                        model: db.Amenities, // Sử dụng alias đã khai báo trong Room
+                        as: 'Amenities', // Khớp với alias trong mô hình Room
+                        through: { attributes: [] }, // Không lấy dữ liệu từ bảng trung gian RoomAmenities
+                        required: false
                     },
                     {
-                        model: db.Hotel
+                        model: db.Hotel,
+                        required: false
                     }
                 ]
             });
@@ -73,6 +87,16 @@ const roomService = {
         const transaction = await db.sequelize.transaction();
         
         try {
+            // Kiểm tra dữ liệu đầu vào
+            if (!roomData.hotelId || !roomData.roomName || !roomData.roomType || !roomData.maxCustomer || !roomData.price) {
+                await transaction.rollback();
+                return {
+                    EM: 'Thiếu thông tin bắt buộc: hotelId, roomName, roomType, maxCustomer, price',
+                    EC: 1,
+                    DT: []
+                };
+            }
+
             // Tạo phòng
             const newRoom = await db.Room.create({
                 hotelId: roomData.hotelId,
@@ -81,6 +105,7 @@ const roomService = {
                 roomStatus: roomData.roomStatus || 'Available',
                 equipmentAndMinibar: roomData.equipmentAndMinibar,
                 maxCustomer: roomData.maxCustomer,
+                maxRoom: roomData.maxRoom || 1, // Thêm trường maxRoom với giá trị mặc định là 1
                 price: roomData.price,
                 roomImage: roomData.roomImage,
                 createdAt: new Date(),
@@ -89,8 +114,21 @@ const roomService = {
 
             // Nếu có tiện nghi được cung cấp, tạo liên kết phòng-tiện nghi
             if (roomData.amenities && roomData.amenities.length > 0) {
+                // Kiểm tra xem amenitiesId có tồn tại không
+                const amenitiesExist = await db.Amenities.findAll({
+                    where: { amenitiesId: roomData.amenities }
+                });
+                if (amenitiesExist.length !== roomData.amenities.length) {
+                    await transaction.rollback();
+                    return {
+                        EM: 'Một số tiện nghi không tồn tại',
+                        EC: 1,
+                        DT: []
+                    };
+                }
+
                 const roomAmenitiesData = roomData.amenities.map(amenityId => ({
-                    roomID: newRoom.id,
+                    roomId: newRoom.roomId,
                     amenitiesId: amenityId,
                     createdAt: new Date(),
                     updatedAt: new Date()
@@ -102,14 +140,17 @@ const roomService = {
             await transaction.commit();
             
             // Lấy phòng mới tạo với các tiện nghi của nó
-            const createdRoom = await db.Room.findByPk(newRoom.id, {
+            const createdRoom = await db.Room.findByPk(newRoom.roomId, {
                 include: [
                     {
-                        model: db.RoomAmenities,
-                        include: [db.Amenities]
+                        model: db.Amenities,
+                        as: 'Amenities',
+                        through: { attributes: [] },
+                        required: false
                     },
                     {
-                        model: db.Hotel
+                        model: db.Hotel,
+                        required: false
                     }
                 ]
             });
@@ -161,15 +202,28 @@ const roomService = {
             
             // Nếu có tiện nghi được cung cấp, cập nhật liên kết phòng-tiện nghi
             if (roomData.amenities && roomData.amenities.length > 0) {
+                // Kiểm tra xem amenitiesId có tồn tại không
+                const amenitiesExist = await db.Amenities.findAll({
+                    where: { amenitiesId: roomData.amenities }
+                });
+                if (amenitiesExist.length !== roomData.amenities.length) {
+                    await transaction.rollback();
+                    return {
+                        EM: 'Một số tiện nghi không tồn tại',
+                        EC: 1,
+                        DT: []
+                    };
+                }
+
                 // Xóa các liên kết hiện có
                 await db.RoomAmenities.destroy({
-                    where: { roomID: roomId },
+                    where: { roomId: roomId },
                     transaction
                 });
                 
                 // Tạo liên kết mới
                 const roomAmenitiesData = roomData.amenities.map(amenityId => ({
-                    roomID: roomId,
+                    roomId: roomId,
                     amenitiesId: amenityId,
                     createdAt: new Date(),
                     updatedAt: new Date()
@@ -184,11 +238,14 @@ const roomService = {
             const updatedRoom = await db.Room.findByPk(roomId, {
                 include: [
                     {
-                        model: db.RoomAmenities,
-                        include: [db.Amenities]
+                        model: db.Amenities,
+                        as: 'Amenities',
+                        through: { attributes: [] },
+                        required: false
                     },
                     {
-                        model: db.Hotel
+                        model: db.Hotel,
+                        required: false
                     }
                 ]
             });
@@ -227,7 +284,7 @@ const roomService = {
             
             // Xóa liên kết phòng-tiện nghi trước
             await db.RoomAmenities.destroy({
-                where: { roomID: roomId },
+                where: { roomId: roomId },
                 transaction
             });
             

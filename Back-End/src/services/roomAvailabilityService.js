@@ -5,23 +5,32 @@ const roomAvailabilityService = {
     // Lấy tất cả thông tin phòng trống
     getAllRoomAvailabilities: async () => {
         try {
-            let roomAvailabilities = await db.RoomAvailability.findAll({
+            const roomAvailabilities = await db.RoomAvailability.findAll({
                 include: [
-                    { model: db.Room },
-                    { model: db.FactBooking }
+                    {
+                        model: db.Room,
+                        include: [
+                            {
+                                model: db.Hotel
+                            }
+                        ]
+                    },
+                    {
+                        model: db.FactBooking
+                    }
                 ]
             });
-
+            
             return {
-                EM: roomAvailabilities.length > 0 ? 'Lấy danh sách phòng trống thành công' : 'Không có dữ liệu phòng trống',
+                EM: 'Lấy danh sách phòng trống thành công',
                 EC: 0,
-                DT: roomAvailabilities || []
+                DT: roomAvailabilities
             };
         } catch (error) {
-            console.error("Error in getAllRoomAvailabilities service:", error);
+            console.log(error);
             return {
                 EM: 'Lỗi từ server',
-                EC: 1,
+                EC: -1,
                 DT: []
             };
         }
@@ -30,179 +39,234 @@ const roomAvailabilityService = {
     // Lấy thông tin phòng trống theo ID
     getRoomAvailabilityById: async (roomAvailabilityId) => {
         try {
-            let roomAvailability = await db.RoomAvailability.findOne({
-                where: { roomAvailabilityId: roomAvailabilityId },
+            const roomAvailability = await db.RoomAvailability.findByPk(roomAvailabilityId, {
                 include: [
-                    { model: db.Room },
-                    { model: db.FactBooking }
+                    {
+                        model: db.Room,
+                        include: [
+                            {
+                                model: db.Hotel
+                            }
+                        ]
+                    },
+                    {
+                        model: db.FactBooking
+                    }
                 ]
             });
-
+            
+            if (!roomAvailability) {
+                return {
+                    EM: 'Không tìm thấy thông tin phòng trống',
+                    EC: 1,
+                    DT: []
+                };
+            }
+            
             return {
-                EM: roomAvailability ? 'Lấy thông tin phòng trống thành công' : 'Không tìm thấy thông tin phòng trống',
+                EM: 'Lấy thông tin phòng trống thành công',
                 EC: 0,
-                DT: roomAvailability || {}
+                DT: roomAvailability
             };
         } catch (error) {
-            console.error("Error in getRoomAvailabilityById service:", error);
+            console.log(error);
             return {
                 EM: 'Lỗi từ server',
-                EC: 1,
-                DT: {}
+                EC: -1,
+                DT: []
             };
         }
     },
 
     // Tạo thông tin phòng trống mới
-    createRoomAvailability: async (data) => {
+    createRoomAvailability: async (roomAvailabilityData) => {
+        const transaction = await db.sequelize.transaction();
+        
         try {
             // Kiểm tra dữ liệu đầu vào
-            if (!data.roomId || !data.dateIn || !data.dateOut) {
+            if (!roomAvailabilityData.roomId || !roomAvailabilityData.dateIn || !roomAvailabilityData.dateOut) {
+                await transaction.rollback();
                 return {
-                    EM: 'Thiếu thông tin bắt buộc',
+                    EM: 'Thiếu thông tin bắt buộc: roomId, dateIn, dateOut',
                     EC: 1,
-                    DT: {}
+                    DT: []
                 };
             }
 
-            // Kiểm tra phòng có tồn tại không
-            const room = await db.Room.findOne({ where: { roomId: data.roomId } });
+            // Kiểm tra số lượng phòng còn lại
+            const room = await db.Room.findByPk(roomAvailabilityData.roomId);
             if (!room) {
+                await transaction.rollback();
                 return {
-                    EM: 'Phòng không tồn tại',
+                    EM: 'Không tìm thấy phòng',
                     EC: 1,
-                    DT: {}
+                    DT: []
                 };
             }
 
-            // Kiểm tra xung đột thời gian
-            const existingAvailability = await db.RoomAvailability.findOne({
-                where: {
-                    roomId: data.roomId,
-                    [Op.or]: [
-                        {
-                            dateIn: {
-                                [Op.lt]: new Date(data.dateOut)
-                            },
-                            dateOut: {
-                                [Op.gt]: new Date(data.dateIn)
-                            }
-                        }
-                    ]
-                }
-            });
-
-            if (existingAvailability) {
+            // Kiểm tra nếu maxRoom <= 0, không thể đặt thêm
+            if (room.maxRoom <= 0) {
+                await transaction.rollback();
                 return {
-                    EM: 'Đã có thông tin phòng trong khoảng thời gian này',
+                    EM: 'Phòng đã hết, không thể đặt thêm',
                     EC: 1,
-                    DT: {}
+                    DT: []
                 };
             }
 
-            // Tạo thông tin phòng trống mới
-            let newRoomAvailability = await db.RoomAvailability.create({
-                roomId: data.roomId,
-                dateIn: new Date(data.dateIn),
-                dateOut: new Date(data.dateOut),
-                isAvailable: data.isAvailable !== undefined ? data.isAvailable : true,
-                bookingId: data.bookingId || null
-            });
+            // Tạo thông tin phòng trống
+            const newRoomAvailability = await db.RoomAvailability.create({
+                roomId: roomAvailabilityData.roomId,
+                dateIn: roomAvailabilityData.dateIn,
+                dateOut: roomAvailabilityData.dateOut,
+                isAvailable: roomAvailabilityData.isAvailable !== undefined ? roomAvailabilityData.isAvailable : true,
+                bookingId: roomAvailabilityData.bookingId,
+                createdAt: new Date(),
+                updatedAt: new Date()
+            }, { transaction });
 
+            // Nếu đây là đơn đặt phòng (isAvailable = false), giảm số lượng phòng
+            if (roomAvailabilityData.isAvailable === false && roomAvailabilityData.bookingId) {
+                await room.update({
+                    maxRoom: room.maxRoom - 1
+                }, { transaction });
+            }
+
+            await transaction.commit();
+            
             return {
                 EM: 'Tạo thông tin phòng trống thành công',
                 EC: 0,
                 DT: newRoomAvailability
             };
         } catch (error) {
-            console.error("Error in createRoomAvailability service:", error);
+            await transaction.rollback();
+            console.log(error);
             return {
                 EM: 'Lỗi từ server',
-                EC: 1,
-                DT: {}
+                EC: -1,
+                DT: []
             };
         }
     },
 
     // Cập nhật thông tin phòng trống
-    updateRoomAvailability: async (roomAvailabilityId, data) => {
+    updateRoomAvailability: async (roomAvailabilityId, roomAvailabilityData) => {
+        const transaction = await db.sequelize.transaction();
+        
         try {
-            // Kiểm tra thông tin phòng trống có tồn tại không
-            let roomAvailability = await db.RoomAvailability.findOne({
-                where: { roomAvailabilityId: roomAvailabilityId }
-            });
-
+            const roomAvailability = await db.RoomAvailability.findByPk(roomAvailabilityId);
+            
             if (!roomAvailability) {
+                await transaction.rollback();
                 return {
                     EM: 'Không tìm thấy thông tin phòng trống',
                     EC: 1,
-                    DT: {}
+                    DT: []
                 };
             }
 
-            // Cập nhật thông tin
+            // Lưu trạng thái cũ để so sánh
+            const oldIsAvailable = roomAvailability.isAvailable;
+            
+            // Cập nhật thông tin phòng trống
             await roomAvailability.update({
-                roomId: data.roomId || roomAvailability.roomId,
-                dateIn: data.dateIn ? new Date(data.dateIn) : roomAvailability.dateIn,
-                dateOut: data.dateOut ? new Date(data.dateOut) : roomAvailability.dateOut,
-                isAvailable: data.isAvailable !== undefined ? data.isAvailable : roomAvailability.isAvailable,
-                bookingId: data.bookingId !== undefined ? data.bookingId : roomAvailability.bookingId
-            });
+                roomId: roomAvailabilityData.roomId !== undefined ? roomAvailabilityData.roomId : roomAvailability.roomId,
+                dateIn: roomAvailabilityData.dateIn !== undefined ? roomAvailabilityData.dateIn : roomAvailability.dateIn,
+                dateOut: roomAvailabilityData.dateOut !== undefined ? roomAvailabilityData.dateOut : roomAvailability.dateOut,
+                isAvailable: roomAvailabilityData.isAvailable !== undefined ? roomAvailabilityData.isAvailable : roomAvailability.isAvailable,
+                bookingId: roomAvailabilityData.bookingId !== undefined ? roomAvailabilityData.bookingId : roomAvailability.bookingId,
+                updatedAt: new Date()
+            }, { transaction });
 
-            // Lấy thông tin đã cập nhật
-            let updatedRoomAvailability = await db.RoomAvailability.findOne({
-                where: { roomAvailabilityId: roomAvailabilityId },
-                include: [
-                    { model: db.Room },
-                    { model: db.FactBooking }
-                ]
-            });
+            // Nếu trạng thái isAvailable thay đổi, cập nhật maxRoom
+            if (oldIsAvailable !== roomAvailabilityData.isAvailable) {
+                const room = await db.Room.findByPk(roomAvailability.roomId);
+                
+                if (room) {
+                    // Nếu từ available -> unavailable, giảm maxRoom
+                    if (oldIsAvailable === true && roomAvailabilityData.isAvailable === false) {
+                        if (room.maxRoom <= 0) {
+                            await transaction.rollback();
+                            return {
+                                EM: 'Phòng đã hết, không thể đặt thêm',
+                                EC: 1,
+                                DT: []
+                            };
+                        }
+                        await room.update({
+                            maxRoom: room.maxRoom - 1
+                        }, { transaction });
+                    } 
+                    // Nếu từ unavailable -> available, tăng maxRoom
+                    else if (oldIsAvailable === false && roomAvailabilityData.isAvailable === true) {
+                        await room.update({
+                            maxRoom: room.maxRoom + 1
+                        }, { transaction });
+                    }
+                }
+            }
 
+            await transaction.commit();
+            
             return {
                 EM: 'Cập nhật thông tin phòng trống thành công',
                 EC: 0,
-                DT: updatedRoomAvailability
+                DT: roomAvailability
             };
         } catch (error) {
-            console.error("Error in updateRoomAvailability service:", error);
+            await transaction.rollback();
+            console.log(error);
             return {
                 EM: 'Lỗi từ server',
-                EC: 1,
-                DT: {}
+                EC: -1,
+                DT: []
             };
         }
     },
 
     // Xóa thông tin phòng trống
     deleteRoomAvailability: async (roomAvailabilityId) => {
+        const transaction = await db.sequelize.transaction();
+        
         try {
-            // Kiểm tra thông tin phòng trống có tồn tại không
-            let roomAvailability = await db.RoomAvailability.findOne({
-                where: { roomAvailabilityId: roomAvailabilityId }
-            });
-
+            const roomAvailability = await db.RoomAvailability.findByPk(roomAvailabilityId);
+            
             if (!roomAvailability) {
+                await transaction.rollback();
                 return {
                     EM: 'Không tìm thấy thông tin phòng trống',
                     EC: 1,
-                    DT: {}
+                    DT: []
                 };
             }
 
-            // Xóa thông tin phòng trống
-            await roomAvailability.destroy();
-
+            // Nếu phòng đang không available (đã đặt), khi xóa cần tăng maxRoom
+            if (roomAvailability.isAvailable === false) {
+                const room = await db.Room.findByPk(roomAvailability.roomId);
+                if (room) {
+                    await room.update({
+                        maxRoom: room.maxRoom + 1
+                    }, { transaction });
+                }
+            }
+            
+            await roomAvailability.destroy({ transaction });
+            
+            await transaction.commit();
+            
             return {
                 EM: 'Xóa thông tin phòng trống thành công',
                 EC: 0,
-                DT: {}
+                DT: []
             };
         } catch (error) {
-            console.error("Error in deleteRoomAvailability service:", error);
+            await transaction.rollback();
+            console.log(error);
             return {
                 EM: 'Lỗi từ server',
-                EC: 1,
-                DT: {}
+                EC: -1,
+                DT: []
             };
         }
     },
@@ -210,60 +274,75 @@ const roomAvailabilityService = {
     // Kiểm tra phòng có sẵn trong khoảng thời gian
     checkRoomAvailability: async (roomId, dateIn, dateOut) => {
         try {
-            // Kiểm tra dữ liệu đầu vào
-            if (!roomId || !dateIn || !dateOut) {
-                return {
-                    EM: 'Thiếu thông tin bắt buộc',
-                    EC: 1,
-                    DT: { isAvailable: false }
-                };
-            }
-
-            // Kiểm tra phòng có tồn tại không
-            const room = await db.Room.findOne({ where: { roomId: roomId } });
+            // Kiểm tra số lượng phòng còn lại
+            const room = await db.Room.findByPk(roomId);
             if (!room) {
                 return {
-                    EM: 'Phòng không tồn tại',
+                    EM: 'Không tìm thấy phòng',
                     EC: 1,
                     DT: { isAvailable: false }
                 };
             }
 
-            // Kiểm tra xem có thông tin phòng không trống trong khoảng thời gian này không
-            const existingAvailability = await db.RoomAvailability.findOne({
+            // Nếu maxRoom <= 0, phòng không còn trống
+            if (room.maxRoom <= 0) {
+                return {
+                    EM: 'Phòng đã hết, không thể đặt thêm',
+                    EC: 0,
+                    DT: { isAvailable: false, remainingRooms: 0 }
+                };
+            }
+
+            // Kiểm tra xem phòng có đang được đặt trong khoảng thời gian này không
+            const overlappingBookings = await db.RoomAvailability.count({
                 where: {
                     roomId: roomId,
                     isAvailable: false,
                     [Op.or]: [
                         {
+                            // Trường hợp 1: dateIn nằm trong khoảng đã đặt
                             dateIn: {
-                                [Op.lt]: new Date(dateOut)
+                                [Op.lte]: dateOut,
+                                [Op.gte]: dateIn
+                            }
+                        },
+                        {
+                            // Trường hợp 2: dateOut nằm trong khoảng đã đặt
+                            dateOut: {
+                                [Op.lte]: dateOut,
+                                [Op.gte]: dateIn
+                            }
+                        },
+                        {
+                            // Trường hợp 3: khoảng thời gian bao trùm khoảng đã đặt
+                            dateIn: {
+                                [Op.lte]: dateIn
                             },
                             dateOut: {
-                                [Op.gt]: new Date(dateIn)
+                                [Op.gte]: dateOut
                             }
                         }
                     ]
                 }
             });
 
-            const isAvailable = !existingAvailability;
+            // Tính số phòng còn lại sau khi trừ đi số đơn đặt phòng trùng thời gian
+            const remainingRooms = room.maxRoom - overlappingBookings;
+            const isAvailable = remainingRooms > 0;
 
             return {
                 EM: isAvailable ? 'Phòng có sẵn trong khoảng thời gian này' : 'Phòng không có sẵn trong khoảng thời gian này',
                 EC: 0,
                 DT: { 
-                    isAvailable,
-                    roomId,
-                    dateIn,
-                    dateOut
+                    isAvailable: isAvailable,
+                    remainingRooms: remainingRooms
                 }
             };
         } catch (error) {
-            console.error("Error in checkRoomAvailability service:", error);
+            console.log(error);
             return {
                 EM: 'Lỗi từ server',
-                EC: 1,
+                EC: -1,
                 DT: { isAvailable: false }
             };
         }
@@ -272,76 +351,83 @@ const roomAvailabilityService = {
     // Tìm kiếm phòng trống theo tiêu chí
     searchAvailableRooms: async (dateIn, dateOut, roomType, guestCount) => {
         try {
-            // Kiểm tra dữ liệu đầu vào
-            if (!dateIn || !dateOut) {
-                return {
-                    EM: 'Cần cung cấp ngày nhận và trả phòng',
-                    EC: 1,
-                    DT: []
-                };
-            }
-
-            // Lấy tất cả phòng có trạng thái Available
-            let whereClause = { roomStatus: 'Available' };
+            // Chuyển đổi chuỗi ngày thành đối tượng Date
+            const startDate = new Date(dateIn);
+            const endDate = new Date(dateOut);
             
-            // Thêm điều kiện lọc theo loại phòng nếu có
-            if (roomType) {
-                whereClause.roomType = roomType;
-            }
-            
-            // Thêm điều kiện lọc theo số lượng khách nếu có
-            if (guestCount) {
-                whereClause.maxCustomer = { [Op.gte]: parseInt(guestCount) };
-            }
-            
-            let availableRooms = await db.Room.findAll({
-                where: whereClause,
+            // Lấy tất cả phòng
+            let rooms = await db.Room.findAll({
+                where: {
+                    ...(roomType && { roomType: roomType }),
+                    ...(guestCount && { maxCustomer: { [Op.gte]: guestCount } }),
+                    maxRoom: { [Op.gt]: 0 } // Chỉ lấy phòng còn chỗ trống
+                },
                 include: [
                     {
-                        model: db.Amenities,
-                        as: 'RoomAmenities',
-                        through: { attributes: [] }
+                        model: db.Hotel
                     },
                     {
-                        model: db.Hotel
+                        model: db.Amenities,
+                        as: 'Amenities',
+                        through: { attributes: [] }
                     }
                 ]
             });
-            
-            // Lấy danh sách phòng đã đặt trong khoảng thời gian
-            const bookedRooms = await db.RoomAvailability.findAll({
-                where: {
-                    isAvailable: false,
-                    [Op.or]: [
-                        {
-                            dateIn: {
-                                [Op.lt]: new Date(dateOut)
+
+            // Kiểm tra từng phòng xem có sẵn trong khoảng thời gian không
+            const availableRooms = [];
+            for (const room of rooms) {
+                // Đếm số lượng đặt phòng trùng thời gian
+                const overlappingBookings = await db.RoomAvailability.count({
+                    where: {
+                        roomId: room.roomId,
+                        isAvailable: false,
+                        [Op.or]: [
+                            {
+                                dateIn: {
+                                    [Op.lte]: endDate,
+                                    [Op.gte]: startDate
+                                }
                             },
-                            dateOut: {
-                                [Op.gt]: new Date(dateIn)
+                            {
+                                dateOut: {
+                                    [Op.lte]: endDate,
+                                    [Op.gte]: startDate
+                                }
+                            },
+                            {
+                                dateIn: {
+                                    [Op.lte]: startDate
+                                },
+                                dateOut: {
+                                    [Op.gte]: endDate
+                                }
                             }
-                        }
-                    ]
-                },
-                attributes: ['roomId']
-            });
-            
-            // Lấy danh sách ID phòng đã đặt
-            const bookedRoomIds = bookedRooms.map(booking => booking.roomId);
-            
-            // Lọc ra các phòng còn trống
-            availableRooms = availableRooms.filter(room => !bookedRoomIds.includes(room.roomId));
-            
+                        ]
+                    }
+                });
+
+                // Tính số phòng còn lại
+                const remainingRooms = room.maxRoom - overlappingBookings;
+                
+                // Nếu còn phòng trống, thêm vào danh sách kết quả
+                if (remainingRooms > 0) {
+                    const roomData = room.toJSON();
+                    roomData.remainingRooms = remainingRooms;
+                    availableRooms.push(roomData);
+                }
+            }
+
             return {
-                EM: 'Lấy danh sách phòng trống thành công',
+                EM: 'Tìm kiếm phòng trống thành công',
                 EC: 0,
                 DT: availableRooms
             };
         } catch (error) {
-            console.error("Error in searchAvailableRooms:", error);
+            console.log(error);
             return {
-                EM: 'Lỗi khi tìm kiếm phòng trống',
-                EC: 1,
+                EM: 'Lỗi từ server',
+                EC: -1,
                 DT: []
             };
         }

@@ -8,7 +8,7 @@ const router = express.Router();
 router.get('/', roomAvailabilityController.getAllRoomAvailabilities);  // Public
 router.get('/:id', roomAvailabilityController.getRoomAvailabilityById);  // Public
 router.post('/check', roomAvailabilityController.checkRoomAvailability);  // Public
-router.get('/search', roomAvailabilityController.searchAvailableRooms);  // Public
+router.post('/search', roomAvailabilityController.searchAvailableRooms);  // Public
 
 // Các endpoint cần quyền admin/staff
 router.post(

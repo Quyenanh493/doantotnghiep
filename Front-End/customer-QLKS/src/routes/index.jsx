@@ -7,6 +7,9 @@ import Introduce from "../pages/Introduce";
 import Amenities from "../pages/Amenities";
 import Logout from "../pages/Logout";
 import Profile from "../pages/Profile";
+import RoomDetail from "../pages/RoomDetail";
+import BookingConfirmation from "../pages/BookingConfirmation";
+import BookingAmenities from "../pages/BookingAmenities";
 
 export const routes = [
     {
@@ -40,6 +43,18 @@ export const routes = [
             {
                 path: "/logout",
                 element: <Logout />
+            },
+            {
+                path: "/room-detail/:roomId",
+                element: <RoomDetail />
+            },
+            {
+                path: "/booking-confirmation",
+                element: <BookingConfirmation />
+            },
+            {
+                path: "/booking-amenities",
+                element: <BookingAmenities />
             },
         ],
     },
