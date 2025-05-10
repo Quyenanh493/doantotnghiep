@@ -1,0 +1,26 @@
+.sidebar {
+  height: 100%;
+  border-right: 1px solid #f0f0f0;
+}
+
+.sidebar-menu {
+  height: 100%;
+  border-right: 0;
+}
+
+.ant-menu-item-selected {
+  background-color: #1890ff !important;
+  color: white !important;
+}
+
+.ant-menu-item-selected a {
+  color: white !important;
+}
+
+.ant-menu-item:hover {
+  color: #1890ff !important;
+}
+
+.ant-menu-item-selected:hover {
+  color: white !important;
+} 

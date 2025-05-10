@@ -14,6 +14,8 @@ module.exports = {
         accountType: 'admin',
         accountStatus: true,
         lastLogin: new Date(),
+        resetPasswordToken: null,
+        resetPasswordExpires: null,
         createdAt: new Date(),
         updatedAt: new Date()
       },
@@ -23,6 +25,8 @@ module.exports = {
         accountType: 'staff',
         accountStatus: true,
         lastLogin: new Date(),
+        resetPasswordToken: null,
+        resetPasswordExpires: null,
         createdAt: new Date(),
         updatedAt: new Date()
       },
@@ -32,6 +36,8 @@ module.exports = {
         accountType: 'staff',
         accountStatus: true,
         lastLogin: new Date(),
+        resetPasswordToken: null,
+        resetPasswordExpires: null,
         createdAt: new Date(),
         updatedAt: new Date()
       },
@@ -41,6 +47,8 @@ module.exports = {
         accountType: 'customer',
         accountStatus: true,
         lastLogin: new Date(),
+        resetPasswordToken: null,
+        resetPasswordExpires: null,
         createdAt: new Date(),
         updatedAt: new Date()
       },
@@ -50,6 +58,8 @@ module.exports = {
         accountType: 'customer',
         accountStatus: true,
         lastLogin: new Date(),
+        resetPasswordToken: null,
+        resetPasswordExpires: null,
         createdAt: new Date(),
         updatedAt: new Date()
       },
@@ -59,6 +69,8 @@ module.exports = {
         accountType: 'customer',
         accountStatus: true,
         lastLogin: new Date(),
+        resetPasswordToken: null,
+        resetPasswordExpires: null,
         createdAt: new Date(),
         updatedAt: new Date()
       },
@@ -68,6 +80,8 @@ module.exports = {
         accountType: 'customer',
         accountStatus: true,
         lastLogin: new Date(),
+        resetPasswordToken: null,
+        resetPasswordExpires: null,
         createdAt: new Date(),
         updatedAt: new Date()
       },
@@ -77,6 +91,8 @@ module.exports = {
         accountType: 'customer',
         accountStatus: true,
         lastLogin: new Date(),
+        resetPasswordToken: null,
+        resetPasswordExpires: null,
         createdAt: new Date(),
         updatedAt: new Date()
       },
@@ -86,6 +102,8 @@ module.exports = {
         accountType: 'customer',
         accountStatus: true,
         lastLogin: new Date(),
+        resetPasswordToken: null,
+        resetPasswordExpires: null,
         createdAt: new Date(),
         updatedAt: new Date()
       },
@@ -95,6 +113,8 @@ module.exports = {
         accountType: 'customer',
         accountStatus: true,
         lastLogin: new Date(),
+        resetPasswordToken: null,
+        resetPasswordExpires: null,
         createdAt: new Date(),
         updatedAt: new Date()
       }

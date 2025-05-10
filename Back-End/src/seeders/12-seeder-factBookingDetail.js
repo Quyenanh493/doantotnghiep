@@ -1,6 +1,5 @@
 'use strict';
 
-/** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
     return queryInterface.bulkInsert('factbookingdetail', [
@@ -13,8 +12,6 @@ module.exports = {
         childrenCount: 0,
         roomCount: 1,
         totalAmount: 1500000.00,
-        paymentMethod: 'Credit Card',
-        statusPayment: 'Paid',
         specialRate: 1500000.00,
         createdAt: new Date(),
         updatedAt: new Date()
@@ -28,8 +25,6 @@ module.exports = {
         childrenCount: 0,
         roomCount: 1,
         totalAmount: 1200000.00,
-        paymentMethod: 'Credit Card',
-        statusPayment: 'Paid',
         specialRate: 1200000.00,
         createdAt: new Date(),
         updatedAt: new Date()
@@ -43,8 +38,6 @@ module.exports = {
         childrenCount: 1,
         roomCount: 1,
         totalAmount: 2500000.00,
-        paymentMethod: 'Cash',
-        statusPayment: 'Paid',
         specialRate: 2500000.00,
         createdAt: new Date(),
         updatedAt: new Date()
@@ -58,8 +51,6 @@ module.exports = {
         childrenCount: 0,
         roomCount: 1,
         totalAmount: 1800000.00,
-        paymentMethod: 'Bank Transfer',
-        statusPayment: 'Paid',
         specialRate: 1800000.00,
         createdAt: new Date(),
         updatedAt: new Date()
@@ -73,8 +64,6 @@ module.exports = {
         childrenCount: 0,
         roomCount: 1,
         totalAmount: 2200000.00,
-        paymentMethod: 'Bank Transfer',
-        statusPayment: 'Paid',
         specialRate: 2200000.00,
         createdAt: new Date(),
         updatedAt: new Date()
@@ -88,8 +77,6 @@ module.exports = {
         childrenCount: 0,
         roomCount: 1,
         totalAmount: 1300000.00,
-        paymentMethod: 'Credit Card',
-        statusPayment: 'Paid',
         specialRate: 1300000.00,
         createdAt: new Date(),
         updatedAt: new Date()
@@ -103,8 +90,6 @@ module.exports = {
         childrenCount: 2,
         roomCount: 1,
         totalAmount: 2000000.00,
-        paymentMethod: 'Credit Card',
-        statusPayment: 'Paid',
         specialRate: 2000000.00,
         createdAt: new Date(),
         updatedAt: new Date()
@@ -118,8 +103,6 @@ module.exports = {
         childrenCount: 0,
         roomCount: 1,
         totalAmount: 5000000.00,
-        paymentMethod: 'Credit Card',
-        statusPayment: 'Paid',
         specialRate: 1500000.00,
         createdAt: new Date(),
         updatedAt: new Date()
@@ -133,8 +116,6 @@ module.exports = {
         childrenCount: 0,
         roomCount: 1,
         totalAmount: 2800000.00,
-        paymentMethod: 'Cash',
-        statusPayment: 'Paid',
         specialRate: 2800000.00,
         createdAt: new Date(),
         updatedAt: new Date()
@@ -148,8 +129,6 @@ module.exports = {
         childrenCount: 0,
         roomCount: 1,
         totalAmount: 3800000.00,
-        paymentMethod: 'Credit Card',
-        statusPayment: 'Paid',
         specialRate: 1900000.00,
         createdAt: new Date(),
         updatedAt: new Date()
@@ -163,8 +142,6 @@ module.exports = {
         childrenCount: 0,
         roomCount: 1,
         totalAmount: 2400000.00,
-        paymentMethod: 'Credit Card',
-        statusPayment: 'Paid',
         specialRate: 1200000.00,
         createdAt: new Date(),
         updatedAt: new Date()
@@ -178,8 +155,6 @@ module.exports = {
         childrenCount: 0,
         roomCount: 1,
         totalAmount: 4400000.00,
-        paymentMethod: 'Bank Transfer',
-        statusPayment: 'Pending',
         specialRate: 1800000.00,
         createdAt: new Date(),
         updatedAt: new Date()
@@ -193,8 +168,6 @@ module.exports = {
         childrenCount: 0,
         roomCount: 1,
         totalAmount: 2600000.00,
-        paymentMethod: 'Credit Card',
-        statusPayment: 'Pending',
         specialRate: 1300000.00,
         createdAt: new Date(),
         updatedAt: new Date()
@@ -203,10 +176,6 @@ module.exports = {
   },
 
   async down(queryInterface, Sequelize) {
-    return queryInterface.bulkDelete('factbookingdetail', null, {
-      truncate: true,
-      cascade: true,
-      restartIdentity: true, 
-    });
+    return queryInterface.bulkDelete('factbookingdetail', null, {});
   }
 };

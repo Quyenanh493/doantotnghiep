@@ -1,4 +1,4 @@
-function Error404 () {
+function Error404() {
   return (
     <>
       Error404

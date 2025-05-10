@@ -8,6 +8,7 @@ const amenitiesService = {
                 include: [
                     {
                         model: db.RoomAmenities,
+                        as: 'AmenitiesInRoom', 
                         include: [db.Room]
                     }
                 ]
@@ -34,6 +35,7 @@ const amenitiesService = {
                 include: [
                     {
                         model: db.RoomAmenities,
+                        as: 'AmenitiesInRoom',  // Thêm alias vào đây
                         include: [db.Room]
                     }
                 ]

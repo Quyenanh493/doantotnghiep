@@ -15,7 +15,7 @@ module.exports = (sequelize, DataTypes) => {
       primaryKey: true,
       autoIncrement: true
     },
-    roomID: {
+    roomId: {
       type: DataTypes.INTEGER,
       references: {
         model: 'Room',

@@ -36,8 +36,6 @@ module.exports = (sequelize, DataTypes) => {
     childrenCount: DataTypes.INTEGER,
     roomCount: DataTypes.INTEGER,
     totalAmount: DataTypes.DECIMAL(10, 2),
-    paymentMethod: DataTypes.STRING,
-    statusPayment: DataTypes.STRING,
     specialRate: DataTypes.DECIMAL(10, 2)
   }, {
     sequelize,

@@ -4,12 +4,13 @@ import Home from "../pages/Home";
 import Room from "../pages/Room";
 import Contact from "../pages/Contact";
 import Introduce from "../pages/Introduce";
-import Amenities from "../pages/Amenities";
 import Logout from "../pages/Logout";
 import Profile from "../pages/Profile";
 import RoomDetail from "../pages/RoomDetail";
 import BookingConfirmation from "../pages/BookingConfirmation";
 import BookingAmenities from "../pages/BookingAmenities";
+import HistoryRoom from "../pages/HistoryRoom";
+import ProtectedBookingRoute from "../components/ProtectedBookingRoute";
 
 export const routes = [
     {
@@ -23,10 +24,6 @@ export const routes = [
             {
                 path: "/room",
                 element: <Room />
-            },
-            {
-                path: "/amenities",
-                element: <Amenities />
             },
             {
                 path: "/contact",
@@ -54,7 +51,11 @@ export const routes = [
             },
             {
                 path: "/booking-amenities",
-                element: <BookingAmenities />
+                element: <ProtectedBookingRoute><BookingAmenities /></ProtectedBookingRoute>
+            },
+            {
+                path: "/history-room",
+                element: <HistoryRoom />
             },
         ],
     },

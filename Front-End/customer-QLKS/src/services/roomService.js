@@ -1,9 +1,9 @@
 import request from '../utils/request';
 
 // Lấy tất cả phòng
-export const getAllRooms = async (params = {}) => {
+export const getAllRooms = async () => {
   try {
-    const response = await request.get('/rooms', { params });
+    const response = await request.get('/rooms');
     return response;
   } catch (error) {
     console.error('Lỗi khi lấy danh sách phòng:', error);
@@ -30,7 +30,7 @@ export const searchAvailableRooms = async (dateIn, dateOut, roomType, guestCount
     
     // Thêm các tham số tùy chọn nếu có
     if (roomType) requestData.roomType = roomType;
-    if (guestCount) requestData.totalGuests = guestCount;
+    if (guestCount) requestData.guestCount = guestCount;
     
     console.log('Dữ liệu gửi đi:', requestData);
     

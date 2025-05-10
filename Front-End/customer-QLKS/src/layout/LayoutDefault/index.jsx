@@ -66,8 +66,8 @@ function LayoutDefault() {
             setCurrent('contact');
         } else if (pathname === '/introduce') {
             setCurrent('about');
-        } else if (pathname === '/amenities') {
-            setCurrent('amenities');
+        } else if (pathname === '/booking-amenities') {
+            setCurrent('booking-amenities');
         }
     }, [location]);
 
@@ -95,8 +95,8 @@ function LayoutDefault() {
             case 'room':
                 navigate('/room');
                 break;
-            case 'amenities':
-                navigate('/amenities');
+            case 'booking-amenities':
+                navigate('/booking-amenities');
                 break;
             case 'contact':
                 navigate('/contact');
@@ -126,7 +126,7 @@ function LayoutDefault() {
                             onClick={handleMenuClick}>
                             <Menu.Item key="home">Trang Chủ</Menu.Item>
                             <Menu.Item key="room">Phòng</Menu.Item>
-                            <Menu.Item key="amenities">Tiện Nghi</Menu.Item>
+                            <Menu.Item key="booking-amenities">Tiện Nghi</Menu.Item>
                             <Menu.Item key="contact">Liên Hệ</Menu.Item>
                             <Menu.Item key="about">Giới Thiệu</Menu.Item>
                         </Menu>

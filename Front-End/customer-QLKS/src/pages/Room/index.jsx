@@ -151,20 +151,20 @@ function Room() {
       setSelectedDates(values.dates);
       
       // Lấy số lượng khách
-      const totalGuests = values.guestInfo ? (guestCounts.adults + guestCounts.children) : null;
+      const guestCount = values.guestInfo ? (guestCounts.adults + guestCounts.children) : null;
     
       // Gọi API tìm kiếm phòng trống
       console.log('Thông tin tìm kiếm:', {
         dateIn,
         dateOut,
         roomType: values.roomType || null,
-        totalGuests
+        guestCount
       });
       const response = await searchAvailableRooms(
         dateIn,
         dateOut,
         values.roomType || null,
-        totalGuests
+        guestCount
       );
       console.log('Dữ liệu trả về từ API:', response); 
       
@@ -223,11 +223,12 @@ function Room() {
     // Chuyển hướng đến trang đặt phòng với thông tin đã chọn
     navigate(`/booking-confirmation`, {
       state: {
+        roomId: roomId,
         dateIn: selectedDates[0].format('YYYY-MM-DD'),
         dateOut: selectedDates[1].format('YYYY-MM-DD'),
         adults: guestCounts.adults,
-        children: guestCounts.children,
-        rooms: guestCounts.rooms
+        childrens: guestCounts.children,
+        roomCount: guestCounts.rooms
       }
     });
   };

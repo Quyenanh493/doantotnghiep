@@ -1,52 +1,96 @@
+@use "sass:color";
+
+// Variables
+$primary-color: #1890ff;
+$secondary-color: #001529;
+$text-color: #333;
+$light-bg: #f5f5f5;
+$border-radius: 8px;
+$box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+$transition-time: 0.3s;
+
+// Mixins
+@mixin flex-center {
+  display: flex;
+  align-items: center;
+}
+
+@mixin card-style {
+  border-radius: $border-radius;
+  box-shadow: $box-shadow;
+  transition: all $transition-time;
+  
+  &:hover {
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+  }
+}
+
+// BookingConfirmation Styles
 .booking-confirmation {
-  padding: 30px 20px;
   max-width: 1200px;
   margin: 0 auto;
+  padding: 24px;
+  
+  // Styling cho thông báo lỗi
+  .ant-result {
+    margin: 50px auto;
+    
+    .ant-result-title {
+      color: #faad14;
+      font-size: 24px;
+    }
+    
+    .ant-result-subtitle {
+      font-size: 16px;
+      margin-bottom: 20px;
+    }
+  }
   
   &__title {
     text-align: center;
-    margin-bottom: 10px;
-    font-weight: 600;
+    margin-bottom: 24px !important;
+    color: $secondary-color;
+    font-weight: 700 !important;
   }
   
   &__breadcrumb {
-    text-align: center;
-    margin-bottom: 30px;
+    margin-bottom: 24px;
     color: #666;
-    font-size: 14px;
     
     span {
-      margin: 0 5px;
+      &:not(:last-child) {
+        margin-right: 8px;
+      }
       
       &:last-child {
-        color: #1890ff;
+        color: $primary-color;
+        font-weight: 500;
       }
     }
   }
   
   &__content {
-    margin-top: 20px;
+    margin-top: 24px;
   }
   
-  &__room-card {
-    height: 100%;
+  &__room-card,
+  &__details-card {
+    @include card-style;
+    margin-bottom: 24px;
     overflow: hidden;
-    
-    .ant-card-body {
-      padding: 0;
-    }
   }
   
   &__room-image {
     width: 100%;
     height: 300px;
     overflow: hidden;
+    border-radius: $border-radius $border-radius 0 0;
     
     img {
       width: 100%;
       height: 100%;
       object-fit: cover;
-      transition: transform 0.3s;
+      transition: transform $transition-time;
       
       &:hover {
         transform: scale(1.05);
@@ -55,92 +99,120 @@
   }
   
   &__room-info {
-    padding: 15px;
+    padding: 16px;
   }
   
   &__room-name {
-    font-size: 20px;
+    font-size: 24px;
     font-weight: 600;
-    margin-bottom: 5px;
+    margin-bottom: 8px;
+    color: $secondary-color;
   }
   
   &__room-price {
     font-size: 18px;
-    color: #f5222d;
+    color: $primary-color;
     font-weight: 500;
+    margin-bottom: 16px;
   }
   
-  &__details-card {
-    height: 100%;
-    
-    .ant-card-body {
-      padding: 20px;
-    }
+  &__hotel-name {
+    margin-bottom: 16px;
+  }
+  
+  &__room-description {
+    color: #666;
+    margin-bottom: 16px;
+  }
+  
+  &__amenities {
+    margin-top: 16px;
+    padding: 16px;
+    background-color: $light-bg;
+    border-radius: $border-radius;
     
     h3 {
-      text-align: center;
-      margin-bottom: 20px;
-      font-weight: 600;
+      margin-bottom: 16px;
+      font-size: 18px;
+      color: $secondary-color;
     }
+  }
+  
+  &__included-amenities {
+    border-left: 4px solid $primary-color;
+  }
+  
+  &__additional-amenities {
+    border-left: 4px solid #52c41a;
+    margin-top: 16px;
   }
   
   &__form {
-    margin-top: 20px;
+    margin-top: 16px;
   }
   
   &__summary {
-    margin: 20px 0;
-    padding: 15px;
-    background-color: #f5f5f5;
-    border-radius: 4px;
+    margin-top: 24px;
+    padding: 16px;
+    background-color: $light-bg;
+    border-radius: $border-radius;
+    
+    &-item {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 12px;
+      
+      &:last-child {
+        font-weight: 700;
+        font-size: 18px;
+        color: $primary-color;
+      }
+    }
   }
   
-  &__summary-item {
-    margin-bottom: 10px;
-    font-size: 15px;
-    
-    &:last-child {
-      margin-bottom: 0;
-      font-weight: 600;
-      font-size: 16px;
-      color: #f5222d;
-    }
+  &__total {
+    font-size: 24px;
+    font-weight: 700;
+    color: $primary-color;
+    text-align: right;
+    margin-top: 16px;
   }
   
   &__actions {
     display: flex;
     justify-content: space-between;
-    margin-top: 20px;
-  }
-  
-  &__book-btn {
-    background-color: #52c41a;
-    border-color: #52c41a;
+    margin-top: 24px;
     
-    &:hover, &:focus {
-      background-color: #73d13d;
-      border-color: #73d13d;
-    }
-  }
-  
-  &__amenities-btn {
-    display: flex;
-    align-items: center;
-    
-    .anticon {
-      margin-right: 5px;
+    button {
+      min-width: 120px;
+      height: 40px;
+      
+      &.ant-btn-primary {
+        background-color: $primary-color;
+        
+        &:hover {
+          background-color: color.adjust($primary-color, $lightness: -10%);
+        }
+      }
     }
   }
 }
 
+// Responsive styles
 @media (max-width: 768px) {
   .booking-confirmation {
+    padding: 16px;
+    
+    &__room-image {
+      height: 200px;
+    }
+    
     &__actions {
       flex-direction: column;
       
       button {
+        margin-bottom: 12px;
         width: 100%;
-        margin-bottom: 10px;
       }
     }
   }

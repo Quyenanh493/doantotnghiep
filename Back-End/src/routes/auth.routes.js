@@ -1,5 +1,6 @@
 import express from "express";
 import apiController from "../controllers/apiController";
+import authController from "../controllers/authController";
 import validationMiddleware from "../middleware/validationMiddleware";
 
 const router = express.Router();
@@ -23,9 +24,9 @@ router.post(
   apiController.handleRefreshToken
 );
 
-router.post(
-  '/logout',
-  apiController.handleLogout
-);
+// API quên mật khẩu
+router.post('/forgot-password', authController.handleForgotPassword);
+router.post('/verify-reset-code', authController.handleVerifyResetCode);
+router.post('/reset-password', authController.handleResetPassword);
 
 export default router;

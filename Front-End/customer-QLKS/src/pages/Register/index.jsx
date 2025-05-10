@@ -155,7 +155,7 @@ function Register({ visible, onCancel, onRegisterSuccess }) {
   
   return (
     <Modal
-      title={<h2 className="register-title">ĐĂNG KÝY</h2>}
+      title={<h2 className="register-title">ĐĂNG KÝ</h2>}
       open={visible}
       onCancel={onCancel}
       footer={null}
@@ -331,7 +331,7 @@ function Register({ visible, onCancel, onRegisterSuccess }) {
             className="register-button"
             loading={loading}
           >
-            ĐĂNG KÝY
+            ĐĂNG KÝ
           </Button>
         </Form.Item>
       </Form>

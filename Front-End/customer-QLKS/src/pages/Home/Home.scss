@@ -553,3 +553,289 @@
     }
   }
 }
+
+// Phần hiển thị phòng nổi bật
+.home__featured-rooms-section {
+  padding: 60px 0;
+  background-color: #f8f9fa;
+}
+
+.home__featured {
+  &-title {
+    text-align: center;
+    font-size: 32px;
+    font-weight: 700;
+    color: #333;
+    margin-bottom: 10px;
+    position: relative;
+    
+    &::after {
+      content: '';
+      position: absolute;
+      bottom: -10px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 80px;
+      height: 3px;
+      background-color: #1890ff;
+    }
+  }
+  
+  &-subtitle {
+    text-align: center;
+    font-size: 16px;
+    color: #666;
+    margin-bottom: 30px;
+  }
+}
+
+.home__room {
+  &-card {
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s, box-shadow 0.3s;
+    height: 100%;
+    
+    &:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    }
+  }
+  
+  &-image {
+    height: 200px;
+    overflow: hidden;
+    
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.5s;
+      
+      &:hover {
+        transform: scale(1.05);
+      }
+    }
+  }
+  
+  &-header {
+    border-bottom: 1px solid #f0f0f0;
+    padding-bottom: 12px;
+    margin-bottom: 12px;
+  }
+  
+  &-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 5px;
+  }
+  
+  &-price {
+    font-size: 16px;
+    color: #ff4d4f;
+    font-weight: 600;
+  }
+  
+  &-section {
+    margin-bottom: 12px;
+    
+    &-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: #555;
+      margin-bottom: 8px;
+    }
+  }
+  
+  &-amenities {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 10px;
+  }
+  
+  &-tag {
+    font-size: 12px;
+    padding: 2px 8px;
+    margin-right: 0;
+  }
+  
+  &-capacity {
+    display: flex;
+    justify-content: space-between;
+    font-size: 14px;
+    color: #555;
+  }
+  
+  &-actions {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 15px;
+    gap: 10px;
+  }
+  
+  &-btn {
+    flex: 1;
+    height: 36px;
+    border-radius: 4px;
+    font-size: 14px;
+    
+    &-detail {
+      color: #1890ff;
+      border-color: #1890ff;
+      
+      &:hover {
+        color: #40a9ff;
+        border-color: #40a9ff;
+      }
+    }
+  }
+}
+
+.home__view-more {
+  display: flex;
+  justify-content: center;
+  margin-top: 40px;
+  
+  &-btn {
+    padding: 0 30px;
+    height: 40px;
+    font-size: 16px;
+    border: none;
+    color: #1890ff;
+    background: transparent;
+    
+    &:hover {
+      color: #40a9ff;
+      background: transparent;
+    }
+  }
+}
+
+// Phần liên hệ
+.home__contact-section {
+  padding: 60px 0;
+  background-color: #fff;
+}
+
+.home__section-title {
+  text-align: center;
+  font-size: 32px;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 40px;
+  position: relative;
+  
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80px;
+    height: 3px;
+    background-color: #1890ff;
+  }
+}
+
+.home__map {
+  height: 350px;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.home__contact {
+  &-info {
+    padding: 20px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  
+  &-title {
+    font-size: 20px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 20px;
+    margin-top: 20px;
+    
+    &:first-child {
+      margin-top: 0;
+    }
+  }
+  
+  &-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
+    
+    i {
+      font-size: 20px;
+      color: #1890ff;
+      margin-right: 15px;
+      width: 30px;
+      text-align: center;
+    }
+    
+    a {
+      font-size: 18px;
+      color: #333;
+      text-decoration: none;
+      transition: color 0.3s;
+      
+      &:hover {
+        color: #1890ff;
+      }
+    }
+  }
+  
+  &-social {
+    display: flex;
+    gap: 20px;
+  }
+}
+
+.home__social-link {
+  display: flex;
+  align-items: center;
+  color: #333;
+  font-size: 16px;
+  text-decoration: none;
+  transition: color 0.3s;
+  
+  i {
+    font-size: 20px;
+    margin-right: 10px;
+    color: #1890ff;
+  }
+  
+  &:hover {
+    color: #1890ff;
+  }
+}
+
+// Thêm import cho Font Awesome nếu chưa có
+@import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css');
+
+// Phần loading và no-rooms
+.home__loading, .home__no-rooms {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;
+  text-align: center;
+  
+  .ant-spin {
+    margin-bottom: 15px;
+  }
+  
+  p {
+    font-size: 16px;
+    color: #666;
+  }
+}

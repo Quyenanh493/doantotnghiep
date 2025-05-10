@@ -43,7 +43,8 @@
   }
 }
 
-.login-form {
+.login-form,
+.forgot-password-form {
   .ant-form-item {
     margin-bottom: 16px;
   }
@@ -80,10 +81,27 @@
   }
 }
 
-.login-button-container {
+.login-form-button,
+.forgot-password-buttons {
   margin-top: 20px;
   text-align: center;
   margin-bottom: 0;
+}
+
+.login-form-links {
+  margin-bottom: 0 !important;
+  text-align: right;
+  
+  .forgot-password-link {
+    padding: 0;
+    height: auto;
+    color: #1890ff;
+    
+    &:hover {
+      color: #40a9ff;
+      text-decoration: underline;
+    }
+  }
 }
 
 .login-button {
@@ -97,6 +115,40 @@
   &:hover, &:focus {
     background-color: #40a9ff;
     border-color: #40a9ff;
+  }
+}
+
+.login-form-footer {
+  text-align: center;
+  margin-top: 16px;
+  font-size: 14px;
+  color: #666;
+  
+  button {
+    padding: 0 4px;
+    height: auto;
+    
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
+.forgot-password-description {
+  margin-bottom: 16px;
+  color: #666;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.forgot-password-buttons {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 24px;
+  
+  button {
+    height: 36px;
+    font-weight: 500;
   }
 }
 
@@ -115,5 +167,15 @@
   
   .login-title {
     font-size: 18px;
+  }
+  
+  .forgot-password-buttons {
+    flex-direction: column;
+    gap: 8px;
+    
+    button {
+      width: 100%;
+      margin-right: 0 !important;
+    }
   }
 }

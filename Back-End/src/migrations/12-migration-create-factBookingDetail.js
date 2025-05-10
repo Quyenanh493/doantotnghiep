@@ -45,12 +45,6 @@ module.exports = {
       totalAmount: {
         type: Sequelize.DECIMAL(10, 2)
       },
-      paymentMethod: {
-        type: Sequelize.STRING
-      },
-      statusPayment: {
-        type: Sequelize.STRING
-      },
       specialRate: {
         type: Sequelize.DECIMAL(10, 2)
       },

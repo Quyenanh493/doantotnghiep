@@ -10,6 +10,11 @@ module.exports = (sequelize, DataTypes) => {
         otherKey: 'roomId',
         as: 'Rooms', // Alias dùng trong include
       });
+      // Thêm alias cho mối quan hệ hasMany
+      Amenities.hasMany(models.RoomAmenities, { 
+        foreignKey: 'amenitiesId',
+        as: 'AmenitiesInRoom'  // Thêm alias riêng
+      });
       Amenities.hasMany(models.FactBookingDetailAmenities, { foreignKey: 'amenitiesId' });
     }
   }

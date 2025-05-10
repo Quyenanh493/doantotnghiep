@@ -30,4 +30,11 @@ router.delete(
   roomController.deleteRoom
 );
 
+// Thêm API đặt phòng mới
+router.post(
+  '/booking', 
+  authMiddleware.verifyToken,
+  roomController.bookRoom
+);
+
 export default router;

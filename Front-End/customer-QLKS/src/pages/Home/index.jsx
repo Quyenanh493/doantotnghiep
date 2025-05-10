@@ -1,7 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import { Form, DatePicker, Button, Layout, Row, Col } from 'antd';
+import { Form, DatePicker, Button, Layout, Row, Col, Card, Tag, Space, Divider, message, Spin } from 'antd';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Pagination, Autoplay, EffectFade } from 'swiper/modules';
 import dayjs from 'dayjs';
@@ -15,9 +15,11 @@ import slide3 from "../../images/slide3.jpg"
 import slide4 from "../../images/slide4.jpg"
 import slide5 from "../../images/slide5.jpg"
 import { setSearchDates, setGuestCounts } from '../../redux/search/searchSlice';
+import { getAllRooms } from '../../services/roomService';
 import "./Home.scss" 
 
 const { Content } = Layout;
+const { Meta } = Card;
 
 function Home() {
   const dispatch = useDispatch();
@@ -33,6 +35,31 @@ function Home() {
   const [guestSelectorVisible, setGuestSelectorVisible] = useState(false);
   const [dateIn, setDateIn] = useState(null);
   const [dateOut, setDateOut] = useState(null);
+  const [rooms, setRooms] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  // Fetch rooms from API
+  useEffect(() => {
+    const fetchRooms = async () => {
+      setLoading(true);
+      try {
+        const response = await getAllRooms();
+        if (response && response.EC === 0 && response.DT) {
+          // Lấy 3 phòng đầu tiên để hiển thị
+          setRooms(response.DT.slice(0, 3));
+        } else {
+          message.error('Không thể tải danh sách phòng');
+        }
+      } catch (error) {
+        console.error('Lỗi khi lấy danh sách phòng:', error);
+        message.error('Đã xảy ra lỗi khi tải danh sách phòng');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchRooms();
+  }, []);
 
   // Xử lý thay đổi số lượng phòng và khách
   const handleGuestChange = (type, action) => {
@@ -85,6 +112,7 @@ function Home() {
     navigate('/room');
   };
 
+
   const sliderData = [
     {
       id: 1,
@@ -107,6 +135,49 @@ function Home() {
       image: slide5,
     }
   ];
+
+  // Hàm lấy danh sách tiện nghi từ dữ liệu phòng
+  const getAmenities = (room) => {
+    let amenities = [];
+    
+    // Phòng ngủ luôn có
+    amenities.push('Phòng Ngủ');
+    
+    // Thêm các tiện nghi khác dựa trên trường Amenities nếu có
+    if (room.Amenities && room.Amenities.length > 0) {
+      room.Amenities.forEach(amenity => {
+        if (amenity.amenityName === 'Ban Công' || 
+            amenity.amenityName === 'Phòng Bếp' || 
+            amenity.amenityName === 'Ghế sofa') {
+          amenities.push(amenity.amenityName);
+        }
+      });
+    }
+    
+    return amenities;
+  };
+  
+  // Hàm lấy danh sách trang thiết bị từ dữ liệu phòng
+  const getFeatures = (room) => {
+    let features = [];
+    
+    // Wifi luôn có
+    features.push('Wifi');
+    
+    // Thêm các trang thiết bị khác dựa trên trường Amenities nếu có
+    if (room.Amenities && room.Amenities.length > 0) {
+      room.Amenities.forEach(amenity => {
+        if (amenity.amenityName === 'Điều Hoà' || 
+            amenity.amenityName === 'Nóng Lạnh' || 
+            amenity.amenityName === 'Tivi' ||
+            amenity.amenityName === 'Máy Sưởi') {
+          features.push(amenity.amenityName);
+        }
+      });
+    }
+    
+    return features;
+  };
 
   return (
     <Layout className="home">
@@ -273,21 +344,129 @@ function Home() {
             </Col>
           </Row>
 
-          {/* Phần còn lại của component giữ nguyên */}
           {/* Phòng nổi bật */}
-          <Row justify="center">
+          <Row justify="center" className="home__featured-rooms-section">
             <Col xs={24} sm={22} md={20} lg={18} xl={18}>
               <div className="home__featured">
-                <h2 className="home__featured-title">PHÒNG</h2>
-                <Row gutter={[24, 24]}>
-                  {/* Các thẻ phòng của bạn giữ nguyên */}
-                  {/* ... */}
-                </Row>
+                <h2 className="home__featured-title">PHÒNG NỔI BẬT</h2>
+                <div className="home__featured-subtitle">Khám phá các loại phòng sang trọng của chúng tôi</div>
+                {loading ? (
+                  <div className="home__loading">
+                    <Spin size="large" />
+                    <p>Đang tải danh sách phòng...</p>
+                  </div>
+                ) : (
+                  <>
+                    <Row gutter={[24, 24]} style={{ marginTop: '30px' }}>
+                      {rooms.length > 0 ? rooms.map(room => (
+                        <Col xs={24} sm={12} lg={8} key={room.roomId}>
+                          <Card
+                            className="home__room-card"
+                            cover={
+                              <div className="home__room-image">
+                                <img 
+                                  alt={room.roomName} 
+                                  src={room.roomImage ? `http://localhost:6969/images/${room.roomImage}` : "https://images.unsplash.com/photo-1611892440504-42a792e24d32?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=60"} 
+                                />
+                              </div>
+                            }
+                            bordered={false}
+                          >
+                            <div className="home__room-header">
+                              <h3 className="home__room-title">{room.roomName}</h3>
+                              <div className="home__room-price">{room.price?.toLocaleString('vi-VN')} vnd mỗi đêm</div>
+                            </div>
+                            
+                            <div className="home__room-section">
+                              <h4 className="home__room-section-title">Cơ sở</h4>
+                              <div className="home__room-amenities">
+                                {getAmenities(room).map((amenity, index) => (
+                                  <Tag key={index} className="home__room-tag">{amenity}</Tag>
+                                ))}
+                              </div>
+                            </div>
+                            
+                            <div className="home__room-section">
+                              <h4 className="home__room-section-title">Tiện nghi & Trang thiết bị</h4>
+                              <div className="home__room-amenities">
+                                {getFeatures(room).map((feature, index) => (
+                                  <Tag key={index} className="home__room-tag">{feature}</Tag>
+                                ))}
+                              </div>
+                            </div>
+                            
+                          </Card>
+                        </Col>
+                      )) : (
+                        <div className="home__no-rooms">
+                          <p>Không tìm thấy phòng nào</p>
+                        </div>
+                      )}
+                    </Row>
+                    <div className="home__view-more">
+                      <Button 
+                        className="home__view-more-btn" 
+                        onClick={() => navigate('/room')}
+                      >
+                        Xem Thêm {">>>"}
+                      </Button>
+                    </div>
+                  </>
+                )}
               </div>
             </Col>
           </Row>
 
-          {/* Phần còn lại của component giữ nguyên không thay đổi */}
+          {/* Phần Liên hệ */}
+          <Row justify="center" className="home__contact-section">
+            <Col xs={24} sm={22} md={20} lg={18} xl={18}>
+              <div className="home__contact">
+                <h2 className="home__section-title">LIÊN HỆ</h2>
+                <Row gutter={[48, 32]}>
+                  <Col xs={24} md={12}>
+                    <div className="home__map">
+                      <iframe
+                        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3779.6543248183077!2d105.69434537490079!3d18.67283856733188!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3139cddf0bf20f23%3A0x86154b56a284fa6d!2zOTkgTMOqIER14bqpbiwgQsOqzIFuIFRodeG7tSwgVGjDoG5oIHBo4buRIFZpbmgsIE5naOG7hyBBbiwgVmnhu4d0IE5hbQ!5e0!3m2!1svi!2s!4v1689175967462!5m2!1svi!2s"
+                        width="100%"
+                        height="100%"
+                        style={{ border: 0, borderRadius: '8px' }}
+                        allowFullScreen=""
+                        loading="lazy"
+                        referrerPolicy="no-referrer-when-downgrade"
+                        title="Hotel Location"
+                      ></iframe>
+                    </div>
+                  </Col>
+                  <Col xs={24} md={12}>
+                    <div className="home__contact-info">
+                      <h3 className="home__contact-title">Bạn cần hỗ trợ? Hãy gọi ngay</h3>
+                      <div className="home__contact-item">
+                        <i className="fas fa-phone-alt"></i>
+                        <a href="tel:+84974562765">+84974562765</a>
+                      </div>
+                      <div className="home__contact-item">
+                        <i className="fas fa-phone-alt"></i>
+                        <a href="tel:+84974562765">+84974562765</a>
+                      </div>
+                      
+                      <h3 className="home__contact-title">Theo dõi ngay</h3>
+                      <div className="home__contact-social">
+                        <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="home__social-link">
+                          <i className="fab fa-facebook-f"></i>
+                          <span>Facebook</span>
+                        </a>
+                        <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="home__social-link">
+                          <i className="fab fa-instagram"></i>
+                          <span>Instagram</span>
+                        </a>
+                      </div>
+                    </div>
+                  </Col>
+                </Row>
+              </div>
+            </Col>
+          </Row>
+          
         </div>
       </Content>
     </Layout>

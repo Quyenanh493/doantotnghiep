@@ -10,6 +10,7 @@ module.exports = (sequelize, DataTypes) => {
       FactBooking.belongsTo(models.Hotel, { foreignKey: 'hotelId' });
       FactBooking.hasMany(models.FactBookingDetail, { foreignKey: 'bookingId' });
       FactBooking.hasMany(models.RoomAvailability, { foreignKey: 'bookingId' });
+      FactBooking.hasOne(models.Payment, { foreignKey: 'bookingId' });
     }
   }
   FactBooking.init({

@@ -1,7 +1,7 @@
-function Home () {
+function Home() {
   return (
     <>
-      Home
+      home
     </>
   )
 }

@@ -13,6 +13,11 @@ module.exports = (sequelize, DataTypes) => {
         as: 'Amenities'
       });
       
+      // Thêm alias cho mối quan hệ hasMany
+      Room.hasMany(models.RoomAmenities, { 
+        foreignKey: 'roomId',
+        as: 'RoomToAmenities'  // Thêm alias riêng
+      });
       Room.hasMany(models.FactBookingDetail, { foreignKey: 'roomId' });
       Room.hasMany(models.RoomAvailability, { foreignKey: 'roomId' });
     }

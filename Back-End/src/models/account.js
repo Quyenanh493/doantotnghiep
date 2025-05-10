@@ -25,7 +25,9 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.BOOLEAN,
       defaultValue: true
     },
-    lastLogin: DataTypes.DATE
+    lastLogin: DataTypes.DATE,
+    resetPasswordToken: DataTypes.STRING,
+    resetPasswordExpires: DataTypes.DATE
   }, {
     sequelize,
     modelName: 'Account',

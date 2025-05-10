@@ -37,12 +37,40 @@ export const registerCustomer = async (userData, isFormData = false) => {
   }
 };
 
-
-
-// Đăng xuất khách hàng
-export const logoutCustomer = () => {
-  // Không xử lý ở đây nữa, việc này sẽ được xử lý ở component Logout
+// Gửi yêu cầu đặt lại mật khẩu (quên mật khẩu)
+export const forgotPassword = async (email) => {
+  try {
+    return await request.post('auth/forgot-password', { email });
+  } catch (error) {
+    console.error('Lỗi gửi yêu cầu đặt lại mật khẩu:', error);
+    throw error;
+  }
 };
+
+// Xác thực mã reset
+export const verifyResetCode = async (email, code) => {
+  try {
+    return await request.post('auth/verify-reset-code', { email, code });
+  } catch (error) {
+    console.error('Lỗi xác thực mã reset:', error);
+    throw error;
+  }
+};
+
+// Đặt lại mật khẩu
+export const resetPassword = async (email, token, newPassword) => {
+  try {
+    return await request.post('auth/reset-password', { 
+      email, 
+      token, 
+      newPassword 
+    });
+  } catch (error) {
+    console.error('Lỗi đặt lại mật khẩu:', error);
+    throw error;
+  }
+};
+
 
 // Lấy hồ sơ khách hàng hiện tại
 export const getCustomerProfile = async () => {

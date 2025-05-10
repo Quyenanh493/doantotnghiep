@@ -96,6 +96,23 @@ const roomController = {
             console.error("Error in deleteRoom:", error);
             next(error);
         }
+    },
+
+    // Đặt phòng mới
+    bookRoom: async (req, res, next) => {
+        try {
+            const bookingData = req.body;
+            let data = await roomService.bookRoom(bookingData);
+            
+            return res.status(201).json({
+                EM: data.EM,
+                EC: data.EC,
+                DT: data.DT
+            });
+        } catch (error) {
+            console.error("Error in bookRoom:", error);
+            next(error);
+        }
     }
 };
 

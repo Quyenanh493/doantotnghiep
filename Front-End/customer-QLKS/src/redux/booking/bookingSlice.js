@@ -4,16 +4,17 @@ const initialState = {
   bookingInfo: {
     customerName: '',
     phoneNumber: '',
-    address: '',
     checkInDate: '',
     checkOutDate: '',
     roomCount: 0,
     daysCount: 0,
     totalAmount: 0,
-    roomId: null,
+    roomId: '',
     roomName: '',
     roomImage: '',
-    roomPrice: 0
+    roomPrice: 0,
+    adultCount: 0,
+    childrenCount: 0,
   },
   selectedAmenities: []
 };
