@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { Row, Col, Card, Button, Checkbox, Typography, Divider, Image, Spin, Empty, Result } from 'antd';
-import { ArrowLeftOutlined, ShoppingCartOutlined } from '@ant-design/icons';
+import { ArrowLeftOutlined, ShoppingCartOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
 import { getAllAmenities } from '../../services/amenitiesService';
 import { addAmenity, removeAmenity } from '../../redux/booking/bookingSlice';
 import './BookingAmenities.scss';
@@ -14,23 +14,56 @@ function BookingAmenities() {
   const navigate = useNavigate();
   const [amenities, setAmenities] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [bookingValid, setBookingValid] = useState(true);
 
   const selectedAmenities = useSelector((state) => state.booking.selectedAmenities);
   const bookingInfo = useSelector((state) => state.booking.bookingInfo);
 
   // Kiểm tra xem người dùng đã đặt phòng chưa
-  const hasBookingInfo = bookingInfo && bookingInfo.roomId && bookingInfo.checkInDate && bookingInfo.checkOutDate;
-
-  // Kiểm tra trạng thái ban đầu
   useEffect(() => {
-    console.log('Initial Selected Amenities:', selectedAmenities);
-    console.log('Booking Info:', bookingInfo);
-  }, []);
+    const checkBookingValidity = () => {
+      // Kiểm tra thông tin từ Redux
+      const hasReduxBookingInfo = bookingInfo && 
+                              bookingInfo.roomId && 
+                              bookingInfo.checkInDate && 
+                              bookingInfo.checkOutDate;
+      
+      // Kiểm tra thông tin từ localStorage
+      let hasLocalBookingInfo = false;
+      try {
+        const savedState = JSON.parse(localStorage.getItem('bookingState') || '{}');
+        hasLocalBookingInfo = savedState && 
+                           savedState.roomId && 
+                           savedState.dateIn && 
+                           savedState.dateOut;
+      } catch (error) {
+        console.error('Lỗi khi đọc bookingState từ localStorage:', error);
+        hasLocalBookingInfo = false;
+      }
+      
+      // Cần cả hai nguồn thông tin đều hợp lệ
+      const isValid = hasReduxBookingInfo && hasLocalBookingInfo;
+      setBookingValid(isValid);
+      
+      // Log để debug
+      console.log('Booking validity check:', {
+        reduxInfo: hasReduxBookingInfo,
+        localInfo: hasLocalBookingInfo,
+        isValid
+      });
+      
+      return isValid;
+    };
+    
+    if (!checkBookingValidity()) {
+      console.warn('Không có thông tin đặt phòng hợp lệ trong trang BookingAmenities');
+    }
+  }, [bookingInfo]);
 
   // Lấy danh sách tiện nghi từ API
   useEffect(() => {
-    // Chỉ tải tiện nghi khi đã có thông tin đặt phòng
-    if (!hasBookingInfo) {
+    // Chỉ tải tiện nghi khi đã có thông tin đặt phòng hợp lệ
+    if (!bookingValid) {
       return;
     }
 
@@ -64,7 +97,7 @@ function BookingAmenities() {
     };
 
     fetchAmenities();
-  }, [hasBookingInfo]);
+  }, [bookingValid]);
 
   // Kiểm tra tiện nghi đã được chọn chưa
   const isAmenitySelected = (amenityId) => {
@@ -74,7 +107,6 @@ function BookingAmenities() {
   // Kiểm tra xem tiện ích có phải là tiện ích có sẵn của phòng không
   const isIncludedAmenity = (amenityId) => {
     const result = selectedAmenities.some((item) => item.id === amenityId && item.isIncluded === true);
-    console.log(`Checking if amenity ${amenityId} is included:`, result);
     return result;
   };
 
@@ -82,8 +114,7 @@ function BookingAmenities() {
   const handleAmenityToggle = (amenity, e) => {
     e.stopPropagation();
     e.preventDefault();
-    console.log('Toggling amenity:', amenity.id, 'Checked:', e.target.checked);
-
+    
     if (!amenity.id) {
       console.error('Không thể xử lý tiện ích vì id là undefined:', amenity);
       return;
@@ -119,24 +150,20 @@ function BookingAmenities() {
 
   // Tính tổng tiền tiện nghi đã chọn
   const calculateTotalAmenitiesPrice = () => {
-    return selectedAmenities.reduce((total, item) => total + Number(item.price), 0);
+    return selectedAmenities.reduce((total, item) => total + Number(item.price || 0), 0);
   };
 
-  // Theo dõi trạng thái selectedAmenities
-  useEffect(() => {
-    console.log('Selected Amenities:', selectedAmenities);
-  }, [selectedAmenities]);
-
   // Hiển thị thông báo nếu chưa đặt phòng
-  if (!hasBookingInfo) {
+  if (!bookingValid) {
     return (
       <div className="booking-amenities">
         <Result
           status="warning"
-          title="Vui lòng đặt phòng trước"
-          subTitle="Bạn cần phải chọn phòng và tiến hành đặt phòng trước khi có thể thêm tiện nghi bổ sung."
+          icon={<ExclamationCircleOutlined />}
+          title="Không thể truy cập trang tiện ích"
+          subTitle="Bạn cần phải chọn phòng và tiến hành đặt phòng trước khi có thể thêm tiện nghi bổ sung. Có thể bạn đã hủy đặt phòng hoặc chưa chọn phòng."
           extra={
-            <Button type="primary" onClick={goToRoomPage}>
+            <Button type="primary" size="large" onClick={goToRoomPage}>
               Tìm và đặt phòng ngay
             </Button>
           }
@@ -189,7 +216,6 @@ function BookingAmenities() {
                     hoverable={!isIncluded}
                     onClick={(e) => {
                       e.stopPropagation();
-                      console.log('Card clicked, but should not trigger amenity toggle');
                     }}
                   >
                     <div className="booking-amenities__item-content">

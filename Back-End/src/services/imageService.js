@@ -37,13 +37,13 @@ const uploadImageHM = async (fileBuffer, fileName, type = 'general') => {
 // Giữ lại các hàm cũ để tương thích ngược (có thể xóa sau này)
 const uploadCustomerImage = async (fileBuffer, fileName, customerId) => {
   try {
-    const downloadURL = await uploadImage(fileBuffer, fileName, 'customer');
+    const downloadURL = await uploadImageHM(fileBuffer, fileName, 'customer');
     
     // Cập nhật bản ghi khách hàng với URL hình ảnh nếu có ID
     if (customerId) {
       await db.Customer.update(
         { customerImage: downloadURL },
-        { where: { id: customerId } }
+        { where: { customerId: customerId } }
       );
     }
     
@@ -56,7 +56,7 @@ const uploadCustomerImage = async (fileBuffer, fileName, customerId) => {
 
 const uploadRoomImage = async (fileBuffer, fileName, roomId) => {
   try {
-    const downloadURL = await uploadImage(fileBuffer, fileName, 'room');
+    const downloadURL = await uploadImageHM(fileBuffer, fileName, 'room');
     
     // Cập nhật bản ghi phòng với URL hình ảnh nếu có ID
     if (roomId) {

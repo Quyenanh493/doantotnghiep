@@ -43,6 +43,18 @@ module.exports = {
       cardType: {
         type: Sequelize.STRING
       },
+      refundAmount: {
+        type: Sequelize.DECIMAL(10, 2)
+      },
+      refundDate: {
+        type: Sequelize.DATE
+      },
+      refundTransactionCode: {
+        type: Sequelize.STRING
+      },
+      vnp_TransactionNo: {
+        type: Sequelize.STRING
+      },
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE

@@ -10,6 +10,8 @@ import RoomDetail from "../pages/RoomDetail";
 import BookingConfirmation from "../pages/BookingConfirmation";
 import BookingAmenities from "../pages/BookingAmenities";
 import HistoryRoom from "../pages/HistoryRoom";
+import PaymentSuccess from "../pages/PaymentSuccess";
+import PaymentFailure from "../pages/PaymentFailure";
 import ProtectedBookingRoute from "../components/ProtectedBookingRoute";
 
 export const routes = [
@@ -56,6 +58,14 @@ export const routes = [
             {
                 path: "/history-room",
                 element: <HistoryRoom />
+            },
+            {
+                path: "/payment/success",
+                element: <PaymentSuccess />
+            },
+            {
+                path: "/payment/failed",
+                element: <PaymentFailure />
             },
         ],
     },

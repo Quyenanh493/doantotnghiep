@@ -182,6 +182,8 @@ $transition-time: 0.3s;
     display: flex;
     justify-content: space-between;
     margin-top: 24px;
+    flex-wrap: wrap;
+    gap: 10px;
     
     button {
       min-width: 120px;
@@ -192,6 +194,20 @@ $transition-time: 0.3s;
         
         &:hover {
           background-color: color.adjust($primary-color, $lightness: -10%);
+        }
+      }
+      
+      &.booking-confirmation__cancel-btn {
+        background-color: #ff4d4f;
+        color: white;
+        
+        &:hover {
+          background-color: #ff7875;
+        }
+        
+        &:disabled {
+          background-color: #ffccc7;
+          color: rgba(0, 0, 0, 0.25);
         }
       }
     }

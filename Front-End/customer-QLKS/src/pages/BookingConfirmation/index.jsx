@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Card, Row, Col, Form, Input, DatePicker, Button, Typography, Divider, Select, notification, List, Modal, Spin, Result } from 'antd';
-import { PlusOutlined, QrcodeOutlined, CheckCircleOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
+import { PlusOutlined } from '@ant-design/icons';
 import axios from 'axios';
 import dayjs from 'dayjs';
 import './BookingConfirmation.scss';
@@ -22,11 +22,7 @@ function BookingConfirmation() {
   const [locationState, setLocationState] = useState(null);
   const [notiApi, contextHolder] = notification.useNotification();
   const [roomAmenities, setRoomAmenities] = useState([]);
-  const [paymentUrl, setPaymentUrl] = useState(null);
-  const [isVNPayModalVisible, setIsVNPayModalVisible] = useState(false);
   const [bookingId, setBookingId] = useState(null);
-  const [paymentStatus, setPaymentStatus] = useState(null);
-  const [checkingPayment, setCheckingPayment] = useState(false);
   const [paymentStatusInterval, setPaymentStatusInterval] = useState(null);
 
   const bookingInfo = useSelector((state) => state.booking.bookingInfo);
@@ -219,53 +215,6 @@ function BookingConfirmation() {
     }
   };
 
-  // Kiểm tra trạng thái thanh toán
-  const checkPaymentStatusHandler = async () => {
-    if (!bookingId) return;
-    
-    setCheckingPayment(true);
-    try {
-      const response = await checkPaymentStatus(bookingId);
-      if (response && response.EC === 0) {
-        const payment = response.DT;
-        setPaymentStatus(payment.statusPayment);
-        
-        if (payment.statusPayment === 'Paid') {
-          // Thanh toán thành công, dừng kiểm tra và hiển thị thông báo
-          clearInterval(paymentStatusInterval);
-          notiApi.success({
-            message: 'Thanh toán thành công',
-            description: 'Cảm ơn bạn đã đặt phòng và thanh toán!'
-          });
-          setIsVNPayModalVisible(false);
-          setTimeout(() => {
-            navigate('/history-room');
-          }, 2000);
-        } else if (payment.statusPayment === 'Failed') {
-          // Thanh toán thất bại, dừng kiểm tra và hiển thị thông báo
-          clearInterval(paymentStatusInterval);
-          notiApi.error({
-            message: 'Thanh toán thất bại',
-            description: 'Vui lòng thử lại hoặc chọn phương thức thanh toán khác.'
-          });
-        }
-      }
-    } catch (error) {
-      console.error('Lỗi khi kiểm tra trạng thái thanh toán:', error);
-    } finally {
-      setCheckingPayment(false);
-    }
-  };
-
-  // Hủy interval khi component unmount
-  useEffect(() => {
-    return () => {
-      if (paymentStatusInterval) {
-        clearInterval(paymentStatusInterval);
-      }
-    };
-  }, [paymentStatusInterval]);
-
   const handleBookNow = async () => {
     try {
       const values = await form.validateFields();
@@ -325,12 +274,118 @@ function BookingConfirmation() {
           const paymentResponse = await createPaymentUrl(newBookingId, ipAddr);
           
           if (paymentResponse && paymentResponse.EC === 0 && paymentResponse.DT.paymentUrl) {
-            setPaymentUrl(paymentResponse.DT.paymentUrl);
-            setIsVNPayModalVisible(true);
+            // Lưu URL thanh toán
+            const paymentUrlFromResponse = paymentResponse.DT.paymentUrl;
             
-            // Thiết lập kiểm tra trạng thái thanh toán mỗi 5 giây
-            const intervalId = setInterval(checkPaymentStatusHandler, 5000);
+            // Hiển thị thông báo chuyển hướng
+            notiApi.info({
+              message: 'Chuyển hướng đến trang thanh toán',
+              description: 'Bạn đang được chuyển đến trang thanh toán VNPay...',
+              duration: 2
+            });
+            
+            // Thiết lập interval kiểm tra trạng thái thanh toán
+            const intervalId = setInterval(() => {
+              checkPaymentStatus(newBookingId)
+                .then(response => {
+                  if (response && response.EC === 0) {
+                    const payment = response.DT;
+                    
+                    if (payment.statusPayment === 'Paid') {
+                      // Thanh toán thành công, dừng kiểm tra
+                      clearInterval(intervalId);
+                      
+                      // Hiển thị thông báo thành công (nếu người dùng quay lại trang)
+                      notiApi.success({
+                        message: 'Thanh toán thành công',
+                        description: 'Cảm ơn bạn đã đặt phòng và thanh toán!'
+                      });
+                      
+                      // Lưu thông tin vào localStorage để có thể xử lý khi người dùng quay lại
+                      localStorage.setItem('payment_status', JSON.stringify({
+                        bookingId: newBookingId,
+                        status: 'Paid',
+                        amount: calculateTotalAmount()
+                      }));
+                      
+                      // Nếu người dùng đang ở trang này, chuyển hướng đến trang thành công
+                      if (document.visibilityState === 'visible') {
+                        navigate(`/payment/success?orderId=${newBookingId}&amount=${calculateTotalAmount()}`);
+                      }
+                    } else if (payment.statusPayment === 'Failed') {
+                      // Thanh toán thất bại, dừng kiểm tra
+                      clearInterval(intervalId);
+                      
+                      // Lưu thông tin vào localStorage
+                      localStorage.setItem('payment_status', JSON.stringify({
+                        bookingId: newBookingId,
+                        status: 'Failed'
+                      }));
+                      
+                      // Nếu người dùng đang ở trang này, chuyển hướng đến trang thất bại
+                      if (document.visibilityState === 'visible') {
+                        navigate(`/payment/failed?error=Giao dịch không thành công&code=99`);
+                      }
+                    }
+                  }
+                })
+                .catch(error => {
+                  console.error('Lỗi khi kiểm tra trạng thái thanh toán:', error);
+                });
+            }, 5000); // Kiểm tra mỗi 5 giây
+            
+            // Lưu interval ID để có thể xóa khi cần
             setPaymentStatusInterval(intervalId);
+            
+            // Thiết lập event listener để xử lý khi tab được kích hoạt lại
+            const handleVisibilityChange = () => {
+              if (document.visibilityState === 'visible') {
+                // Kiểm tra xem có thông tin thanh toán trong localStorage không
+                const paymentStatus = JSON.parse(localStorage.getItem('payment_status') || '{}');
+                if (paymentStatus.bookingId === newBookingId) {
+                  if (paymentStatus.status === 'Paid') {
+                    navigate(`/payment/success?orderId=${newBookingId}&amount=${paymentStatus.amount}`);
+                  } else if (paymentStatus.status === 'Failed') {
+                    navigate(`/payment/failed?error=Giao dịch không thành công&code=99`);
+                  }
+                  // Xóa thông tin thanh toán sau khi đã xử lý
+                  localStorage.removeItem('payment_status');
+                }
+                
+                // Kiểm tra trạng thái thanh toán ngay lập tức khi tab được kích hoạt lại
+                checkPaymentStatus(newBookingId)
+                  .then(response => {
+                    if (response && response.EC === 0) {
+                      const payment = response.DT;
+                      if (payment.statusPayment === 'Paid') {
+                        clearInterval(intervalId);
+                        navigate(`/payment/success?orderId=${newBookingId}&amount=${calculateTotalAmount()}`);
+                      } else if (payment.statusPayment === 'Failed') {
+                        clearInterval(intervalId);
+                        navigate(`/payment/failed?error=Giao dịch không thành công&code=99`);
+                      }
+                    }
+                  })
+                  .catch(error => {
+                    console.error('Lỗi khi kiểm tra trạng thái thanh toán:', error);
+                  });
+              }
+            };
+            
+            // Đăng ký sự kiện visibility change
+            document.addEventListener('visibilitychange', handleVisibilityChange);
+            
+            // Cleanup function để xóa event listener và interval khi component unmount
+            const cleanup = () => {
+              document.removeEventListener('visibilitychange', handleVisibilityChange);
+              clearInterval(intervalId);
+            };
+            
+            // Thêm cleanup vào unload để đảm bảo dọn dẹp khi người dùng rời trang
+            window.addEventListener('unload', cleanup);
+            
+            // Chuyển hướng trực tiếp đến trang thanh toán VNPay
+            window.location.href = paymentUrlFromResponse;
           } else {
             notiApi.error({
               message: 'Lỗi thanh toán',
@@ -365,52 +420,41 @@ function BookingConfirmation() {
     }
   };
 
-  const handleVNPayModalOk = () => {
-    // Nếu đang kiểm tra thanh toán, không đóng modal ngay
-    if (checkingPayment) return;
-    
-    // Nếu đã có kết quả thanh toán thì xử lý theo kết quả
-    if (paymentStatus === 'Paid') {
-      setIsVNPayModalVisible(false);
-      dispatch(resetBooking());
-      navigate('/history-room');
-    } else if (paymentStatus === 'Failed') {
-      setIsVNPayModalVisible(false);
-      // Có thể hiển thị lựa chọn để thử lại hoặc đổi phương thức thanh toán
-    } else {
-      // Nếu chưa có kết quả, kiểm tra thủ công một lần
-      checkPaymentStatusHandler();
-      
-      // Hiển thị thông báo cho người dùng
-      notiApi.info({
-        message: 'Đang kiểm tra thanh toán',
-        description: 'Vui lòng đợi khi chúng tôi xác nhận trạng thái thanh toán của bạn.'
-      });
-    }
-  };
-
-  const handleVNPayModalCancel = () => {
-    // Hỏi xác nhận nếu muốn hủy quá trình thanh toán
-    Modal.confirm({
-      title: 'Hủy thanh toán?',
-      icon: <ExclamationCircleOutlined />,
-      content: 'Bạn có chắc muốn hủy quá trình thanh toán này không? Đơn đặt phòng của bạn vẫn sẽ được lưu nhưng ở trạng thái chưa thanh toán.',
-      onOk() {
-        if (paymentStatusInterval) {
-          clearInterval(paymentStatusInterval);
-        }
-        setIsVNPayModalVisible(false);
-        navigate('/history-room');
+  // Hủy interval khi component unmount
+  useEffect(() => {
+    return () => {
+      if (paymentStatusInterval) {
+        clearInterval(paymentStatusInterval);
       }
-    });
-  };
+    };
+  }, [paymentStatusInterval]);
 
-  // Mở URL thanh toán trong cửa sổ mới
-  const openPaymentUrl = () => {
-    if (paymentUrl) {
-      window.open(paymentUrl, '_blank');
-    }
-  };
+  // Kiểm tra trạng thái thanh toán khi quay lại từ trang VNPay
+  useEffect(() => {
+    const checkPaymentOnReturn = async () => {
+      // Kiểm tra xem có phải đang trở lại từ VNPay không
+      const paymentStatus = JSON.parse(localStorage.getItem('payment_status') || '{}');
+      if (paymentStatus.bookingId) {
+        try {
+          const response = await checkPaymentStatus(paymentStatus.bookingId);
+          if (response && response.EC === 0) {
+            const payment = response.DT;
+            if (payment.statusPayment === 'Paid') {
+              navigate(`/payment/success?orderId=${paymentStatus.bookingId}&amount=${paymentStatus.amount || 0}`);
+            } else if (payment.statusPayment === 'Failed') {
+              navigate(`/payment/failed?error=Giao dịch không thành công&code=99`);
+            }
+          }
+        } catch (error) {
+          console.error('Lỗi khi kiểm tra trạng thái thanh toán:', error);
+        } finally {
+          localStorage.removeItem('payment_status');
+        }
+      }
+    };
+    
+    checkPaymentOnReturn();
+  }, [navigate]);
 
   const goToAmenities = () => {
     navigate('/booking-amenities');
@@ -461,7 +505,7 @@ function BookingConfirmation() {
           <Card className="booking-confirmation__room-card">
             <div className="booking-confirmation__room-image">
               <img
-                src={bookingInfo.roomImage ? `http://localhost:6969/images/${bookingInfo.roomImage}` : 'https://via.placeholder.com/500x300'}
+                src={bookingInfo.roomImage}
                 alt={bookingInfo.roomName || 'Phòng'}
               />
             </div>
@@ -649,56 +693,37 @@ function BookingConfirmation() {
                 >
                   Thêm Tiện Nghi
                 </Button>
+                
+                <Button
+                  type="danger"
+                  className="booking-confirmation__cancel-btn"
+                  onClick={() => {
+                    Modal.confirm({
+                      title: 'Hủy đặt phòng',
+                      content: 'Bạn có chắc chắn muốn hủy đặt phòng? Tất cả thông tin đã chọn sẽ bị mất.',
+                      okText: 'Hủy đặt phòng',
+                      cancelText: 'Quay lại',
+                      okButtonProps: { danger: true },
+                      onOk: () => {
+                        dispatch(resetBooking());
+                        localStorage.removeItem('bookingState');
+                        notiApi.success({
+                          message: 'Đã hủy đặt phòng',
+                          description: 'Thông tin đặt phòng đã được xóa thành công.'
+                        });
+                        navigate('/room');
+                      }
+                    });
+                  }}
+                  disabled={loading}
+                >
+                  Hủy Đặt Phòng
+                </Button>
               </div>
             </Form>
           </Card>
         </Col>
       </Row>
-
-      <Modal
-        title="Thanh toán bằng VNPay"
-        open={isVNPayModalVisible}
-        onOk={handleVNPayModalOk}
-        onCancel={handleVNPayModalCancel}
-        okText="Đã thanh toán"
-        cancelText="Hủy"
-        okButtonProps={{ loading: checkingPayment }}
-      >
-        <div style={{ textAlign: 'center' }}>
-          <p>Nhấn vào nút bên dưới để mở trang thanh toán VNPay:</p>
-          
-          <Button 
-            type="primary" 
-            icon={<QrcodeOutlined />} 
-            onClick={openPaymentUrl} 
-            style={{ margin: '20px 0' }}
-          >
-            Mở Trang Thanh Toán VNPay
-          </Button>
-          
-          {checkingPayment && (
-            <div style={{ margin: '20px 0' }}>
-              <Spin /> <span style={{ marginLeft: 10 }}>Đang kiểm tra trạng thái thanh toán...</span>
-            </div>
-          )}
-          
-          {paymentStatus === 'Paid' && (
-            <div style={{ margin: '20px 0', color: '#52c41a' }}>
-              <CheckCircleOutlined style={{ fontSize: 24 }} /> <span style={{ marginLeft: 10 }}>Thanh toán thành công!</span>
-            </div>
-          )}
-          
-          {paymentStatus === 'Failed' && (
-            <div style={{ margin: '20px 0', color: '#f5222d' }}>
-              <ExclamationCircleOutlined style={{ fontSize: 24 }} /> <span style={{ marginLeft: 10 }}>Thanh toán thất bại!</span>
-            </div>
-          )}
-          
-          <p style={{ marginTop: 16 }}>
-            Sau khi thanh toán, nhấn "Đã thanh toán" để hệ thống kiểm tra và xác nhận thanh toán của bạn.
-          </p>
-        </div>
-      </Modal>
     </div>
   );
 }

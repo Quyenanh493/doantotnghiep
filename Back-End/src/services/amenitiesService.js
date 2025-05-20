@@ -64,6 +64,48 @@ const amenitiesService = {
         }
     },
 
+    // Lấy tiện nghi theo ID phòng
+    getAmenityByRoomId: async (roomId) => {
+        try {
+            // Kiểm tra phòng có tồn tại không
+            const room = await db.Room.findByPk(roomId);
+            
+            if (!room) {
+                return {
+                    EM: 'Không tìm thấy phòng',
+                    EC: 1,
+                    DT: []
+                };
+            }
+            
+            // Lấy danh sách tiện nghi của phòng thông qua mối quan hệ nhiều-nhiều
+            const amenities = await db.Amenities.findAll({
+                include: [
+                    {
+                        model: db.Room,
+                        as: 'Rooms',
+                        where: { roomId: roomId },
+                        through: { attributes: [] },
+                        required: true
+                    }
+                ]
+            });
+            
+            return {
+                EM: 'Lấy danh sách tiện nghi của phòng thành công',
+                EC: 0,
+                DT: amenities
+            };
+        } catch (error) {
+            console.log(error);
+            return {
+                EM: 'Lỗi từ server',
+                EC: -1,
+                DT: []
+            };
+        }
+    },
+
     // Tạo tiện nghi mới
     createAmenity: async (amenityData) => {
         try {

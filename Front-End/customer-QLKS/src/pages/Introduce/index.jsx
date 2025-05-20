@@ -43,6 +43,7 @@ function Introduce() {
       try {
         setLoading(true);
         const response = await getDefaultHotel();
+        console.log(response);
         
         if (response && response.EC === 0 && response.DT) {
           setHotel(response.DT);
@@ -83,14 +84,6 @@ function Introduce() {
       </div>
     );
   }
-
-  // Tạo dữ liệu mẫu cho các phần cần thiết
-  const carouselImages = [
-    hotel.hotelImage ? `http://localhost:6969/images/${hotel.hotelImage}` : 'https://via.placeholder.com/1200x500?text=Hotel+Image+1',
-    'https://images.unsplash.com/photo-1566073771259-6a8506099945?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxzZWFyY2h8M3x8aG90ZWx8ZW58MHx8MHx8&auto=format&fit=crop&w=1200&q=60',
-    'https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxzZWFyY2h8MjB8fGhvdGVsfGVufDB8fDB8fA%3D%3D&auto=format&fit=crop&w=1200&q=60',
-    'https://images.unsplash.com/photo-1618773928121-c32242e63f39?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxzZWFyY2h8OXx8aG90ZWwlMjByb29tfGVufDB8fDB8fA%3D%3D&auto=format&fit=crop&w=1200&q=60'
-  ];
 
   const hotelAmenities = [
     { title: 'Hồ Bơi', description: 'Hồ bơi vô cực với tầm nhìn tuyệt đẹp', icon: '🏊‍♂️' },
@@ -136,7 +129,7 @@ function Introduce() {
   return (
     <div className="introduce-page">
       {/* Hero Banner */}
-      <div className="introduce-banner">
+      {/* <div className="introduce-banner">
         <Carousel autoplay effect="fade" className="introduce-carousel">
           {carouselImages.map((image, index) => (
             <div key={index}>
@@ -159,7 +152,7 @@ function Introduce() {
             </div>
           ))}
         </Carousel>
-      </div>
+      </div> */}
 
       <div className="introduce-container">
         {/* Giới Thiệu */}
@@ -221,10 +214,7 @@ function Introduce() {
             <Col xs={24} md={12}>
               <div className="image-container">
                 <Image
-                  src={hotel.hotelImage 
-                    ? `http://localhost:6969/images/${hotel.hotelImage}` 
-                    : "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxzZWFyY2h8NHx8aG90ZWx8ZW58MHx8MHx8&auto=format&fit=crop&w=600&q=60"
-                  }
+                  src={hotel.hotelImage}
                   alt={hotel.hotelName}
                   className="featured-image"
                   preview={false}

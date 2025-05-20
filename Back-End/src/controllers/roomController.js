@@ -113,6 +113,23 @@ const roomController = {
             console.error("Error in bookRoom:", error);
             next(error);
         }
+    },
+
+    // Lấy phòng theo hotelId
+    getRoomsByHotelId: async (req, res, next) => {
+        try {
+            const hotelId = req.params.hotelId;
+            let data = await roomService.getRoomsByHotelId(hotelId);
+            
+            return res.status(200).json({
+                EM: data.EM,
+                EC: data.EC,
+                DT: data.DT
+            });
+        } catch (error) {
+            console.error("Error in getRoomsByHotelId:", error);
+            next(error);
+        }
     }
 };
 

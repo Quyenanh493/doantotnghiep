@@ -93,8 +93,8 @@ $box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         border-color: $success-color;
         
         &:hover, &:focus {
-          background-color: lighten($success-color, 10%);
-          border-color: lighten($success-color, 10%);
+          background-color: color.adjust($success-color, $lightness: 10%);
+          border-color: color.adjust($success-color, $lightness: 10%);
         }
       }
       

@@ -7,12 +7,13 @@ import customerRoutes from "./customer.routes";
 import uploadRoutes from "./upload.routes";
 import paymentRoutes from "./payment.routes";
 import contactRoutes from "./contact.routes";
-import hotelRoutes from "./hotelRoute";
+import hotelRoutes from "./hotel.routes";
 import factBookingRoutes from "./factBooking.routes";
 import factBookingDetailRoutes from "./factBookingDetail.routes";
 import accountRoutes from "./account.routes";
 import userRoutes from "./user.routes";
 import roleRoutes from "./role.routes";
+import dashboardRoutes from "./dashboard.routes";
 
 const router = express.Router();
 
@@ -31,6 +32,7 @@ let initApiRoutes = (app) => {
   router.use('/accounts', accountRoutes);
   router.use('/users', userRoutes);
   router.use('/roles', roleRoutes);
+  router.use('/dashboard', dashboardRoutes);
 
   return app.use("/api/v1/", router);
 }

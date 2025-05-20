@@ -366,7 +366,7 @@ function Home() {
                               <div className="home__room-image">
                                 <img 
                                   alt={room.roomName} 
-                                  src={room.roomImage ? `http://localhost:6969/images/${room.roomImage}` : "https://images.unsplash.com/photo-1611892440504-42a792e24d32?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=60"} 
+                                  src={room.roomImage} 
                                 />
                               </div>
                             }

@@ -159,7 +159,7 @@ function LayoutDefault() {
                 </Layout>
 
                 <footer className="layout__footer">
-                    copyright @2024
+                    copyright @2025
                 </footer>
             </Layout>
 

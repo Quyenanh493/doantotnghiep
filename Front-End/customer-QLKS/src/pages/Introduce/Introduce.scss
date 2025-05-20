@@ -373,7 +373,7 @@ $transition-time: 0.3s;
           
           &:hover {
             background-color: #f0f0f0;
-            color: darken($primary-color, 10%);
+            color: color.adjust($primary-color, $lightness: -10%);
           }
           
           .anticon {

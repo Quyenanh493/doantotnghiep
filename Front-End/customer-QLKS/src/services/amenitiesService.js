@@ -85,3 +85,14 @@ export const getPopularAmenities = async (limit = 10) => {
     throw error;
   }
 };
+
+// Lấy tiện nghi của phòng theo roomId
+export const getAmenityByRoomId = async (roomId) => {
+  try {
+    const response = await request.get(`/amenities/room/${roomId}`);
+    return response;
+  } catch (error) {
+    console.error(`Lỗi khi lấy tiện nghi của phòng ID ${roomId}:`, error);
+    throw error;
+  }
+};

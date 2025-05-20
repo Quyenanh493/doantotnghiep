@@ -19,7 +19,6 @@ function Login({ visible, onCancel, onLoginSuccess, onShowRegister }) {
   const [resetPasswordToken, setResetPasswordToken] = useState(null);
   const [resetPasswordEmail, setResetPasswordEmail] = useState('');
   const [verificationCode, setVerificationCode] = useState('');
-  const [verifyingCode, setVerifyingCode] = useState(false);
 
   const handleSubmit = async (values) => {
     setLoading(true);
@@ -235,7 +234,6 @@ function Login({ visible, onCancel, onLoginSuccess, onShowRegister }) {
       <ResetPasswordModal 
         visible={showResetPasswordModal}
         onCancel={handleResetPasswordModalCancel}
-        token={resetPasswordToken}
         email={resetPasswordEmail}
       />
     </>

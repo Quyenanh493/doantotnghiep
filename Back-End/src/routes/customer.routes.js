@@ -20,7 +20,7 @@ router.get('/:id',
 router.post(
   '/', 
   authMiddleware.verifyToken,
-  authMiddleware.checkRole(['admin', 'staff']),
+  authMiddleware.checkRole(['admin']),
   customerController.createCustomer
 );
 

@@ -1,5 +1,5 @@
 import { Modal, Form, Input, Button, Steps, Alert, notification } from 'antd';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { MailOutlined, KeyOutlined, LockOutlined } from '@ant-design/icons';
 import { forgotPassword, verifyResetCode, resetPassword } from '../../services/logRegCusService';
 import './ResetPasswordModal.scss';
@@ -13,8 +13,9 @@ const { Step } = Steps;
  * @param {boolean} props.visible Trạng thái hiển thị của modal
  * @param {Function} props.onCancel Hàm xử lý khi đóng modal
  * @param {Function} props.onSuccess Hàm xử lý khi đặt lại mật khẩu thành công
+ * @param {string} props.email Email đã nhập từ form đăng nhập (nếu có)
  */
-function ResetPasswordModal({ visible, onCancel, onSuccess }) {
+function ResetPasswordModal({ visible, onCancel, onSuccess, email: initialEmail }) {
   const [emailForm] = Form.useForm();
   const [verifyForm] = Form.useForm();
   const [passwordForm] = Form.useForm();
@@ -26,6 +27,20 @@ function ResetPasswordModal({ visible, onCancel, onSuccess }) {
   const [errorMessage, setErrorMessage] = useState('');
   
   const [notiApi, contextHolder] = notification.useNotification();
+
+  // Thiết lập giá trị ban đầu khi component được mở
+  useEffect(() => {
+    if (visible) {
+      // Nếu đã có email từ props, điền email vào form và chuyển sang bước tiếp theo
+      if (initialEmail) {
+        setEmail(initialEmail);
+        emailForm.setFieldsValue({ email: initialEmail });
+        
+        // Nếu đã có email, chuyển thẳng sang bước xác nhận mã
+        setCurrentStep(1);
+      }
+    }
+  }, [visible, initialEmail, emailForm]);
 
   // Xử lý nút "Tiếp tục" ở step 1 (nhập email)
   const handleEmailSubmit = async (values) => {
@@ -100,11 +115,13 @@ function ResetPasswordModal({ visible, onCancel, onSuccess }) {
         
         // Gọi callback onSuccess
         if (onSuccess) {
-          onSuccess();
+          onSuccess(true);
         }
         
         // Đóng modal
-        onCancel();
+        if (onCancel) {
+          onCancel(true);
+        }
       } else {
         setErrorMessage(response?.EM || 'Có lỗi xảy ra khi đặt lại mật khẩu');
       }
@@ -127,19 +144,26 @@ function ResetPasswordModal({ visible, onCancel, onSuccess }) {
     verifyForm.resetFields();
     passwordForm.resetFields();
     
-    onCancel();
+    if (onCancel) {
+      onCancel(false);
+    }
   };
 
   // Xử lý nút quay lại
   const handleBack = () => {
-    setCurrentStep(currentStep - 1);
-    setErrorMessage('');
+    // Nếu đang ở bước 1 và có initialEmail, đóng modal thay vì quay lại
+    if (currentStep === 1 && initialEmail) {
+      handleCancel();
+    } else {
+      setCurrentStep(currentStep - 1);
+      setErrorMessage('');
+    }
   };
 
   return (
     <Modal
       title="Đặt lại mật khẩu"
-      visible={visible}
+      open={visible}
       onCancel={handleCancel}
       footer={null}
       width={500}

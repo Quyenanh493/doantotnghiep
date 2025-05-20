@@ -71,6 +71,19 @@ export const resetPassword = async (email, token, newPassword) => {
   }
 };
 
+// Đổi mật khẩu
+export const changePassword = async (accountId, currentPassword, newPassword) => {
+  try {
+    return await request.post('accounts/change-password', {
+      accountId,
+      currentPassword,
+      newPassword
+    });
+  } catch (error) {
+    console.error('Lỗi đổi mật khẩu:', error);
+    throw error;
+  }
+};
 
 // Lấy hồ sơ khách hàng hiện tại
 export const getCustomerProfile = async () => {

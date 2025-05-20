@@ -1,37 +1,79 @@
 import LayoutDefault from "../layout/LayoutDefault";
 import Error404 from "../pages/Error404";
-import Home from "../pages/Home";
-import Categories from "../pages/Categories";
 import Customers from "../pages/Customers";
-import Rooms from "../pages/Rooms";
-import Bookings from "../pages/Bookings";
+import Room from "../pages/Room";
+import Dashboard from "../pages/DashBoard";
+import Hotel from "../pages/Hotel";
+import Login from "../pages/Login";
+import Logout from "../pages/Logout";
+import ProtectedRoute from "../components/ProtectedRoute";
+import User from "../pages/User";
+import FactBooking from "../pages/FactBooking";
+import Payment from "../pages/Payment";
+import Amenities from "../pages/Amenities";
+import Account from "../pages/Account";
+import Permission from "../pages/Permission";
 
 export const routes = [
     {
         path: "/",
-        element: <LayoutDefault />,
+        element: <ProtectedRoute />,
         children: [
             {
                 path: "/",
-                element: <Home />
-            },
-            {
-                path: "/categories",
-                element: <Categories />
-            },
-            {
-                path: "/customers",
-                element: <Customers />
-            },
-            {
-                path: "/rooms",
-                element: <Rooms />
-            },
-            {
-                path: "/bookings",
-                element: <Bookings />
+                element: <LayoutDefault />,
+                children: [
+                    {
+                        path: "/",
+                        element: <Dashboard />
+                    },
+                    {
+                        path: "/hotel",
+                        element: <Hotel />
+                    },
+                    {
+                        path: "/customers",
+                        element: <Customers />
+                    },
+                    {
+                        path: "/user",
+                        element: <User />
+                    },
+                    {
+                        path: "/bookings/room",
+                        element: <Room />
+                    },
+                    {
+                        path: "/bookings/factBooking",
+                        element: <FactBooking />
+                    },
+                    {
+                        path: "/bookings/payment",
+                        element: <Payment />
+                    },
+                    {
+                        path: "/amenities",
+                        element: <Amenities />
+                    },
+                    {
+                        path: "/account",
+                        element: <Account />
+                    },
+                    {
+                        path: "/permission",
+                        element: <Permission />
+                    }
+                ],
             },
         ],
+    },
+    {
+        path: "/login",
+        element: <Login />
+    },
+    {
+        path: "/logout",
+        element: <Logout />
     },
     {
         path: "*",

@@ -26,7 +26,7 @@ const checkPhoneExist = async (userPhone) => {
   return !!user;
 }
 
-// Cập nhật hàm registerNewUser để nhận URL hình ảnh trực tiếp từ frontend
+
 const registerNewUser = async (rawUserData) => {
   try {
     // check email exist
@@ -49,7 +49,7 @@ const registerNewUser = async (rawUserData) => {
       }
     }
     
-    let imageUrl = rawUserData.imageUrl || '';
+    let imageUrl = rawUserData.image || '';
     
     // Tạo transaction để đảm bảo tính nhất quán dữ liệu
     const result = await db.sequelize.transaction(async (t) => {
@@ -85,8 +85,8 @@ const registerNewUser = async (rawUserData) => {
 
     if (result) {
       // Generate JWT tokens
-      const token = authMiddleware.generateToken(result.newAccount.id, 'customer');
-      const refreshToken = authMiddleware.generateRefreshToken(result.newAccount.id, 'customer');
+      const token = authMiddleware.generateToken(result.newAccount.accountId, 'customer');
+      const refreshToken = authMiddleware.generateRefreshToken(result.newAccount.accountId, 'customer');
       
       return {
         EM: 'Đăng ký tài khoản thành công',
@@ -153,7 +153,7 @@ const handleUserLogin = async (rawData) => {
             attributes: { exclude: ['password'] },
             include: [{ 
               model: db.Role,
-              attributes: ['id', 'roleName', 'roleDescription'] 
+              attributes: ['roleId', 'roleName', 'description'] 
             }]
           });
         } else {
@@ -167,8 +167,8 @@ const handleUserLogin = async (rawData) => {
         await account.update({ lastLogin: new Date() });
         
         // Generate JWT tokens
-        const token = authMiddleware.generateToken(account.id, account.accountType);
-        const refreshToken = authMiddleware.generateRefreshToken(account.id, account.accountType);
+        const token = authMiddleware.generateToken(account.accountId, account.accountType);
+        const refreshToken = authMiddleware.generateRefreshToken(account.accountId, account.accountType);
         
         // Trả về thông tin người dùng (không bao gồm mật khẩu)
         let userInfo = {

@@ -4,18 +4,18 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 // Generate JWT token
-const generateToken = (userId, accountType) => {
+const generateToken = (accountId, accountType) => {
   return jwt.sign(
-    { id: userId, accountType: accountType },
+    { accountId, accountType },
     process.env.JWT_SECRET || 'fallback-secret-key',
     { expiresIn: process.env.JWT_EXPIRES_IN || '24h' }
   );
 };
 
 // Generate refresh token
-const generateRefreshToken = (userId, accountType) => {
+const generateRefreshToken = (accountId, accountType) => {
   return jwt.sign(
-    { id: userId, accountType: accountType },
+    { accountId, accountType },
     process.env.JWT_REFRESH_SECRET || 'fallback-refresh-secret-key',
     { expiresIn: process.env.JWT_REFRESH_EXPIRES_IN || '7d' }
   );
@@ -23,9 +23,8 @@ const generateRefreshToken = (userId, accountType) => {
 
 // Verify token middleware
 const verifyToken = (req, res, next) => {
-  // Get token from Authorization header or cookie
   const token = req.headers.authorization?.split(' ')[1] || req.cookies.jwt;
-  
+
   if (!token) {
     return res.status(401).json({
       EM: 'Không có token xác thực',
@@ -36,7 +35,7 @@ const verifyToken = (req, res, next) => {
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET || 'fallback-secret-key');
-    req.user = decoded;
+    req.user = decoded; // decoded = { accountId, accountType }
     next();
   } catch (error) {
     if (error.name === 'TokenExpiredError') {
@@ -46,7 +45,7 @@ const verifyToken = (req, res, next) => {
         DT: ''
       });
     }
-    
+
     return res.status(401).json({
       EM: 'Token không hợp lệ',
       EC: -1,
@@ -58,15 +57,13 @@ const verifyToken = (req, res, next) => {
 // Refresh token function
 const refreshToken = async (refreshToken) => {
   try {
-    // Verify refresh token
     const decoded = jwt.verify(
-      refreshToken, 
+      refreshToken,
       process.env.JWT_REFRESH_SECRET || 'fallback-refresh-secret-key'
     );
-    
-    // Check if user exists
-    const user = await db.Account.findOne({ where: { id: decoded.id } });
-    
+
+    const user = await db.Account.findOne({ where: { accountId: decoded.accountId } });
+
     if (!user) {
       return {
         EM: 'Người dùng không tồn tại',
@@ -74,11 +71,10 @@ const refreshToken = async (refreshToken) => {
         DT: ''
       };
     }
-    
-    // Generate new tokens
-    const newAccessToken = generateToken(user.id, user.accountType);
-    const newRefreshToken = generateRefreshToken(user.id, user.accountType);
-    
+
+    const newAccessToken = generateToken(user.accountId, user.accountType);
+    const newRefreshToken = generateRefreshToken(user.accountId, user.accountType);
+
     return {
       EM: 'Làm mới token thành công',
       EC: 0,

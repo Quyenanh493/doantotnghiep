@@ -6,6 +6,7 @@ const router = express.Router();
 
 // Các endpoint API cho Amenities
 router.get('/', amenitiesController.getAllAmenities);  // Public
+router.get('/room/:roomId', amenitiesController.getAmenityByRoomId);  // Public
 router.get('/:id', amenitiesController.getAmenityById);  // Public
 
 // Các endpoint cần quyền admin/staff

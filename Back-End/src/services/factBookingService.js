@@ -283,18 +283,22 @@ const factBookingService = {
                 };
             }
             
-            // Kiểm tra xem có payment liên kết không
-            const payment = await db.Payment.findOne({
+            // Xóa Payment liên kết (nếu có)
+            await db.Payment.destroy({
+                where: { bookingId: bookingId },
+                transaction
+            });
+            
+            // Xóa FactBookingDetailAmenities liên quan thông qua BookingDetail
+            const bookingDetails = await db.FactBookingDetail.findAll({
                 where: { bookingId: bookingId }
             });
             
-            if (payment) {
-                await transaction.rollback();
-                return {
-                    EM: 'Không thể xóa đơn đặt phòng đã có thanh toán',
-                    EC: 1,
-                    DT: []
-                };
+            for (const detail of bookingDetails) {
+                await db.FactBookingDetailAmenities.destroy({
+                    where: { bookingDetailId: detail.bookingDetailId },
+                    transaction
+                });
             }
             
             // Xóa FactBookingDetail liên kết

@@ -27,18 +27,18 @@ router.post('/refund',
   paymentController.refundTransaction
 );
 
-// Kiểm tra trạng thái thanh toán
-router.get(
-  '/status/:bookingId',
-  authMiddleware.verifyToken,
-  paymentController.checkPaymentStatus
-);
-
 // Lấy thông tin thanh toán theo bookingId
 router.get(
   '/:bookingId',
   authMiddleware.verifyToken,
   paymentController.getPaymentByBookingId
+);
+
+// Lấy tất cả các thanh toán
+router.get(
+  '/',
+  authMiddleware.verifyToken,
+  paymentController.getAllPayments
 );
 
 export default router;

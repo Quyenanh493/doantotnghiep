@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Row, Col, Card, Button, DatePicker, Form, Input, Select, Divider, Tag, Pagination, notification } from 'antd';
 import { SearchOutlined } from '@ant-design/icons';
 import { getAllRooms, checkRoomAvailability, searchAvailableRooms } from '../../services/roomService';
-import { getAllAmenities } from '../../services/amenitiesService';
+import { getAllAmenities, getAmenityByRoomId } from '../../services/amenitiesService';
 import './Room.scss';
 import dayjs from 'dayjs';
 import { useNavigate } from 'react-router-dom';
@@ -39,6 +39,7 @@ function Room() {
     children: 0
   });
   const [guestSelectorVisible, setGuestSelectorVisible] = useState(false);
+  const [roomAmenities, setRoomAmenities] = useState({});
 
   // Xử lý thay đổi số lượng khách
   const handleGuestChange = (type, action) => {
@@ -63,6 +64,34 @@ function Room() {
   // Tạo chuỗi hiển thị số phòng và khách
   const guestSummary = `${guestCounts.rooms} phòng, ${guestCounts.adults + guestCounts.children} khách`;
   
+  // Lấy tiện nghi cho từng phòng
+  const fetchRoomAmenities = async (roomId) => {
+    try {
+      const response = await getAmenityByRoomId(roomId);
+      if (response && response.EC === 0) {
+        return response.DT;
+      }
+      return [];
+    } catch (error) {
+      console.error(`Lỗi khi lấy tiện nghi cho phòng ${roomId}:`, error);
+      return [];
+    }
+  };
+
+  // Lấy tiện nghi cho tất cả các phòng hiện tại
+  const fetchAllRoomAmenities = async (roomsData) => {
+    if (!roomsData || roomsData.length === 0) return;
+    
+    const amenitiesMap = {};
+    
+    for (const room of roomsData) {
+      const amenities = await fetchRoomAmenities(room.roomId);
+      amenitiesMap[room.roomId] = amenities;
+    }
+    
+    setRoomAmenities(amenitiesMap);
+  };
+  
   // Lấy dữ liệu phòng và tiện nghi từ API
   const fetchData = async () => {
     setLoading(true);
@@ -83,6 +112,9 @@ function Room() {
           ...prev,
           total: availableRooms.length
         }));
+        
+        // Lấy tiện nghi cho các phòng hiện tại
+        await fetchAllRoomAmenities(availableRooms);
       }
       
       if (amenitiesResponse && amenitiesResponse.DT) {
@@ -175,6 +207,9 @@ function Room() {
           current: 1,
           total: response.DT.length
         }));
+        
+        // Lấy tiện nghi cho các phòng tìm kiếm được
+        await fetchAllRoomAmenities(response.DT);
         
         // Hiển thị thông báo nếu không tìm thấy phòng
         if (response.DT.length === 0) {
@@ -408,7 +443,7 @@ function Room() {
             <Col xs={24} sm={24} md={12} lg={12} xl={12} key={room.roomId}>
               <Card className="room__card" loading={loading}>
                 <div className="room__card-image">
-                  <img src={room.roomImage ? `http://localhost:6969/images/${room.roomImage}` : 'https://via.placeholder.com/600x400'} alt={room.roomName} />
+                  <img src={room.roomImage} alt={room.roomName} />
                 </div>
                 <div className="room__card-info">
                   <div className="room__card-header">
@@ -422,16 +457,11 @@ function Room() {
                     <div className="room__card-features">
                       <h3>Tiện Nghi</h3>
                       <div className="room__card-features-list">
-                        {room.RoomAmenities && room.RoomAmenities.map((item, index) => {
-                          const amenityDetail = item.Amenities || 
-                            (item.amenitiesId ? getAmenityDetails(item.amenitiesId) : null);
-                          
-                          return (
-                            <Tag key={index} className="room__card-feature-tag">
-                              {amenityDetail ? amenityDetail.amenitiesName : 'Tiện nghi'}
-                            </Tag>
-                          );
-                        })}
+                        {roomAmenities[room.roomId] && roomAmenities[room.roomId].map((amenity, index) => (
+                          <Tag key={index} className="room__card-feature-tag">
+                            {amenity.amenitiesName}
+                          </Tag>
+                        ))}
                       </div>
                     </div>
                     

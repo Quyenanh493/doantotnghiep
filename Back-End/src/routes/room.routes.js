@@ -7,6 +7,7 @@ const router = express.Router();
 // Các endpoint API cho Room
 router.get('/', roomController.getAllRooms);  // Public
 router.get('/:id', roomController.getRoomById);  // Public
+router.get('/hotel/:hotelId', roomController.getRoomsByHotelId);
 
 // Các endpoint cần quyền admin/staff
 router.post(

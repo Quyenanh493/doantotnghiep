@@ -4,12 +4,14 @@ import {
   UserOutlined, 
   AppstoreOutlined,
   CreditCardOutlined,
-  OrderedListOutlined,
-  SettingOutlined,
-  TeamOutlined
+  ClusterOutlined,
+  TeamOutlined,
+  SignatureOutlined,
+  AppstoreAddOutlined,
+  PlusSquareOutlined
 } from '@ant-design/icons';
 import { Link, useLocation } from 'react-router-dom';
-import './Sidebar.css';
+import './Sidebar.scss';
 
 function Sidebar() {
   const location = useLocation();
@@ -21,34 +23,56 @@ function Sidebar() {
       label: <Link to="/">Quản lý Dashboard</Link>,
     },
     {
+      key: '/hotel',
+      icon: <UserOutlined />,
+      label: <Link to="/hotel">Quản lý khách sạn</Link>,
+    },
+    {
+      key: '/account',
+      icon: <UserOutlined />,
+      label: <Link to="/account">Quản lý tài khoản</Link>,
+    },
+    {
+      key: '/user',
+      icon: <TeamOutlined />,
+      label: <Link to="/user">Quản lý nhân sự</Link>,
+    },
+    {
       key: '/customers',
       icon: <UserOutlined />,
       label: <Link to="/customers">Quản lý khách hàng</Link>,
     },
     {
-      key: '/rooms',
-      icon: <AppstoreOutlined />,
-      label: <Link to="/rooms">Quản lý phòng</Link>,
+      key: '/bookings-management',
+      icon: <AppstoreAddOutlined />,
+      label: <span style={{ fontSize: "14px" }}>Quản lý đặt phòng</span>,
+      children: [
+        {
+          key: '/bookings/room',
+          icon: <AppstoreOutlined />,
+          label: <Link to="/bookings/room">Phòng</Link>,
+        },
+        {
+          key: '/bookings/factBooking',
+          icon: <SignatureOutlined />,
+          label: <Link to="/bookings/factBooking">Đơn đặt phòng</Link>,
+        },
+        {
+          key: '/bookings/payment',
+          icon: <CreditCardOutlined />,
+          label: <Link to="/bookings/payment">Thanh toán</Link>,
+        }
+      ],
     },
     {
-      key: '/bookings',
-      icon: <CreditCardOutlined />,
-      label: <Link to="/bookings">Quản lý đặt phòng</Link>,
+      key: '/amenities',
+      icon: <PlusSquareOutlined />,
+      label: <Link to="/amenities">Quản lý Tiện ích</Link>,
     },
     {
-      key: '/categories',
-      icon: <OrderedListOutlined />,
-      label: <Link to="/categories">Danh sách danh mục</Link>,
-    },
-    {
-      key: '/users',
-      icon: <TeamOutlined />,
-      label: <Link to="/users">Quản lý người dùng</Link>,
-    },
-    {
-      key: '/settings',
-      icon: <SettingOutlined />,
-      label: <Link to="/settings">Quản lý cài đặt</Link>,
+      key: '/permission',
+      icon: <ClusterOutlined />,
+      label: <Link to="/permission">Quản lý Quyền</Link>,
     },
   ];
 

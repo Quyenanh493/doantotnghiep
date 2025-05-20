@@ -1,5 +1,4 @@
 import logRegUserService from "../services/logRegCustomerService"
-import imageService from "../services/imageService";
 import authMiddleware from "../middleware/authMiddleware";
 
 const handleRegister = async (req, res, next) => {
@@ -51,38 +50,6 @@ const handleLogin = async (req, res, next) => {
     });
   } catch (e) {
     console.error("Error in handleLogin:", e);
-    next(e);
-  }
-};
-
-// API tải lên hình ảnh đơn giản
-const handleUploadImage = async (req, res, next) => {
-  try {
-    if (!req.file) {
-      return res.status(400).json({
-        EM: 'Không có file ảnh được tải lên',
-        EC: -1,
-        DT: ''
-      });
-    }
-
-    // Lấy thông tin về loại hình ảnh (mặc định là 'general')
-    const imageType = req.body.type || 'general';
-    
-    // Tải hình ảnh lên Cloudinary với thư mục phù hợp
-    const imageUrl = await imageService.uploadImageHM(
-      req.file.buffer,
-      req.file.originalname,
-      imageType
-    );
-
-    return res.status(200).json({
-      EM: 'Tải ảnh lên thành công',
-      EC: 0,
-      DT: { imageUrl }
-    });
-  } catch (e) {
-    console.error("Error in handleUploadImage:", e);
     next(e);
   }
 };
@@ -151,7 +118,6 @@ const handleLogout = async (req, res, next) => {
 module.exports = {
   handleRegister,
   handleLogin,
-  handleUploadImage,
   handleRefreshToken,
   handleLogout
 };

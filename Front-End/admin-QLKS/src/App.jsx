@@ -1,4 +1,4 @@
-import './App.css'
+import './App.scss'
 import AllRoute from './components/AllRoute'
 
 function App() {

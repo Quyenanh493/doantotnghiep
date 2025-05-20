@@ -24,7 +24,11 @@ module.exports = (sequelize, DataTypes) => {
     transactionCode: DataTypes.STRING,
     paymentDate: DataTypes.DATE,
     bankCode: DataTypes.STRING,
-    cardType: DataTypes.STRING
+    cardType: DataTypes.STRING,
+    refundAmount: DataTypes.DECIMAL(10, 2),
+    refundDate: DataTypes.DATE,
+    refundTransactionCode: DataTypes.STRING,
+    vnp_TransactionNo: DataTypes.STRING // Mã giao dịch từ VNPay
   }, {
     sequelize,
     modelName: 'Payment',

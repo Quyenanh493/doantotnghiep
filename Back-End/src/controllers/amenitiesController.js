@@ -69,6 +69,23 @@ const amenitiesController = {
         }
     },
 
+    // Lấy tiện nghi theo ID phòng
+    getAmenityByRoomId: async (req, res, next) => {
+        try {
+            const roomId = req.params.roomId;
+            let data = await amenitiesService.getAmenityByRoomId(roomId);
+            
+            return res.status(200).json({
+                EM: data.EM,
+                EC: data.EC,
+                DT: data.DT
+            });
+        } catch (error) {
+            console.error("Error in getAmenityByRoomId:", error);
+            next(error);
+        }
+    },
+
     // Xóa tiện nghi
     deleteAmenity: async (req, res, next) => {
         try {

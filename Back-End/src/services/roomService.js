@@ -105,6 +105,8 @@ const roomService = {
                 maxRoom: roomData.maxRoom || 1,
                 price: roomData.price,
                 roomImage: roomData.roomImage,
+                roomStar: roomData.roomStar || 0,
+                description: roomData.description || '',
                 createdAt: new Date(),
                 updatedAt: new Date()
             }, { transaction });
@@ -189,6 +191,8 @@ const roomService = {
                 maxCustomer: roomData.maxCustomer !== undefined ? roomData.maxCustomer : room.maxCustomer,
                 price: roomData.price !== undefined ? roomData.price : room.price,
                 roomImage: roomData.roomImage !== undefined ? roomData.roomImage : room.roomImage,
+                roomStar: roomData.roomStar !== undefined ? roomData.roomStar : room.roomStar,
+                description: roomData.description !== undefined ? roomData.description : room.description,
                 updatedAt: new Date()
             }, { transaction });
             
@@ -538,6 +542,47 @@ const roomService = {
         }
     },
 
+    getRoomsByHotelId: async (hotelId) => {
+        try {
+            if (!Number.isInteger(parseInt(hotelId))) {
+                return {
+                    EM: 'ID khách sạn không hợp lệ',
+                    EC: 1,
+                    DT: []
+                };
+            }
+
+            const rooms = await db.Room.findAll({
+                where: { hotelId: hotelId },
+                include: [
+                    {
+                        model: db.Amenities,
+                        as: 'Amenities',
+                        through: { attributes: [] },
+                        required: false
+                    },
+                    {
+                        model: db.Hotel,
+                        required: false
+                    }
+                ]
+            });
+            
+            return {
+                EM: 'Lấy danh sách phòng theo khách sạn thành công',
+                EC: 0,
+                DT: rooms
+            };
+        } catch (error) {
+            console.log(error);
+            return {
+                EM: 'Lỗi từ server',
+                EC: -1,
+                DT: []
+            };
+        }
+    },
+
 };
 
 async function checkRoomAvailability(roomId, dateIn, dateOut) {
@@ -615,7 +660,5 @@ async function checkRoomAvailability(roomId, dateIn, dateOut) {
         };
     }
 }
-
-
 
 export default roomService;

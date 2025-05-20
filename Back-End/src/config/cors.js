@@ -16,4 +16,4 @@ const configCors = {
   optionsSuccessStatus: 204,
 }
 
-export default configCors;  // Chuyển sang ES module export
+export default configCors;  

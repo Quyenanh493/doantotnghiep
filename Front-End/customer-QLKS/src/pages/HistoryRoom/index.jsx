@@ -256,7 +256,7 @@ function HistoryRoom() {
         <Card className="history-room__card">
           <div style={{ textAlign: 'center', padding: '20px' }}>
             <p>Bạn chưa có lịch sử đặt phòng nào.</p>
-            <Button type="primary" onClick={() => navigate('/search')}>
+            <Button type="primary" onClick={() => navigate('/room')}>
               Tìm phòng ngay
             </Button>
           </div>
