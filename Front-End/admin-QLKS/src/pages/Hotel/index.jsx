@@ -14,6 +14,7 @@ import { getAllHotels, getHotelById, createHotel, updateHotel, deleteHotel } fro
 import dayjs from 'dayjs';
 import './Hotel.scss';
 import { uploadImage } from '../../services/uploadImageService';
+import { usePermissions } from '../../contexts/PermissionContext';
 
 const { confirm } = Modal;
 const { TextArea } = Input;
@@ -29,6 +30,12 @@ function Hotel() {
   const [imageUrl, setImageUrl] = useState('');
   const [uploadedImageUrl, setUploadedImageUrl] = useState('');
   const [uploadLoading, setUploadLoading] = useState(false);
+
+  // Get permission utilities
+  const { canCreate, canUpdate, canDelete, isLoading: permissionLoading } = usePermissions();
+  const hasCreatePermission = canCreate('hotel');
+  const hasUpdatePermission = canUpdate('hotel');
+  const hasDeletePermission = canDelete('hotel');
 
   useEffect(() => {
     fetchHotels();
@@ -253,26 +260,27 @@ function Hotel() {
         <Space size="middle">
           <Button 
             type="primary" 
-            shape="circle" 
             icon={<EyeOutlined />} 
             size="small" 
             onClick={() => showViewModal(record.hotelId)}
           />
+          {hasUpdatePermission && (
           <Button 
-            type="primary" 
-            shape="circle" 
+            type="default" 
             icon={<EditOutlined />} 
             size="small" 
             onClick={() => showAddEditModal(record)}
           />
+          )}
+          {hasDeletePermission && (
           <Button 
             type="primary" 
             danger 
-            shape="circle" 
             icon={<DeleteOutlined />} 
             size="small" 
             onClick={() => showDeleteConfirm(record.hotelId, record.hotelName)}
           />
+          )}
         </Space>
       ),
     },
@@ -283,9 +291,11 @@ function Hotel() {
       <Card 
         title="Danh sách khách sạn" 
         extra={
-          <Button type="primary" icon={<PlusOutlined />} onClick={() => showAddEditModal()}>
-            Thêm mới
-          </Button>
+          hasCreatePermission && (
+            <Button type="primary" icon={<PlusOutlined />} onClick={() => showAddEditModal()}>
+              Thêm mới
+            </Button>
+          )
         }
       >
         <div className="table-actions">
@@ -298,10 +308,15 @@ function Hotel() {
           />
         </div>
         <Table
-          columns={columns}
+          columns={columns.filter(col => {
+            // Always show all columns except action if no permissions
+            if (col.key !== 'action') return true;
+            // Only show action column if user has at least one action permission
+            return hasUpdatePermission || hasDeletePermission;
+          })}
           dataSource={filteredData}
           rowKey="hotelId"
-          loading={loading}
+          loading={loading || permissionLoading}
           pagination={{
             pageSize: 10,
             showSizeChanger: true,
@@ -410,22 +425,24 @@ function Hotel() {
       <Modal
         title="Chi tiết khách sạn"
         visible={isViewModalVisible}
-        onCancel={handleViewCancel}
+        onCancel={() => setIsViewModalVisible(false)}
         footer={[
-          <Button key="back" onClick={handleViewCancel}>
+          <Button key="back" onClick={() => setIsViewModalVisible(false)}>
             Đóng
           </Button>,
-          <Button 
-            key="edit" 
-            type="primary" 
-            onClick={() => {
-              setIsViewModalVisible(false);
-              showAddEditModal(currentHotel);
-            }}
-          >
-            Chỉnh sửa
-          </Button>,
-        ]}
+          hasUpdatePermission && (
+            <Button 
+              key="edit" 
+              type="primary" 
+              onClick={() => {
+                setIsViewModalVisible(false);
+                showAddEditModal(currentHotel);
+              }}
+            >
+              Chỉnh sửa
+            </Button>
+          ),
+        ].filter(Boolean)}
         width={700}
       >
         {currentHotel && (

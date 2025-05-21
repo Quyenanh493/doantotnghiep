@@ -1,4 +1,5 @@
 import request from '../utils/request';
+import { getCookie } from '../helper/cookie';
 
 // Lấy thông tin chi tiết phòng
 export const getRoomDetails = async (roomId) => {
@@ -72,6 +73,13 @@ export const getBookingHistory = async () => {
 // Lấy lịch sử đặt phòng từ factBooking API
 export const getFactBookingHistory = async (customerId) => {
   try {
+    // Kiểm tra token trước khi gọi API
+    const accessToken = getCookie('accessToken');
+    if (!accessToken || accessToken === 'undefined' || accessToken === 'null') {
+      console.warn('Access token không hợp lệ, có thể cần đăng nhập lại');
+      throw new Error('Bạn cần đăng nhập để xem lịch sử đặt phòng');
+    }
+
     // Nếu có customerId, sẽ lấy theo customerId, ngược lại lấy theo token
     if (customerId) {
       const response = await request.get(`/bookings/customer/${customerId}`);
@@ -83,6 +91,15 @@ export const getFactBookingHistory = async (customerId) => {
     }
   } catch (error) {
     console.error('Lỗi khi lấy lịch sử đặt phòng từ factBooking:', error);
+    
+    // Xử lý lỗi cụ thể nếu cần
+    if (error.response) {
+      console.log('Response status:', error.response.status);
+      if (error.response.status === 401) {
+        console.log('Unauthorized access. User may need to login again.');
+      }
+    }
+    
     throw error;
   }
 };

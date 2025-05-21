@@ -13,7 +13,8 @@ module.exports = {
         maxRoom: 10,
         price: 1500000.00,
         roomImage: 'deluxe_king.jpg',
-        roomStar: 4,
+        averageRating: 4.0,
+        totalReview: 5,
         description: 'Phòng sang trọng với giường King size, tầm nhìn ra thành phố và đầy đủ tiện nghi cao cấp',
         createdAt: new Date(),
         updatedAt: new Date()
@@ -27,7 +28,8 @@ module.exports = {
         maxRoom: 10,
         price: 1200000.00,
         roomImage: 'superior_twin.jpg',
-        roomStar: 3,
+        averageRating: 3.0,
+        totalReview: 3,
         description: 'Phòng tiêu chuẩn với hai giường đơn, phù hợp cho bạn bè hoặc đồng nghiệp',
         createdAt: new Date(),
         updatedAt: new Date()
@@ -41,7 +43,8 @@ module.exports = {
         maxRoom: 10,
         price: 2500000.00,
         roomImage: 'executive_suite.jpg',
-        roomStar: 5,
+        averageRating: 5.0,
+        totalReview: 8,
         description: 'Phòng suite rộng rãi với phòng khách riêng biệt, bồn tắm jacuzzi và dịch vụ VIP',
         createdAt: new Date(),
         updatedAt: new Date()
@@ -55,7 +58,8 @@ module.exports = {
         maxRoom: 10,
         price: 1800000.00,
         roomImage: 'garden_view.jpg',
-        roomStar: 4,
+        averageRating: 4.0,
+        totalReview: 4,
         description: 'Phòng với tầm nhìn ra khu vườn nhiệt đới xinh đẹp của khu nghỉ dưỡng',
         createdAt: new Date(),
         updatedAt: new Date()
@@ -69,7 +73,8 @@ module.exports = {
         maxRoom: 10,
         price: 2200000.00,
         roomImage: 'ocean_view.jpg',
-        roomStar: 5,
+        averageRating: 5.0,
+        totalReview: 6,
         description: 'Phòng cao cấp với ban công riêng và tầm nhìn ra biển tuyệt đẹp',
         createdAt: new Date(),
         updatedAt: new Date()
@@ -83,7 +88,8 @@ module.exports = {
         maxRoom: 10,
         price: 1300000.00,
         roomImage: 'business_room.jpg',
-        roomStar: 3,
+        averageRating: 3.5,
+        totalReview: 2,
         description: 'Phòng thiết kế dành cho doanh nhân với bàn làm việc rộng và ghế ergonomic',
         createdAt: new Date(),
         updatedAt: new Date()
@@ -97,7 +103,8 @@ module.exports = {
         maxRoom: 10,
         price: 2000000.00,
         roomImage: 'family_room.jpg',
-        roomStar: 4,
+        averageRating: 4.5,
+        totalReview: 4,
         description: 'Phòng rộng rãi dành cho gia đình với giường đôi và hai giường đơn',
         createdAt: new Date(),
         updatedAt: new Date()
@@ -111,7 +118,8 @@ module.exports = {
         maxRoom: 10,
         price: 2800000.00,
         roomImage: 'beach_front.jpg',
-        roomStar: 5,
+        averageRating: 5.0,
+        totalReview: 7,
         description: 'Phòng cao cấp với lối đi trực tiếp ra bãi biển riêng của khách sạn',
         createdAt: new Date(),
         updatedAt: new Date()
@@ -125,7 +133,8 @@ module.exports = {
         maxRoom: 10,
         price: 1900000.00,
         roomImage: 'mountain_view.jpg',
-        roomStar: 4,
+        averageRating: 4.0,
+        totalReview: 3,
         description: 'Phòng với tầm nhìn ra núi đồi Đà Lạt, có lò sưởi và ban công riêng',
         createdAt: new Date(),
         updatedAt: new Date()
@@ -139,7 +148,8 @@ module.exports = {
         maxRoom: 10,
         price: 900000.00,
         roomImage: 'standard_room.jpg',
-        roomStar: 3,
+        averageRating: 3.0,
+        totalReview: 2,
         description: 'Phòng tiêu chuẩn với đầy đủ tiện nghi cơ bản, phù hợp cho khách du lịch tiết kiệm',
         createdAt: new Date(),
         updatedAt: new Date()

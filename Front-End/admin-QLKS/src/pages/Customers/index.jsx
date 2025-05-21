@@ -15,6 +15,7 @@ import { getAllCustomers, getCustomerById, createCustomer, updateCustomer, delet
 import { uploadImage } from '../../services/uploadImageService';
 import dayjs from 'dayjs';
 import './Customers.scss';
+import { usePermissions } from '../../contexts/PermissionContext';
 
 const { confirm } = Modal;
 const { TextArea } = Input;
@@ -30,6 +31,12 @@ function Customers() {
   const [imageUrl, setImageUrl] = useState('');
   const [uploadedImageUrl, setUploadedImageUrl] = useState('');
   const [uploadLoading, setUploadLoading] = useState(false);
+
+  // Get permission utilities
+  const { canCreate, canUpdate, canDelete, isLoading: permissionLoading } = usePermissions();
+  const hasCreatePermission = canCreate('customers');
+  const hasUpdatePermission = canUpdate('customers');
+  const hasDeletePermission = canDelete('customers');
 
   useEffect(() => {
     fetchCustomers();
@@ -259,29 +266,30 @@ function Customers() {
       key: 'action',
       width: 120,
       render: (_, record) => (
-        <Space size="small">
+        <Space size="middle">
           <Button 
             type="primary" 
-            shape="circle" 
             icon={<EyeOutlined />} 
             size="small" 
             onClick={() => showViewModal(record.customerId)}
           />
+          {hasUpdatePermission && (
           <Button 
-            type="primary" 
-            shape="circle" 
+            type="default" 
             icon={<EditOutlined />} 
             size="small" 
             onClick={() => showAddEditModal(record)}
           />
+          )}
+          {hasDeletePermission && (
           <Button 
             type="primary" 
             danger 
-            shape="circle" 
             icon={<DeleteOutlined />} 
             size="small" 
             onClick={() => showDeleteConfirm(record.customerId, record.customerName)}
           />
+          )}
         </Space>
       ),
     },
@@ -297,9 +305,11 @@ function Customers() {
           </Space>
         }
         extra={
-          <Button type="primary" icon={<PlusOutlined />} onClick={() => showAddEditModal()}>
-            Thêm mới
-          </Button>
+          hasCreatePermission && (
+            <Button type="primary" icon={<PlusOutlined />} onClick={() => showAddEditModal()}>
+              Thêm mới
+            </Button>
+          )
         }
       >
         <div className="table-actions">
@@ -312,10 +322,15 @@ function Customers() {
           />
         </div>
         <Table
-          columns={columns}
+          columns={columns.filter(col => {
+            // Always show all columns except action if no permissions
+            if (col.key !== 'action') return true;
+            // Only show action column if user has at least one action permission
+            return hasUpdatePermission || hasDeletePermission;
+          })}
           dataSource={filteredData}
           rowKey="customerId"
-          loading={loading}
+          loading={loading || permissionLoading}
           pagination={{
             pageSize: 10,
             showSizeChanger: true,
@@ -452,17 +467,19 @@ function Customers() {
           <Button key="back" onClick={handleViewCancel}>
             Đóng
           </Button>,
-          <Button 
-            key="edit" 
-            type="primary" 
-            onClick={() => {
-              setIsViewModalVisible(false);
-              showAddEditModal(currentCustomer);
-            }}
-          >
-            Chỉnh sửa
-          </Button>,
-        ]}
+          hasUpdatePermission && (
+            <Button 
+              key="edit" 
+              type="primary" 
+              onClick={() => {
+                setIsViewModalVisible(false);
+                showAddEditModal(currentCustomer);
+              }}
+            >
+              Chỉnh sửa
+            </Button>
+          ),
+        ].filter(Boolean)}
         width={700}
       >
         {currentCustomer && (

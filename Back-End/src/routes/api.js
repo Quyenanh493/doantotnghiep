@@ -13,7 +13,9 @@ import factBookingDetailRoutes from "./factBookingDetail.routes";
 import accountRoutes from "./account.routes";
 import userRoutes from "./user.routes";
 import roleRoutes from "./role.routes";
+import permissionRoutes from "./permission.routes";
 import dashboardRoutes from "./dashboard.routes";
+import roomReviewRoutes from "./roomReview.routes";
 
 const router = express.Router();
 
@@ -32,7 +34,9 @@ let initApiRoutes = (app) => {
   router.use('/accounts', accountRoutes);
   router.use('/users', userRoutes);
   router.use('/roles', roleRoutes);
+  router.use('/permissions', permissionRoutes);
   router.use('/dashboard', dashboardRoutes);
+  router.use('/room-reviews', roomReviewRoutes);
 
   return app.use("/api/v1/", router);
 }

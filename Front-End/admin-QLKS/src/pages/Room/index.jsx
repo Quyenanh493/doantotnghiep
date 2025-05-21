@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Table, Input, Button, Space, Card, Tag, Modal, Form, message, Descriptions, Upload, Spin, Select, InputNumber, Checkbox } from 'antd';
+import { Table, Input, Button, Space, Card, Tag, Modal, Form, message, Descriptions, Upload, Spin, Select, InputNumber, Checkbox, Rate } from 'antd';
 import { 
   SearchOutlined, 
   PlusOutlined, 
@@ -15,6 +15,7 @@ import {
 import { getAllRooms, getRoomById, createRoom, updateRoom, deleteRoom, getRoomsByHotelId } from '../../services/roomService';
 import { getAllHotels } from '../../services/hotelService';
 import { uploadImage } from '../../services/uploadImageService';
+import { usePermissions } from '../../contexts/PermissionContext';
 import './Room.scss';
 
 const { confirm } = Modal;
@@ -33,6 +34,12 @@ function Room() {
   const [imageUrls, setImageUrls] = useState([]);
   const [uploadLoading, setUploadLoading] = useState(false);
   const [selectedHotel, setSelectedHotel] = useState(null);
+
+  // Get permission utilities
+  const { canCreate, canUpdate, canDelete, isLoading: permissionLoading } = usePermissions();
+  const hasCreatePermission = canCreate('rooms');
+  const hasUpdatePermission = canUpdate('rooms');
+  const hasDeletePermission = canDelete('rooms');
 
   console.log(currentRoom);
   useEffect(() => {
@@ -282,6 +289,27 @@ function Room() {
       sorter: (a, b) => a.maxCustomer - b.maxCustomer,
     },
     {
+      title: 'Đánh giá sao',
+      dataIndex: 'averageRating',
+      key: 'averageRating',
+      render: (rating) => (
+        <Rate 
+          disabled 
+          allowHalf 
+          defaultValue={rating || 0} 
+          style={{ fontSize: '14px' }}
+        />
+      ),
+      sorter: (a, b) => a.averageRating - b.averageRating,
+    },
+    {
+      title: 'Số lượng đánh giá',
+      dataIndex: 'totalReview',
+      key: 'totalReview',
+      render: (total) => total || 0,
+      sorter: (a, b) => (a.totalReview || 0) - (b.totalReview || 0),
+    },
+    {
       title: 'Trạng thái',
       dataIndex: 'roomStatus',
       key: 'roomStatus',
@@ -310,26 +338,30 @@ function Room() {
       key: 'action',
       width: 150,
       render: (_, record) => (
-        <Space size="small">
-          <Button
-            type="primary"
-            icon={<EyeOutlined />}
-            size="small"
+        <Space size="middle">
+          <Button 
+            type="primary" 
+            icon={<EyeOutlined />} 
+            size="small" 
             onClick={() => showViewModal(record.roomId)}
           />
-          <Button
-            type="default"
-            icon={<EditOutlined />}
-            size="small"
+          {hasUpdatePermission && (
+          <Button 
+            type="default" 
+            icon={<EditOutlined />} 
+            size="small" 
             onClick={() => showAddEditModal(record)}
           />
-          <Button
-            type="primary"
-            danger
-            icon={<DeleteOutlined />}
-            size="small"
+          )}
+          {hasDeletePermission && (
+          <Button 
+            type="primary" 
+            danger 
+            icon={<DeleteOutlined />} 
+            size="small" 
             onClick={() => showDeleteConfirm(record.roomId, record.roomName)}
           />
+          )}
         </Space>
       ),
     },
@@ -345,9 +377,11 @@ function Room() {
           </Space>
         }
         extra={
-          <Button type="primary" icon={<PlusOutlined />} onClick={() => showAddEditModal()}>
-            Thêm phòng mới
-          </Button>
+          hasCreatePermission && (
+            <Button type="primary" icon={<PlusOutlined />} onClick={() => showAddEditModal()}>
+              Thêm phòng mới
+            </Button>
+          )
         }
       >
         <div className="table-actions" style={{ marginBottom: 16 }}>
@@ -374,10 +408,15 @@ function Room() {
         </div>
 
         <Table
-          columns={columns}
+          columns={columns.filter(col => {
+            // Always show all columns except action if no permissions
+            if (col.key !== 'action') return true;
+            // Only show action column if user has at least one action permission
+            return hasUpdatePermission || hasDeletePermission;
+          })}
           dataSource={filteredData}
           rowKey="roomId"
-          loading={loading}
+          loading={loading || permissionLoading}
           pagination={{
             pageSize: 10,
             showSizeChanger: true,
@@ -527,17 +566,19 @@ function Room() {
           <Button key="back" onClick={handleViewCancel}>
             Đóng
           </Button>,
-          <Button
-            key="edit"
-            type="primary"
-            onClick={() => {
-              handleViewCancel();
-              showAddEditModal(currentRoom);
-            }}
-          >
-            Chỉnh sửa
-          </Button>,
-        ]}
+          hasUpdatePermission && (
+            <Button 
+              key="edit" 
+              type="primary" 
+              onClick={() => {
+                handleViewCancel();
+                showAddEditModal(currentRoom);
+              }}
+            >
+              Chỉnh sửa
+            </Button>
+          ),
+        ].filter(Boolean)}
         width={700}
       >
         {currentRoom && (
@@ -548,7 +589,13 @@ function Room() {
             <Descriptions.Item label="Giá phòng">{new Intl.NumberFormat('vi-VN').format(currentRoom.price)} VNĐ</Descriptions.Item>
             <Descriptions.Item label="Số người tối đa">{currentRoom.maxCustomer}</Descriptions.Item>
             <Descriptions.Item label="Số lượng phòng">{currentRoom.maxRoom}</Descriptions.Item>
-            <Descriptions.Item label="Đánh giá">{Number(currentRoom.roomStar)} sao</Descriptions.Item>
+            <Descriptions.Item label="Đánh giá mặc định">{Number(currentRoom.roomStar)} sao</Descriptions.Item>
+            <Descriptions.Item label="Đánh giá từ khách hàng">
+              <span style={{ marginRight: '10px' }}>
+                <Rate disabled allowHalf value={currentRoom.averageRating || 0} style={{ fontSize: '16px' }} />
+              </span>
+              <span>({parseFloat(currentRoom.averageRating)?.toFixed(1) || '0.0'}) - {currentRoom.totalReview || 0} đánh giá</span>
+            </Descriptions.Item>
             <Descriptions.Item label="Trạng thái">
               <Tag color={
                 currentRoom.roomStatus === 'Available' ? 'green' :

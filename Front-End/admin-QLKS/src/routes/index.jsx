@@ -2,6 +2,7 @@ import LayoutDefault from "../layout/LayoutDefault";
 import Error404 from "../pages/Error404";
 import Customers from "../pages/Customers";
 import Room from "../pages/Room";
+import RoomReview from "../pages/RoomReview";
 import Dashboard from "../pages/DashBoard";
 import Hotel from "../pages/Hotel";
 import Login from "../pages/Login";
@@ -13,6 +14,7 @@ import Payment from "../pages/Payment";
 import Amenities from "../pages/Amenities";
 import Account from "../pages/Account";
 import Permission from "../pages/Permission";
+import Role from "../pages/Role";
 
 export const routes = [
     {
@@ -44,6 +46,10 @@ export const routes = [
                         element: <Room />
                     },
                     {
+                        path: "/bookings/roomReview",
+                        element: <RoomReview />
+                    },
+                    {
                         path: "/bookings/factBooking",
                         element: <FactBooking />
                     },
@@ -62,6 +68,10 @@ export const routes = [
                     {
                         path: "/permission",
                         element: <Permission />
+                    },
+                    {
+                        path: "/role",
+                        element: <Role />
                     }
                 ],
             },

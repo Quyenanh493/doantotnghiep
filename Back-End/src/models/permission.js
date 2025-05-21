@@ -19,7 +19,8 @@ module.exports = (sequelize, DataTypes) => {
       autoIncrement: true
     },
     permissionName: DataTypes.STRING,
-    description: DataTypes.STRING
+    resource: DataTypes.STRING,
+    action: DataTypes.STRING
   }, {
     sequelize,
     modelName: 'Permission',

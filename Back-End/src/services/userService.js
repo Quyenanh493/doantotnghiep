@@ -381,6 +381,109 @@ const userService = {
                 DT: []
             };
         }
+    },
+
+    // Gán vai trò cho người dùng
+    assignRoleToUser: async (userId, roleId) => {
+        try {
+            // Kiểm tra người dùng có tồn tại không
+            const user = await db.User.findByPk(userId);
+            if (!user) {
+                return {
+                    EM: 'Không tìm thấy người dùng',
+                    EC: 1,
+                    DT: []
+                };
+            }
+
+            // Kiểm tra vai trò có tồn tại không
+            const role = await db.Role.findByPk(roleId);
+            if (!role) {
+                return {
+                    EM: 'Không tìm thấy vai trò',
+                    EC: 2,
+                    DT: []
+                };
+            }
+
+            // Gán vai trò cho người dùng
+            await user.update({ roleId });
+
+            // Lấy thông tin người dùng đã cập nhật
+            const updatedUser = await db.User.findByPk(userId, {
+                include: [{
+                    model: db.Role,
+                    attributes: ['roleId', 'roleName', 'description']
+                }]
+            });
+
+            return {
+                EM: 'Gán vai trò cho người dùng thành công',
+                EC: 0,
+                DT: updatedUser
+            };
+        } catch (error) {
+            console.error("Error in assignRoleToUser service:", error);
+            return {
+                EM: 'Lỗi từ server',
+                EC: -1,
+                DT: []
+            };
+        }
+    },
+
+    // Lấy danh sách quyền của người dùng
+    getUserPermissions: async (userId) => {
+        try {
+            // Kiểm tra người dùng có tồn tại không
+            const user = await db.User.findByPk(userId, {
+                include: [{
+                    model: db.Role,
+                    include: [{
+                        model: db.Permission,
+                        through: { attributes: [] } // Không lấy thông tin từ bảng trung gian
+                    }]
+                }]
+            });
+
+            if (!user) {
+                return {
+                    EM: 'Không tìm thấy người dùng',
+                    EC: 1,
+                    DT: []
+                };
+            }
+
+            // Kiểm tra người dùng có vai trò không
+            if (!user.Role) {
+                return {
+                    EM: 'Người dùng chưa được gán vai trò',
+                    EC: 2,
+                    DT: []
+                };
+            }
+
+            return {
+                EM: 'Lấy danh sách quyền của người dùng thành công',
+                EC: 0,
+                DT: {
+                    userId: user.id,
+                    userName: user.name,
+                    role: {
+                        roleId: user.Role.roleId,
+                        roleName: user.Role.roleName
+                    },
+                    permissions: user.Role.Permissions
+                }
+            };
+        } catch (error) {
+            console.error("Error in getUserPermissions service:", error);
+            return {
+                EM: 'Lỗi từ server',
+                EC: -1,
+                DT: []
+            };
+        }
     }
 };
 

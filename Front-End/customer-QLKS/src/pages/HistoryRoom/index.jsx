@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Typography, Button, Card, Row, Col, notification, Modal, Spin, message } from 'antd';
-import { ReloadOutlined, CreditCardOutlined } from '@ant-design/icons';
+import { ReloadOutlined, CreditCardOutlined, CommentOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import { 
   getFactBookingHistory, 
@@ -10,6 +10,8 @@ import {
   queryTransactionStatus, 
   cancelBooking 
 } from '../../services/bookingService';
+import { checkCustomerReviewed, getRoomReviewsByCustomerId } from '../../services/roomReviewService';
+import ReviewForm from '../../components/ReviewForm';
 import './HistoryRoom.scss';
 
 const { Title } = Typography;
@@ -18,6 +20,7 @@ function HistoryRoom() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [bookings, setBookings] = useState([]);
+  console.log("bookings",bookings);
   const [notiApi, contextHolder] = notification.useNotification();
   const [messageApi] = message.useMessage();
   const [paymentUrl, setPaymentUrl] = useState(null);
@@ -27,6 +30,9 @@ function HistoryRoom() {
   const [checkingPayment, setCheckingPayment] = useState(false);
   const [paymentStatus, setPaymentStatus] = useState(null);
   const [paymentStatusInterval, setPaymentStatusInterval] = useState(null);
+  const [reviewModalVisible, setReviewModalVisible] = useState(false);
+  const [selectedRoomForReview, setSelectedRoomForReview] = useState(null);
+  const [userReviews, setUserReviews] = useState({});
 
   const fetchBookingHistory = async () => {
     setLoading(true);
@@ -35,6 +41,9 @@ function HistoryRoom() {
       const response = await getFactBookingHistory(userData.customerId);
       if (response && response.EC === 0) {
         setBookings(response.DT);
+        
+        // Kiểm tra đánh giá của người dùng sau khi lấy dữ liệu đặt phòng
+        await checkUserReviews(userData.customerId, response.DT);
       } else {
         notiApi.error({
           message: 'Lỗi',
@@ -55,6 +64,16 @@ function HistoryRoom() {
   useEffect(() => {
     fetchBookingHistory();
   }, []);
+
+  // Thêm useEffect để debug dữ liệu booking
+  useEffect(() => {
+    if (bookings && bookings.length > 0) {
+      console.log('Chi tiết booking đầu tiên:', bookings[0]);
+      if (bookings[0].FactBookingDetails && bookings[0].FactBookingDetails.length > 0) {
+        console.log('Chi tiết phòng:', bookings[0].FactBookingDetails[0]);
+      }
+    }
+  }, [bookings]);
 
   // Hủy interval khi component unmount
   useEffect(() => {
@@ -231,6 +250,109 @@ function HistoryRoom() {
     return today.isBefore(checkInDate);
   };
 
+  // Thêm hàm kiểm tra đánh giá
+  const checkUserReviews = async (customerId, bookings) => {
+    try {
+      if (!customerId) {
+        console.warn('customerId không xác định khi kiểm tra đánh giá:', customerId);
+        return;
+      }
+      
+      const reviewsInfo = {};
+      console.log('Đang kiểm tra đánh giá cho customer:', customerId);
+      
+      try {
+        // Gọi API để lấy tất cả đánh giá của khách hàng
+        const response = await getRoomReviewsByCustomerId(customerId);
+        console.log('Kết quả đánh giá từ API:', response);
+        
+        if (response && response.EC === 0 && response.DT) {
+          const userReviews = response.DT;
+          
+          // Log tất cả đánh giá
+          console.log('Tất cả đánh giá của người dùng:', userReviews);
+          
+          // Gán trạng thái đã đánh giá cho từng phòng
+          for (const booking of bookings) {
+            if (booking.FactBookingDetails && booking.FactBookingDetails.length > 0) {
+              for (const detail of booking.FactBookingDetails) {
+                // Lấy roomId trực tiếp từ detail
+                const roomId = detail.roomId;
+                if (roomId) {
+                  // Kiểm tra xem phòng này đã được đánh giá chưa
+                  const hasReviewed = userReviews.some(review => 
+                    parseInt(review.roomId) === parseInt(roomId)
+                  );
+                  
+                  reviewsInfo[roomId] = hasReviewed;
+                  console.log(`Phòng ${roomId} đã đánh giá: ${hasReviewed}`, {
+                    reviewsForThisRoom: userReviews.filter(r => parseInt(r.roomId) === parseInt(roomId))
+                  });
+                }
+              }
+            }
+          }
+        }
+      } catch (apiError) {
+        console.error('Lỗi khi gọi API đánh giá:', apiError);
+      }
+      
+      console.log('Cập nhật trạng thái đánh giá:', reviewsInfo);
+      setUserReviews(reviewsInfo);
+    } catch (error) {
+      console.error('Lỗi khi kiểm tra đánh giá:', error);
+    }
+  };
+
+  // Hàm mở modal đánh giá
+  const handleOpenReview = (room) => {
+    if (!room || !room.roomId) {
+      console.error('Không có thông tin phòng để đánh giá');
+      message.error('Không thể mở đánh giá: thiếu thông tin phòng');
+      return;
+    }
+    
+    console.log('Mở modal đánh giá cho phòng:', room);
+    setSelectedRoomForReview(room);
+    setReviewModalVisible(true);
+  };
+
+  // Hàm đóng modal đánh giá
+  const handleCloseReview = () => {
+    setReviewModalVisible(false);
+    setSelectedRoomForReview(null);
+  };
+
+  // Hàm xử lý sau khi đánh giá thành công
+  const handleReviewSuccess = async () => {
+    // Cập nhật lại trạng thái đánh giá của người dùng
+    const userData = JSON.parse(localStorage.getItem('user') || '{}');
+    
+    // Fetch lại toàn bộ dữ liệu
+    await fetchBookingHistory();
+    
+    // Thông báo thành công
+    message.success('Đánh giá của bạn đã được ghi nhận!');
+  };
+
+  // Hàm kiểm tra điều kiện để hiển thị nút đánh giá (checkout date <= today)
+  const canReviewBooking = (dateOut) => {
+    const today = dayjs();
+    const checkoutDate = dayjs(dateOut);
+    const canReview = today.isAfter(checkoutDate) || today.isSame(checkoutDate, 'day');
+    
+    console.log('Kiểm tra điều kiện đánh giá:', {
+      dateOut: dateOut,
+      today: today.format('YYYY-MM-DD'),
+      checkoutDate: checkoutDate.format('YYYY-MM-DD'),
+      isAfter: today.isAfter(checkoutDate),
+      isSame: today.isSame(checkoutDate, 'day'),
+      canReview: canReview
+    });
+    
+    return canReview;
+  };
+
   return (
     <div className="history-room">
       {contextHolder}
@@ -269,16 +391,33 @@ function HistoryRoom() {
             let roomName = "Phòng Đơn"; // Mặc định
             let roomType = "Đơn"; // Mặc định
             
-            if (booking.FactBookingDetails && booking.FactBookingDetails.length > 0) {
+            // Sử dụng giá từ Payment trước (ưu tiên)
+            if (booking.Payment) {
+              totalPrice = Number(booking.Payment.amount || 0);
+            }
+            
+            // Nếu không có Payment hoặc giá trị là 0, thử lấy từ FactBookingDetails
+            if (totalPrice === 0 && booking.FactBookingDetails && booking.FactBookingDetails.length > 0) {
               booking.FactBookingDetails.forEach(detail => {
-                if (detail.Room) {
+                if (detail.totalAmount) {
                   totalPrice += Number(detail.totalAmount || 0);
-                  roomName = detail.Room.roomName || roomName;
-                  roomType = detail.Room.roomType || roomType;
+                }
+                // Thông tin roomType dựa trên specialRate nếu có
+                if (detail.specialRate) {
+                  const rate = Number(detail.specialRate);
+                  if (rate <= 1000000) roomType = "Standard";
+                  else if (rate <= 2000000) roomType = "Deluxe";
+                  else roomType = "Family";
                 }
               });
-            } else if (booking.Payment) {
-              totalPrice = Number(booking.Payment.amount || 0);
+            }
+            
+            // Nếu vẫn là 0, thử lấy tổng số ngày * số phòng * giá phòng 
+            if (totalPrice === 0 && booking.dateIn && booking.dateOut) {
+              const days = dayjs(booking.dateOut).diff(dayjs(booking.dateIn), 'day');
+              const roomCount = booking.FactBookingDetails?.[0]?.roomCount || 1;
+              const pricePerDay = booking.FactBookingDetails?.[0]?.specialRate || 1000000;
+              totalPrice = days * roomCount * Number(pricePerDay);
             }
             
             // Kiểm tra trạng thái thanh toán
@@ -343,6 +482,45 @@ function HistoryRoom() {
                         Hủy Đặt Phòng
                       </Button>
                     )}
+                    
+                    {booking.FactBookingDetails && booking.FactBookingDetails.map(detail => {
+                      // Lấy roomId từ detail.roomId thay vì detail.Room.roomId
+                      const roomId = detail.roomId;
+                      if (!roomId) return null;
+                      
+                      // Kiểm tra điều kiện đánh giá với thông tin chi tiết
+                      const canReview = true; // Bỏ qua kiểm tra ngày để test
+                      const hasReviewed = userReviews[roomId] || false;
+                      
+                      console.log(`Nút đánh giá - Phòng ${roomId}:`, {
+                        hasReviewed,
+                        canReview,
+                        dateOut: booking.dateOut,
+                        disabled: !canReview || hasReviewed,
+                        userReviews
+                      });
+                      
+                      // Chuẩn bị dữ liệu room để truyền vào hàm handleOpenReview
+                      const roomData = {
+                        roomId: roomId,
+                        roomName: displayRoomName,
+                        specialRate: detail.specialRate,
+                        totalAmount: detail.totalAmount
+                      };
+                      
+                      return (
+                        <Button
+                          key={detail.bookingDetailId}
+                          type="default"
+                          icon={<CommentOutlined />}
+                          className="history-room__review-btn"
+                          onClick={() => handleOpenReview(roomData)}
+                          disabled={hasReviewed} // Tạm thời bỏ điều kiện canReview để kiểm tra
+                        >
+                          {hasReviewed ? 'Đã đánh giá' : 'Đánh giá'}
+                        </Button>
+                      );
+                    })}
                   </div>
                 </Card>
               </Col>
@@ -354,7 +532,7 @@ function HistoryRoom() {
       {/* Modal thanh toán VNPay */}
       <Modal
         title="Thanh toán VNPay"
-        visible={isVNPayModalVisible}
+        open={isVNPayModalVisible}
         onOk={handleVNPayModalOk}
         onCancel={handleVNPayModalCancel}
         footer={[
@@ -404,6 +582,18 @@ function HistoryRoom() {
           </div>
         )}
       </Modal>
+      
+      {/* Review Modal */}
+      {selectedRoomForReview && (
+        <ReviewForm
+          roomId={selectedRoomForReview.roomId}
+          roomName={selectedRoomForReview.roomName}
+          customerId={JSON.parse(localStorage.getItem('user') || '{}').customerId}
+          visible={reviewModalVisible}
+          onClose={handleCloseReview}
+          onSuccess={handleReviewSuccess}
+        />
+      )}
     </div>
   );
 }

@@ -105,7 +105,8 @@ const roomService = {
                 maxRoom: roomData.maxRoom || 1,
                 price: roomData.price,
                 roomImage: roomData.roomImage,
-                roomStar: roomData.roomStar || 0,
+                averageRating: roomData.averageRating || 0.0,
+                totalReview: roomData.totalReview || 0,
                 description: roomData.description || '',
                 createdAt: new Date(),
                 updatedAt: new Date()
@@ -191,7 +192,8 @@ const roomService = {
                 maxCustomer: roomData.maxCustomer !== undefined ? roomData.maxCustomer : room.maxCustomer,
                 price: roomData.price !== undefined ? roomData.price : room.price,
                 roomImage: roomData.roomImage !== undefined ? roomData.roomImage : room.roomImage,
-                roomStar: roomData.roomStar !== undefined ? roomData.roomStar : room.roomStar,
+                averageRating: roomData.averageRating !== undefined ? roomData.averageRating : room.averageRating,
+                totalReview: roomData.totalReview !== undefined ? roomData.totalReview : room.totalReview,
                 description: roomData.description !== undefined ? roomData.description : room.description,
                 updatedAt: new Date()
             }, { transaction });

@@ -1,6 +1,7 @@
 import express from "express";
 import paymentController from "../controllers/paymentController";
 import authMiddleware from "../middleware/authMiddleware";
+import permissionMiddleware from "../middleware/permissionMiddleware";
 
 const router = express.Router();
 
@@ -23,7 +24,7 @@ router.get('/query-dr/:transactionCode',
 // Hoàn tiền giao dịch
 router.post('/refund',
   authMiddleware.verifyToken,
-  authMiddleware.checkRole(['admin']), // Chỉ admin mới có thể hoàn tiền
+  permissionMiddleware.canUpdate('payments'),
   paymentController.refundTransaction
 );
 
@@ -31,6 +32,7 @@ router.post('/refund',
 router.get(
   '/:bookingId',
   authMiddleware.verifyToken,
+  permissionMiddleware.canRead('payments'),
   paymentController.getPaymentByBookingId
 );
 
@@ -38,6 +40,7 @@ router.get(
 router.get(
   '/',
   authMiddleware.verifyToken,
+  permissionMiddleware.canRead('payments'),
   paymentController.getAllPayments
 );
 

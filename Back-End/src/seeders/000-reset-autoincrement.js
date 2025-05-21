@@ -15,6 +15,7 @@ module.exports = {
       'rolepermission',
       'room',
       'roomamenities',
+      'roomreview',
       'user'
     ];
 

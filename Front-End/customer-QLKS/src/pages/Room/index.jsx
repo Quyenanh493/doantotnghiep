@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Row, Col, Card, Button, DatePicker, Form, Input, Select, Divider, Tag, Pagination, notification } from 'antd';
+import { Row, Col, Card, Button, DatePicker, Form, Input, Select, Divider, Tag, Pagination, notification, Rate } from 'antd';
 import { SearchOutlined } from '@ant-design/icons';
 import { getAllRooms, checkRoomAvailability, searchAvailableRooms } from '../../services/roomService';
 import { getAllAmenities, getAmenityByRoomId } from '../../services/amenitiesService';
@@ -449,6 +449,13 @@ function Room() {
                   <div className="room__card-header">
                     <h2 className="room__card-name">{room.roomName}</h2>
                     <div className="room__card-price">{Number(room.price).toLocaleString()} vnđ mỗi đêm</div>
+                  </div>
+                  
+                  <div className="room__card-rating">
+                    <Rate disabled value={room.averageRating || 0} allowHalf />
+                    <span className="room__card-rating-text">
+                      {room.averageRating || 0}/5 ({room.totalReview || 0} đánh giá)
+                    </span>
                   </div>
                   
                   <Divider className="room__card-divider" />

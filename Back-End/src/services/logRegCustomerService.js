@@ -85,14 +85,14 @@ const registerNewUser = async (rawUserData) => {
 
     if (result) {
       // Generate JWT tokens
-      const token = authMiddleware.generateToken(result.newAccount.accountId, 'customer');
+      const accessToken = authMiddleware.generateToken(result.newAccount.accountId, 'customer');
       const refreshToken = authMiddleware.generateRefreshToken(result.newAccount.accountId, 'customer');
       
       return {
         EM: 'Đăng ký tài khoản thành công',
         EC: 0,
         DT: { 
-          token,
+          accessToken,
           refreshToken
         }
       }

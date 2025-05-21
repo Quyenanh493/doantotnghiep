@@ -1,18 +1,24 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, forwardRef, useImperativeHandle } from "react";
 import { getCustomerRegisterByMonth } from "../../services/dashboardService";
 import { Area } from "@ant-design/charts";
 
-function CustomerArea() {
+const CustomerArea = forwardRef(function CustomerArea({ year }, ref) {
     const [dataCustomer, setDataCustomer] = useState([]);
+
+    useImperativeHandle(ref, () => ({
+        getData: () => {
+            return dataCustomer;
+        }
+    }));
 
     useEffect(() => {
         const fetchApi = async () => {
-            const response = await getCustomerRegisterByMonth("2025");
+            const response = await getCustomerRegisterByMonth(year);
             // console.log(response);
             setDataCustomer(response);
         }
         fetchApi();
-    }, []);
+    }, [year]);
 
     console.log("customer", dataCustomer);
     
@@ -29,10 +35,10 @@ function CustomerArea() {
     }
     return (
         <>
-            <h1>Biểu đồ khách hàng đăng kí năm 2025</h1>
+            <h1>Biểu đồ khách hàng đăng kí năm {year}</h1>
             <Area {...config} />
         </>
     )
-}
+});
 
 export default CustomerArea;

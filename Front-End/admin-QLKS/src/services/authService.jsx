@@ -70,18 +70,25 @@ export const getCurrentUser = () => {
 export const refreshToken = async () => {
   try {
     const refreshToken = getCookie('refreshToken');
-    if (!refreshToken) {
-      throw new Error('Không có refresh token');
+    if (!refreshToken || refreshToken === 'undefined' || refreshToken === 'null') {
+      throw new Error('Không có refresh token hoặc token không hợp lệ');
     }
     
     const response = await request.post('auth/refresh-token', { refreshToken });
     
-    if (response.EC === 0 && response.DT && response.DT.accessToken) {
-      setCookie('accessToken', response.DT.accessToken, 1);
-      return response;
+    if (response.EC === 0 && response.DT) {
+      if (response.DT.accessToken && typeof response.DT.accessToken === 'string') {
+        setCookie('accessToken', response.DT.accessToken, 1);
+        
+        if (response.DT.refreshToken && typeof response.DT.refreshToken === 'string') {
+          setCookie('refreshToken', response.DT.refreshToken, 7);
+        }
+        
+        return response;
+      }
     }
     
-    throw new Error('Không thể làm mới token');
+    throw new Error('Không thể làm mới token: ' + (response.EM || 'Lỗi không xác định'));
   } catch (error) {
     console.error('Lỗi khi làm mới token:', error);
     throw error;

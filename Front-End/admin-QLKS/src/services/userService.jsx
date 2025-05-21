@@ -64,4 +64,26 @@ export const deleteUser = async (userId) => {
     console.error(`Lỗi khi xóa người dùng ID ${userId}:`, error);
     throw error;
   }
+};
+
+// Gán vai trò cho người dùng
+export const assignRoleToUser = async (userId, roleId) => {
+  try {
+    const response = await request.put(`users/${userId}/role`, { roleId });
+    return response;
+  } catch (error) {
+    console.error(`Lỗi khi gán vai trò cho người dùng:`, error);
+    throw error;
+  }
+};
+
+// Lấy quyền của người dùng
+export const getUserPermissions = async (userId) => {
+  try {
+    const response = await request.get(`users/${userId}/permissions`);
+    return response;
+  } catch (error) {
+    console.error(`Lỗi khi lấy quyền của người dùng ID ${userId}:`, error);
+    throw error;
+  }
 }; 

@@ -12,6 +12,7 @@ import {
 } from '@ant-design/icons';
 import { getAllAmenities, getAmenityById, createAmenity, updateAmenity, deleteAmenity } from '../../services/amenitiesService';
 import { uploadImage } from '../../services/uploadImageService';
+import { usePermissions } from '../../contexts/PermissionContext';
 import './Amenities.scss';
 
 const { confirm } = Modal;
@@ -27,6 +28,12 @@ function Amenities() {
   const [form] = Form.useForm();
   const [iconUrl, setIconUrl] = useState('');
   const [uploadLoading, setUploadLoading] = useState(false);
+  
+  // Get permission utilities
+  const { canCreate, canUpdate, canDelete, isLoading: permissionLoading } = usePermissions();
+  const hasCreatePermission = canCreate('amenities');
+  const hasUpdatePermission = canUpdate('amenities');
+  const hasDeletePermission = canDelete('amenities');
 
   useEffect(() => {
     fetchAmenities();
@@ -223,19 +230,23 @@ function Amenities() {
             size="small" 
             onClick={() => showViewModal(record.amenitiesId)}
           />
-          <Button 
-            type="default" 
-            icon={<EditOutlined />} 
-            size="small" 
-            onClick={() => showAddEditModal(record)}
-          />
-          <Button 
-            type="primary" 
-            danger 
-            icon={<DeleteOutlined />} 
-            size="small" 
-            onClick={() => showDeleteConfirm(record.amenitiesId, record.amenitiesName)}
-          />
+          {hasUpdatePermission && (
+            <Button 
+              type="default" 
+              icon={<EditOutlined />} 
+              size="small" 
+              onClick={() => showAddEditModal(record)}
+            />
+          )}
+          {hasDeletePermission && (
+            <Button 
+              type="primary" 
+              danger 
+              icon={<DeleteOutlined />} 
+              size="small" 
+              onClick={() => showDeleteConfirm(record.amenitiesId, record.amenitiesName)}
+            />
+          )}
         </Space>
       ),
     },
@@ -246,9 +257,11 @@ function Amenities() {
       <Card 
         title="Danh sách tiện nghi" 
         extra={
-          <Button type="primary" icon={<PlusOutlined />} onClick={() => showAddEditModal()}>
-            Thêm mới
-          </Button>
+          hasCreatePermission && (
+            <Button type="primary" icon={<PlusOutlined />} onClick={() => showAddEditModal()}>
+              Thêm mới
+            </Button>
+          )
         }
       >
         <div className="table-actions">
@@ -261,10 +274,15 @@ function Amenities() {
           />
         </div>
         <Table
-          columns={columns}
+          columns={columns.filter(col => {
+            // Always show all columns except action if no permissions
+            if (col.key !== 'action') return true;
+            // Only show action column if user has at least one action permission
+            return hasUpdatePermission || hasDeletePermission;
+          })}
           dataSource={filteredData}
           rowKey="amenitiesId"
-          loading={loading}
+          loading={loading || permissionLoading}
           pagination={{
             pageSize: 10,
             showSizeChanger: true,
@@ -364,17 +382,19 @@ function Amenities() {
           <Button key="back" onClick={handleViewCancel}>
             Đóng
           </Button>,
-          <Button 
-            key="edit" 
-            type="primary" 
-            onClick={() => {
-              setIsViewModalVisible(false);
-              showAddEditModal(currentAmenity);
-            }}
-          >
-            Chỉnh sửa
-          </Button>,
-        ]}
+          hasUpdatePermission && (
+            <Button 
+              key="edit" 
+              type="primary" 
+              onClick={() => {
+                setIsViewModalVisible(false);
+                showAddEditModal(currentAmenity);
+              }}
+            >
+              Chỉnh sửa
+            </Button>
+          ),
+        ].filter(Boolean)}
         width={700}
       >
         {currentAmenity && (

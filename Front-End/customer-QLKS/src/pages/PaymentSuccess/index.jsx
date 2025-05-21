@@ -39,6 +39,12 @@ function PaymentSuccess() {
         }
       } catch (error) {
         console.error('Error fetching booking details:', error);
+        
+        // Xử lý lỗi 401 - Unauthorized
+        if (error.response && error.response.status === 401) {
+          // Hiển thị thông báo lỗi nhưng vẫn hiển thị thông tin đơn hàng cơ bản
+          console.log('Authentication error. Will show limited booking info.');
+        }
       } finally {
         setLoading(false);
       }

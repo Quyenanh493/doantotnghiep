@@ -6,10 +6,15 @@ import {
     InfoCircleOutlined, 
     SyncOutlined, 
     RollbackOutlined, 
-    SearchOutlined
+    SearchOutlined,
+    EyeOutlined,
+    EditOutlined,
+    DeleteOutlined,
+    PlusOutlined
 } from '@ant-design/icons';
 import './Payment.scss';
 import dayjs from 'dayjs';
+import { usePermissions } from '../../contexts/PermissionContext';
 
 const { Option } = Select;
 
@@ -26,6 +31,12 @@ function Payment() {
     const [queryForm] = Form.useForm();
     const [queryResult, setQueryResult] = useState(null);
     const [queryLoading, setQueryLoading] = useState(false);
+
+    // Get permission utilities
+    const { canCreate, canUpdate, canDelete, isLoading: permissionLoading } = usePermissions();
+    const hasCreatePermission = canCreate('payments');
+    const hasUpdatePermission = canUpdate('payments');
+    const hasDeletePermission = canDelete('payments');
 
     // Fetch all payments on component mount
     useEffect(() => {
@@ -258,36 +269,29 @@ function Payment() {
             title: 'Thao tác',
             key: 'action',
             render: (_, record) => (
-                <Space size="small">
-                    <Tooltip title="Xem chi tiết">
-                        <Button 
-                            type="primary" 
-                            icon={<InfoCircleOutlined />}
-                            size="small"
-                            onClick={() => showDetailsModal(record)}
-                        />
-                    </Tooltip>
-                    
-                    <Tooltip title="Truy vấn trạng thái">
-                        <Button 
-                            type="default"
-                            icon={<SearchOutlined />}
-                            size="small"
-                            onClick={() => showQueryModal(record)}
-                        />
-                    </Tooltip>
-                    
-                    {/* Only show refund button for successful payments that haven't been refunded */}
-                    {record.statusPayment === 'Paid' && !record.refundAmount && (
-                        <Tooltip title="Hoàn tiền">
-                            <Button 
-                                type="default" 
-                                danger
-                                icon={<RollbackOutlined />}
-                                size="small"
-                                onClick={() => showRefundModal(record)}
-                            />
-                        </Tooltip>
+                <Space size="middle">
+                    <Button 
+                        type="primary" 
+                        icon={<EyeOutlined />} 
+                        size="small" 
+                        onClick={() => showDetailsModal(record)}
+                    />
+                    {hasUpdatePermission && (
+                    <Button 
+                        type="default" 
+                        icon={<EditOutlined />} 
+                        size="small" 
+                        onClick={() => showDetailsModal(record)}
+                    />
+                    )}
+                    {hasDeletePermission && (
+                    <Button 
+                        type="primary" 
+                        danger 
+                        icon={<DeleteOutlined />} 
+                        size="small" 
+                        onClick={() => showRefundModal(record)}
+                    />
                     )}
                 </Space>
             ),
@@ -304,24 +308,43 @@ function Payment() {
                     </Space>
                 }
                 extra={
-                    <Button 
-                        type="primary" 
-                        icon={<SyncOutlined />}
-                        onClick={fetchPayments} 
-                        loading={loading}
-                    >
-                        Làm mới
-                    </Button>
+                    <Space>
+                        {hasCreatePermission && (
+                            <Button 
+                                type="primary" 
+                                icon={<PlusOutlined />}
+                                onClick={fetchPayments} 
+                                loading={loading}
+                            >
+                                Làm mới
+                            </Button>
+                        )}
+                        {hasCreatePermission && (
+                            <Button 
+                                type="primary" 
+                                icon={<PlusOutlined />}
+                                onClick={() => {
+                                    // Implement the logic to add a new payment
+                                }}
+                            >
+                                Thanh toán mới
+                            </Button>
+                        )}
+                    </Space>
                 }
             >
                 <Table 
-                    columns={columns} 
+                    columns={columns.filter(col => {
+                        if (col.key !== 'action') return true;
+                        return hasUpdatePermission || hasDeletePermission;
+                    })}
                     dataSource={payments} 
                     rowKey="paymentId"
-                    loading={loading}
+                    loading={loading || permissionLoading}
                     pagination={{ 
                         pageSize: 10,
-                        showTotal: (total) => `Tổng cộng ${total} giao dịch`
+                        showTotal: (total) => `Tổng cộng ${total} giao dịch`,
+                        showSizeChanger: true
                     }}
                 />
             </Card>

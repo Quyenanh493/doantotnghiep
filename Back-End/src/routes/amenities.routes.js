@@ -1,6 +1,7 @@
 import express from "express";
 import amenitiesController from "../controllers/amenitiesController";
 import authMiddleware from "../middleware/authMiddleware";
+import permissionMiddleware from "../middleware/permissionMiddleware";
 
 const router = express.Router();
 
@@ -9,25 +10,25 @@ router.get('/', amenitiesController.getAllAmenities);  // Public
 router.get('/room/:roomId', amenitiesController.getAmenityByRoomId);  // Public
 router.get('/:id', amenitiesController.getAmenityById);  // Public
 
-// Các endpoint cần quyền admin/staff
+// Các endpoint cần quyền tương ứng
 router.post(
   '/', 
   authMiddleware.verifyToken,
-  authMiddleware.checkRole(['admin', 'staff']),
+  permissionMiddleware.canCreate('amenities'),
   amenitiesController.createAmenity
 );
 
 router.put(
   '/:id', 
   authMiddleware.verifyToken,
-  authMiddleware.checkRole(['admin', 'staff']),
+  permissionMiddleware.canUpdate('amenities'),
   amenitiesController.updateAmenity
 );
 
 router.delete(
   '/:id', 
   authMiddleware.verifyToken,
-  authMiddleware.checkRole(['admin']),
+  permissionMiddleware.canDelete('amenities'),
   amenitiesController.deleteAmenity
 );
 

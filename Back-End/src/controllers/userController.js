@@ -1,4 +1,9 @@
 import userService from '../services/userService';
+import db from '../models';
+
+const User = db.User;
+const Role = db.Role;
+const Permission = db.Permission;
 
 const userController = {
     // Lấy tất cả người dùng
@@ -89,6 +94,39 @@ const userController = {
             return res.status(200).json(result);
         } catch (error) {
             console.error("Error in deleteUser controller:", error);
+            return res.status(500).json({
+                EM: 'Lỗi từ server',
+                EC: -1,
+                DT: []
+            });
+        }
+    },
+
+    // Gán vai trò cho người dùng
+    assignRoleToUser: async (req, res) => {
+        try {
+            const userId = req.params.id;
+            const { roleId } = req.body;
+            const result = await userService.assignRoleToUser(userId, roleId);
+            return res.status(200).json(result);
+        } catch (error) {
+            console.error("Error in assignRoleToUser controller:", error);
+            return res.status(500).json({
+                EM: 'Lỗi từ server',
+                EC: -1,
+                DT: []
+            });
+        }
+    },
+
+    // Lấy danh sách quyền của người dùng
+    getUserPermissions: async (req, res) => {
+        try {
+            const userId = req.params.id;
+            const result = await userService.getUserPermissions(userId);
+            return res.status(200).json(result);
+        } catch (error) {
+            console.error("Error in getUserPermissions controller:", error);
             return res.status(500).json({
                 EM: 'Lỗi từ server',
                 EC: -1,

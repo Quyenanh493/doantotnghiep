@@ -3,7 +3,8 @@ import dashboardService from '../services/dashboardService';
 const dashboardController = {
   getTotalRevenue: async (req, res) => {
     try {
-      const result = await dashboardService.getTotalRevenue();
+      const year = req.query.year || new Date().getFullYear();
+      const result = await dashboardService.getTotalRevenue(year);
       return res.status(result.EC === 0 ? 200 : 400).json(result);
     } catch (err) {
       console.error('Error in getTotalRevenue controller:', err);
@@ -31,7 +32,8 @@ const dashboardController = {
 
   getBookedRoomCount: async (req, res) => {
     try {
-      const result = await dashboardService.getBookedRoomCount();
+      const year = req.query.year || new Date().getFullYear();
+      const result = await dashboardService.getBookedRoomCount(year);
       return res.status(result.EC === 0 ? 200 : 400).json(result);
     } catch (err) {
       console.error('Error in getBookedRoomCount controller:', err);

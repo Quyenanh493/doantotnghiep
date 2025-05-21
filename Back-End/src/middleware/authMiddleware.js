@@ -57,14 +57,16 @@ const verifyToken = (req, res, next) => {
 // Refresh token function
 const refreshToken = async (refreshToken) => {
   try {
+    // Verify the refresh token
     const decoded = jwt.verify(
       refreshToken,
       process.env.JWT_REFRESH_SECRET || 'fallback-refresh-secret-key'
     );
 
-    const user = await db.Account.findOne({ where: { accountId: decoded.accountId } });
+    // Find the account associated with the token
+    const account = await db.Account.findOne({ where: { accountId: decoded.accountId } });
 
-    if (!user) {
+    if (!account) {
       return {
         EM: 'Người dùng không tồn tại',
         EC: -1,
@@ -72,15 +74,27 @@ const refreshToken = async (refreshToken) => {
       };
     }
 
-    const newAccessToken = generateToken(user.accountId, user.accountType);
-    const newRefreshToken = generateRefreshToken(user.accountId, user.accountType);
+    // Check if account is active
+    if (!account.accountStatus) {
+      return {
+        EM: 'Tài khoản đã bị vô hiệu hóa',
+        EC: -1,
+        DT: ''
+      };
+    }
+
+    // Generate new tokens
+    const newAccessToken = generateToken(account.accountId, account.accountType);
+    const newRefreshToken = generateRefreshToken(account.accountId, account.accountType);
 
     return {
       EM: 'Làm mới token thành công',
       EC: 0,
       DT: {
-        token: newAccessToken,
-        refreshToken: newRefreshToken
+        accessToken: newAccessToken,
+        refreshToken: newRefreshToken,
+        accountId: account.accountId,
+        accountType: account.accountType
       }
     };
   } catch (error) {

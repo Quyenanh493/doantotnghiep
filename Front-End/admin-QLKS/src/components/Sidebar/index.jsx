@@ -8,7 +8,10 @@ import {
   TeamOutlined,
   SignatureOutlined,
   AppstoreAddOutlined,
-  PlusSquareOutlined
+  PlusSquareOutlined,
+  UsergroupAddOutlined,
+  UserAddOutlined,
+  StarOutlined
 } from '@ant-design/icons';
 import { Link, useLocation } from 'react-router-dom';
 import './Sidebar.scss';
@@ -33,11 +36,6 @@ function Sidebar() {
       label: <Link to="/account">Quản lý tài khoản</Link>,
     },
     {
-      key: '/user',
-      icon: <TeamOutlined />,
-      label: <Link to="/user">Quản lý nhân sự</Link>,
-    },
-    {
       key: '/customers',
       icon: <UserOutlined />,
       label: <Link to="/customers">Quản lý khách hàng</Link>,
@@ -51,6 +49,11 @@ function Sidebar() {
           key: '/bookings/room',
           icon: <AppstoreOutlined />,
           label: <Link to="/bookings/room">Phòng</Link>,
+        },
+        {
+          key: '/bookings/roomReview',
+          icon: <StarOutlined />,
+          label: <Link to="/bookings/roomReview">Đánh giá phòng</Link>,
         },
         {
           key: '/bookings/factBooking',
@@ -70,9 +73,26 @@ function Sidebar() {
       label: <Link to="/amenities">Quản lý Tiện ích</Link>,
     },
     {
-      key: '/permission',
+      key: '/role-permission',
       icon: <ClusterOutlined />,
-      label: <Link to="/permission">Quản lý Quyền</Link>,
+      label: <span style={{ fontSize: "14px" }}>Quản lý Phân quyền</span>,
+      children: [
+        {
+          key: '/role',
+          icon: <UsergroupAddOutlined />,
+          label: <Link to="/role">Quản lý vai trò</Link>,
+        },
+        {
+          key: '/permission',
+          icon: <UserAddOutlined />,
+          label: <Link to="/permission">Quản lý quyền</Link>,
+        },
+        {
+          key: '/user',
+          icon: <TeamOutlined />,
+          label: <Link to="/user">Quản lý nhân sự</Link>,
+        },
+      ],
     },
   ];
 

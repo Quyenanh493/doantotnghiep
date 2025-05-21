@@ -5,12 +5,15 @@ import {
   DeleteOutlined, 
   ExclamationCircleOutlined,
   EyeOutlined,
-  BookOutlined
+  BookOutlined,
+  EditOutlined,
+  PlusOutlined
 } from '@ant-design/icons';
 import { getAllBookings, getBookingById, deleteBooking } from '../../services/factBookingService';
 import { getBookingDetailsByBookingId } from '../../services/factBookingDetailService';
 import dayjs from 'dayjs';
 import './FactBooking.scss';
+import { usePermissions } from '../../contexts/PermissionContext';
 
 const { confirm } = Modal;
 const { RangePicker } = DatePicker;
@@ -24,6 +27,12 @@ function FactBooking() {
   const [currentBooking, setCurrentBooking] = useState(null);
   const [bookingDetails, setBookingDetails] = useState([]);
   const [dateRange, setDateRange] = useState(null);
+
+  // Get permission utilities
+  const { canCreate, canUpdate, canDelete, isLoading: permissionLoading } = usePermissions();
+  const hasCreatePermission = canCreate('bookings');
+  const hasUpdatePermission = canUpdate('bookings');
+  const hasDeletePermission = canDelete('bookings');
 
   useEffect(() => {
     fetchBookings();
@@ -231,26 +240,30 @@ function FactBooking() {
       key: 'action',
       width: 150,
       render: (_, record) => (
-        <Space size="small">
-          <Button
-            type="primary"
-            icon={<EyeOutlined />}
-            size="small"
+        <Space size="middle">
+          <Button 
+            type="primary" 
+            icon={<EyeOutlined />} 
+            size="small" 
             onClick={() => showViewModal(record.bookingId)}
           />
-          <Button
-            type="default"
-            icon={<BookOutlined />}
-            size="small"
+          {hasUpdatePermission && (
+          <Button 
+            type="default" 
+            icon={<EditOutlined />} 
+            size="small" 
             onClick={() => showDetailModal(record.bookingId)}
           />
-          <Button
-            type="primary"
-            danger
-            icon={<DeleteOutlined />}
-            size="small"
+          )}
+          {hasDeletePermission && (
+          <Button 
+            type="primary" 
+            danger 
+            icon={<DeleteOutlined />} 
+            size="small" 
             onClick={() => showDeleteConfirm(record.bookingId)}
           />
+          )}
         </Space>
       ),
     },
@@ -283,10 +296,15 @@ function FactBooking() {
         </div>
 
         <Table
-          columns={columns}
+          columns={columns.filter(col => {
+            // Always show all columns except action if no permissions
+            if (col.key !== 'action') return true;
+            // Only show action column if user has at least one action permission
+            return hasUpdatePermission || hasDeletePermission;
+          })}
           dataSource={filteredData}
           rowKey="bookingId"
-          loading={loading}
+          loading={loading || permissionLoading}
           pagination={{
             pageSize: 10,
             showSizeChanger: true,
@@ -304,7 +322,19 @@ function FactBooking() {
           <Button key="back" onClick={handleViewCancel}>
             Đóng
           </Button>,
-        ]}
+          hasUpdatePermission && (
+            <Button 
+              key="edit" 
+              type="primary" 
+              onClick={() => {
+                setIsViewModalVisible(false);
+                showDetailModal(currentBooking.bookingId);
+              }}
+            >
+              Chỉnh sửa
+            </Button>
+          ),
+        ].filter(Boolean)}
         width={700}
       >
         {currentBooking && (

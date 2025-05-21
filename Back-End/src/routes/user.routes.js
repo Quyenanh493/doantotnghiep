@@ -44,4 +44,20 @@ router.delete(
   userController.deleteUser
 );
 
+// API gán vai trò cho người dùng
+router.put(
+  '/:id/role',
+  authMiddleware.verifyToken,
+  authMiddleware.checkRole(['admin']),
+  userController.assignRoleToUser
+);
+
+// API lấy danh sách quyền của người dùng
+router.get(
+  '/:id/permissions',
+  authMiddleware.verifyToken,
+  authMiddleware.checkRole(['admin']),
+  userController.getUserPermissions
+);
+
 export default router; 

@@ -3,10 +3,20 @@ import { Op, fn, col, literal } from 'sequelize';
 
 const dashboardService = {
   // Tổng doanh thu đã thu về (chỉ tính các payment đã Paid)
-  getTotalRevenue: async () => {
+  getTotalRevenue: async (year) => {
     try {
+      if (!year || isNaN(year)) {
+        year = new Date().getFullYear();
+      }
+
       const total = await db.Payment.sum('amount', {
-        where: { statusPayment: 'Paid' }
+        where: { 
+          statusPayment: 'Paid',
+          createdAt: {
+            [Op.gte]: new Date(`${year}-01-01`),
+            [Op.lte]: new Date(`${year}-12-31`)
+          }
+        }
       });
       return {
         EM: 'Lấy tổng doanh thu thành công',
@@ -43,12 +53,26 @@ const dashboardService = {
   },
 
   // Số phòng đã được đặt
-  getBookedRoomCount: async () => {
+  getBookedRoomCount: async (year) => {
     try {
+      if (!year || isNaN(year)) {
+        year = new Date().getFullYear();
+      }
+
       // Đếm tổng roomCount với các trạng thái đã đặt thành công hoặc xác nhận
-      const { FactBookingDetail } = db;
+      const { FactBookingDetail, FactBooking } = db;
       const result = await FactBookingDetail.findAll({
         attributes: [[fn('SUM', col('roomCount')), 'totalBooked']],
+        include: [{
+          model: FactBooking,
+          attributes: [],
+          where: {
+            orderDate: {
+              [Op.gte]: new Date(`${year}-01-01`),
+              [Op.lte]: new Date(`${year}-12-31`)
+            }
+          }
+        }],
         where: {
           bookingStatus: {
             [Op.in]: ['Completed', 'Confirmed']
@@ -56,6 +80,7 @@ const dashboardService = {
         },
         raw: true
       });
+      
       const total = result[0]?.totalBooked || 0;
       return {
         EM: 'Lấy số phòng đã được đặt thành công',

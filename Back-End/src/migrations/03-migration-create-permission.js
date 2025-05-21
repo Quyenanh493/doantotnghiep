@@ -12,7 +12,10 @@ module.exports = {
       permissionName: {
         type: Sequelize.STRING
       },
-      description: {
+      resource: {
+        type: Sequelize.STRING
+      },
+      action: {
         type: Sequelize.STRING
       },
       createdAt: {

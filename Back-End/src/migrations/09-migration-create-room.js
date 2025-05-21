@@ -39,8 +39,13 @@ module.exports = {
       roomImage: {
         type: Sequelize.STRING
       },
-      roomStar: {
-        type: Sequelize.INTEGER
+      averageRating: {
+        type: Sequelize.DECIMAL(3, 1),
+        defaultValue: 0.0
+      },
+      totalReview: {
+        type: Sequelize.INTEGER,
+        defaultValue: 0
       },
       description: {
         type: Sequelize.TEXT

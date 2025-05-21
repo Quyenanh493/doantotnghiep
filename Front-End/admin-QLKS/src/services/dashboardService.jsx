@@ -1,9 +1,10 @@
 import request from '../utils/request';
 
 // Lấy tổng doanh thu
-export const getTotalRevenue = async () => {
+export const getTotalRevenue = async (year) => {
   try {
-    const response = await request.get('dashboard/revenue');
+    const url = year ? `dashboard/revenue?year=${year}` : 'dashboard/revenue';
+    const response = await request.get(url);
     return response.DT;
   } catch (error) {
     console.error('Lỗi khi lấy tổng doanh thu:', error);
@@ -12,9 +13,10 @@ export const getTotalRevenue = async () => {
 };
 
 // Lấy số phòng được đặt
-export const getBookedRoomCount = async () => {
+export const getBookedRoomCount = async (year) => {
   try {
-    const response = await request.get('dashboard/rooms/booked');
+    const url = year ? `dashboard/rooms/booked?year=${year}` : 'dashboard/rooms/booked';
+    const response = await request.get(url);
     return response.DT;
   } catch (error) {
     console.error('Lỗi khi lấy số lượng khách hàng:', error);

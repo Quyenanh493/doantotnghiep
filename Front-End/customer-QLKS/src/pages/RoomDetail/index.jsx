@@ -1,12 +1,14 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { Row, Col, Card, Rate, Divider, Spin, Image, Tag, List, Typography } from 'antd';
-import { WifiOutlined, CoffeeOutlined, CarOutlined, ShoppingOutlined } from '@ant-design/icons';
+import { Row, Col, Card, Rate, Divider, Spin, Image, Tag, List, Typography, Avatar } from 'antd';
+import { WifiOutlined, CoffeeOutlined, CarOutlined, ShoppingOutlined, UserOutlined } from '@ant-design/icons';
 import { getRoomById } from '../../services/roomService';
 import { getAmenityByRoomId } from '../../services/amenitiesService';
+import { getRoomReviewsByRoomId } from '../../services/roomReviewService';
+import dayjs from 'dayjs';
 import './RoomDetail.scss';
 
-const { Title, Text } = Typography;
+const { Title, Text, Paragraph } = Typography;
 
 // Hàm này giúp chọn icon phù hợp cho từng loại tiện ích
 const getAmenityIcon = (amenityName) => {
@@ -28,6 +30,8 @@ function RoomDetail() {
   const [room, setRoom] = useState(null);
   const [loading, setLoading] = useState(true);
   const [amenities, setAmenities] = useState([]);
+  const [reviews, setReviews] = useState([]);
+  const [reviewsLoading, setReviewsLoading] = useState(true);
 
   useEffect(() => {
     const fetchRoomDetail = async () => {
@@ -45,10 +49,17 @@ function RoomDetail() {
         if (amenitiesResponse && amenitiesResponse.DT) {
           setAmenities(amenitiesResponse.DT);
         }
+        
+        // Lấy đánh giá của phòng
+        const reviewsResponse = await getRoomReviewsByRoomId(roomId);
+        if (reviewsResponse && reviewsResponse.DT) {
+          setReviews(reviewsResponse.DT);
+        }
       } catch (error) {
         console.error('Lỗi khi lấy thông tin phòng:', error);
       } finally {
         setLoading(false);
+        setReviewsLoading(false);
       }
     };
 
@@ -83,8 +94,8 @@ function RoomDetail() {
               <h1 className="room-detail__title">{room.roomName}</h1>
               <div className="room-detail__meta">
                 <div className="room-detail__rating">
-                  <Rate disabled defaultValue={room.roomStar || 0} allowHalf />
-                  <span className="room-detail__rating-text">{room.roomStar || 0}/5</span>
+                  <Rate disabled defaultValue={room.averageRating || 0} allowHalf />
+                  <span className="room-detail__rating-text">{room.averageRating || 0}/5 ({room.totalReview || 0} đánh giá)</span>
                 </div>
                 <div className="room-detail__price">
                   <Text strong>{Number(room.price).toLocaleString()} vnđ</Text> / đêm
@@ -164,6 +175,46 @@ function RoomDetail() {
                   <p>Không có tiện ích nào được thêm vào phòng này.</p>
                 )}
               </div>
+            </div>
+          </Col>
+
+          <Col xs={24}>
+            <Divider />
+            <div className="room-detail__reviews">
+              <h2 className="room-detail__section-title">Đánh giá từ khách hàng</h2>
+              {reviewsLoading ? (
+                <div className="room-detail__reviews-loading">
+                  <Spin size="small" tip="Đang tải đánh giá..." />
+                </div>
+              ) : reviews.length > 0 ? (
+                <List
+                  className="room-detail__reviews-list"
+                  itemLayout="horizontal"
+                  dataSource={reviews}
+                  renderItem={review => (
+                    <List.Item className="room-detail__review-item">
+                      <div className="room-detail__review-content">
+                        <div className="room-detail__review-header">
+                          <Avatar icon={<UserOutlined />} />
+                          <div className="room-detail__review-author">
+                            <div>{review.Customer?.customerName || 'Khách hàng'}</div>
+                            <div className="room-detail__review-date">
+                              {dayjs(review.createdAt).format('DD/MM/YYYY')}
+                            </div>
+                          </div>
+                        </div>
+                        <div className="room-detail__review-rating">
+                          <Rate disabled value={review.rating} />
+                          <span>{review.rating}/5</span>
+                        </div>
+                        <Paragraph>{review.comment}</Paragraph>
+                      </div>
+                    </List.Item>
+                  )}
+                />
+              ) : (
+                <p>Chưa có đánh giá nào cho phòng này.</p>
+              )}
             </div>
           </Col>
         </Row>

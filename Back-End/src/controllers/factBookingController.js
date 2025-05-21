@@ -4,7 +4,16 @@ const factBookingController = {
     // Lấy tất cả đơn đặt phòng
     getAllBookings: async (req, res, next) => {
         try {
-            let data = await factBookingService.getAllBookings();
+            let data;
+            
+            // Nếu là khách hàng đang gọi API (đã được lưu trong req.customerInfo từ middleware)
+            if (req.customerInfo) {
+                // Lấy danh sách đơn đặt phòng của khách hàng hiện tại
+                data = await factBookingService.getBookingsByCustomerId(req.customerInfo.customerId);
+            } else {
+                // Mặc định lấy tất cả đơn đặt phòng (cho admin/staff)
+                data = await factBookingService.getAllBookings();
+            }
             
             return res.status(200).json({
                 EM: data.EM,

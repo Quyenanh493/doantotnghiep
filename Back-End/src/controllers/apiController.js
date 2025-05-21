@@ -34,13 +34,25 @@ const handleLogin = async (req, res, next) => {
     // Validation đã được xử lý bởi middleware
     let data = await logRegUserService.handleUserLogin(req.body);
     
-    // Set token in HTTP-only cookie for better security
-    if (data.EC === 0 && data.DT && data.DT.token) {
-      res.cookie('accessToken', data.DT.token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production', // Use secure in production
-        maxAge: 24 * 60 * 60 * 1000 // 24 hours
-      });
+    // Set tokens in HTTP-only cookies for better security
+    if (data.EC === 0 && data.DT) {
+      // Set access token
+      if (data.DT.accessToken) {
+        res.cookie('accessToken', data.DT.accessToken, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === 'production',
+          maxAge: 24 * 60 * 60 * 1000 // 24 hours
+        });
+      }
+      
+      // Set refresh token
+      if (data.DT.refreshToken) {
+        res.cookie('refreshToken', data.DT.refreshToken, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === 'production',
+          maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+        });
+      }
     }
     
     return res.status(200).json({
@@ -72,11 +84,17 @@ const handleRefreshToken = async (req, res, next) => {
     const result = await authMiddleware.refreshToken(refreshToken);
     
     if (result.EC === 0) {
-      // Set new access token in HTTP-only cookie
-      res.cookie('accessToken', result.DT.token, {
+      // Set new tokens in HTTP-only cookies
+      res.cookie('accessToken', result.DT.accessToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         maxAge: 24 * 60 * 60 * 1000 // 24 hours
+      });
+      
+      res.cookie('refreshToken', result.DT.refreshToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
       });
       
       return res.status(200).json({
@@ -93,7 +111,11 @@ const handleRefreshToken = async (req, res, next) => {
     });
   } catch (e) {
     console.error("Error in handleRefreshToken:", e);
-    next(e);
+    return res.status(500).json({
+      EM: 'Lỗi server khi xử lý refresh token',
+      EC: -1,
+      DT: ''
+    });
   }
 };
 

@@ -1,39 +1,41 @@
 import express from "express";
 import customerController from "../controllers/customerController";
 import authMiddleware from "../middleware/authMiddleware";
+import permissionMiddleware from "../middleware/permissionMiddleware";
 
 const router = express.Router();
 
 // Các endpoint API cho Customer
 router.get('/', 
   authMiddleware.verifyToken,
-  authMiddleware.checkRole(['admin', 'staff']),
+  permissionMiddleware.canRead('customers'),
   customerController.getAllCustomers
 );
 
 router.get('/:id', 
   authMiddleware.verifyToken,
-  authMiddleware.checkRole(['admin', 'staff']),
+  permissionMiddleware.canRead('customers'),
   customerController.getCustomerById
 );
 
 router.post(
   '/', 
   authMiddleware.verifyToken,
-  authMiddleware.checkRole(['admin']),
+  permissionMiddleware.canCreate('customers'),
   customerController.createCustomer
 );
 
 router.put(
   '/:id', 
   authMiddleware.verifyToken,
+  permissionMiddleware.canUpdate('customers'),
   customerController.updateCustomer
 );
 
 router.delete(
   '/:id', 
   authMiddleware.verifyToken,
-  authMiddleware.checkRole(['admin']),
+  permissionMiddleware.canDelete('customers'),
   customerController.deleteCustomer
 );
 

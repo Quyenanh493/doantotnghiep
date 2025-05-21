@@ -1,6 +1,7 @@
 'use strict';
 const {
-  Model
+  Model,
+  DECIMAL
 } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
   class Room extends Model {
@@ -20,6 +21,7 @@ module.exports = (sequelize, DataTypes) => {
       });
       Room.hasMany(models.FactBookingDetail, { foreignKey: 'roomId' });
       Room.hasMany(models.RoomAvailability, { foreignKey: 'roomId' });
+      Room.hasMany(models.RoomReview, { foreignKey: 'roomId' });
     }
   }
   Room.init({
@@ -42,7 +44,14 @@ module.exports = (sequelize, DataTypes) => {
     maxRoom: DataTypes.INTEGER,
     price: DataTypes.DECIMAL(10, 2),
     roomImage: DataTypes.STRING,
-    roomStar: DataTypes.INTEGER,
+    averageRating: {
+      type: DataTypes.DECIMAL(3, 1),
+      defaultValue: 0.0
+    },
+    totalReview: {
+      type: DataTypes.INTEGER,
+      defaultValue: 0
+    },
     description: DataTypes.STRING,
   }, {
     sequelize,

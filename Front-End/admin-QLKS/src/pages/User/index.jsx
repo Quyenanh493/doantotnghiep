@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Table, Input, Button, Space, Card, Tag, Modal, Form, DatePicker, message, Descriptions, Upload, Spin, Select, Switch } from 'antd';
+import { Empty, Table, Input, Button, Space, Card, Tag, Modal, Form, DatePicker, message, Descriptions, Upload, Spin, Select, Switch } from 'antd';
 import { 
   SearchOutlined, 
   PlusOutlined, 
@@ -9,9 +9,12 @@ import {
   UploadOutlined,
   EyeOutlined,
   UserOutlined,
-  LoadingOutlined
+  LoadingOutlined,
+  TeamOutlined,
+  KeyOutlined
 } from '@ant-design/icons';
-import { getAllUsers, getUserById, createUser, updateUser, deleteUser } from '../../services/userService';
+import { getAllUsers, getUserById, createUser, updateUser, deleteUser, assignRoleToUser, getUserPermissions } from '../../services/userService';
+import { getAllRoles } from '../../services/roleService';
 import { uploadImage } from '../../services/uploadImageService';
 import { getAllHotels } from '../../services/hotelService';
 import dayjs from 'dayjs';
@@ -32,10 +35,16 @@ function User() {
   const [imageUrl, setImageUrl] = useState('');
   const [uploadedImageUrl, setUploadedImageUrl] = useState('');
   const [uploadLoading, setUploadLoading] = useState(false);
+  const [roles, setRoles] = useState([]);
+  const [isRoleModalVisible, setIsRoleModalVisible] = useState(false);
+  const [isPermissionModalVisible, setIsPermissionModalVisible] = useState(false);
+  const [userPermissions, setUserPermissions] = useState([]);
+  const [roleForm] = Form.useForm();
 
   useEffect(() => {
     fetchUsers();
     fetchHotels();
+    fetchRoles();
   }, []);
 
   const fetchUsers = async () => {
@@ -61,6 +70,22 @@ function User() {
       }
     } catch (error) {
       console.error('Error fetching hotels:', error);
+    }
+  };
+
+  const fetchRoles = async () => {
+    try {
+      const response = await getAllRoles();
+      if (response && response.DT) {
+        console.log("Fetched roles:", response.DT);
+        setRoles(response.DT);
+      } else {
+        console.error("Roles data not found in response:", response);
+        message.error('Không thể tải danh sách vai trò: Dữ liệu không hợp lệ');
+      }
+    } catch (error) {
+      console.error('Error fetching roles:', error);
+      message.error('Không thể tải danh sách vai trò');
     }
   };
 
@@ -227,6 +252,57 @@ function User() {
     </div>
   );
 
+  const showRoleModal = (user) => {
+    setCurrentUser(user);
+    setIsRoleModalVisible(true);
+    roleForm.setFieldsValue({
+      roleId: user.roleId
+    });
+  };
+
+  const showPermissionsModal = async (userId) => {
+    try {
+      setLoading(true);
+      const response = await getUserPermissions(userId);
+      if (response && response.DT) {
+        setCurrentUser(response.DT);
+        setUserPermissions(response.DT.permissions || []);
+        setIsPermissionModalVisible(true);
+      }
+    } catch (error) {
+      console.error('Error fetching user permissions:', error);
+      message.error('Không thể tải thông tin quyền của người dùng');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleRoleCancel = () => {
+    setIsRoleModalVisible(false);
+    setCurrentUser(null);
+    roleForm.resetFields();
+  };
+
+  const handlePermissionCancel = () => {
+    setIsPermissionModalVisible(false);
+    setUserPermissions([]);
+  };
+
+  const handleRoleSubmit = async (values) => {
+    try {
+      setLoading(true);
+      await assignRoleToUser(currentUser.userId, values.roleId);
+      message.success('Gán vai trò thành công');
+      setIsRoleModalVisible(false);
+      fetchUsers();
+    } catch (error) {
+      console.error('Error assigning role:', error);
+      message.error('Lỗi khi gán vai trò cho người dùng');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const columns = [
     {
       title: 'STT',
@@ -276,19 +352,31 @@ function User() {
     {
       title: 'Thao tác',
       key: 'action',
-      width: 120,
+      width: 250,
       render: (_, record) => (
         <Space size="small">
           <Button 
             type="primary" 
-            shape="circle" 
             icon={<EyeOutlined />} 
             size="small" 
             onClick={() => showViewModal(record.userId)}
           />
           <Button 
-            type="primary" 
-            shape="circle" 
+            type="default" 
+            icon={<TeamOutlined />} 
+            size="small" 
+            onClick={() => showRoleModal(record)}
+            title="Phân quyền"
+          />
+          <Button
+            type="default"
+            icon={<KeyOutlined />}
+            size="small"
+            onClick={() => showPermissionsModal(record.userId)}
+            title="Xem quyền"
+          />
+          <Button 
+            type="default" 
             icon={<EditOutlined />} 
             size="small" 
             onClick={() => showAddEditModal(record)}
@@ -296,7 +384,6 @@ function User() {
           <Button 
             type="primary" 
             danger 
-            shape="circle" 
             icon={<DeleteOutlined />} 
             size="small" 
             onClick={() => showDeleteConfirm(record.userId, record.userName)}
@@ -304,13 +391,6 @@ function User() {
         </Space>
       ),
     },
-  ];
-
-  // Lấy danh sách vai trò
-  const roles = [
-    { roleId: 1, roleName: 'Admin' },
-    { roleId: 2, roleName: 'Manager' },
-    { roleId: 3, roleName: 'Staff' },
   ];
 
   return (
@@ -353,7 +433,7 @@ function User() {
       {/* Modal thêm/sửa người dùng */}
       <Modal
         title={currentUser ? 'Cập nhật người dùng' : 'Thêm người dùng mới'}
-        visible={isModalVisible}
+        open={isModalVisible}
         onCancel={handleCancel}
         footer={null}
         destroyOnClose
@@ -421,9 +501,13 @@ function User() {
             rules={[{ required: true, message: 'Vui lòng chọn vai trò' }]}
           >
             <Select placeholder="Chọn vai trò" className="role-select">
-              {roles.map(role => (
-                <Option key={role.roleId} value={role.roleId}>{role.roleName}</Option>
-              ))}
+              {roles && roles.length > 0 ? (
+                roles.map(role => (
+                  <Option key={role.roleId} value={role.roleId}>{role.roleName}</Option>
+                ))
+              ) : (
+                <Option disabled value="">Không có vai trò nào, vui lòng tạo vai trò trước</Option>
+              )}
             </Select>
           </Form.Item>
           
@@ -464,7 +548,7 @@ function User() {
       {/* Modal xem chi tiết */}
       <Modal
         title="Chi tiết người dùng"
-        visible={isViewModalVisible}
+        open={isViewModalVisible}
         onCancel={handleViewCancel}
         footer={[
           <Button key="back" onClick={handleViewCancel}>
@@ -507,6 +591,86 @@ function User() {
               </Descriptions.Item>
             )}
           </Descriptions>
+        )}
+      </Modal>
+
+      {/* Modal gán vai trò */}
+      <Modal
+        title={`Phân quyền cho người dùng: ${currentUser?.userName}`}
+        open={isRoleModalVisible}
+        onCancel={handleRoleCancel}
+        footer={null}
+        width={500}
+      >
+        <Form
+          form={roleForm}
+          layout="vertical"
+          onFinish={handleRoleSubmit}
+        >
+          <Form.Item
+            name="roleId"
+            label="Vai trò"
+            rules={[{ required: true, message: 'Vui lòng chọn vai trò' }]}
+          >
+            <Select placeholder="Chọn vai trò">
+              {roles && roles.length > 0 ? (
+                roles.map(role => (
+                  <Select.Option key={role.roleId} value={role.roleId}>
+                    {role.roleName}
+                  </Select.Option>
+                ))
+              ) : (
+                <Select.Option disabled value="">
+                  Không có vai trò nào, vui lòng tạo vai trò trước
+                </Select.Option>
+              )}
+            </Select>
+          </Form.Item>
+
+          <Form.Item className="form-actions">
+            <Space>
+              <Button onClick={handleRoleCancel}>
+                Hủy
+              </Button>
+              <Button type="primary" htmlType="submit" loading={loading}>
+                Lưu thay đổi
+              </Button>
+            </Space>
+          </Form.Item>
+        </Form>
+      </Modal>
+
+      {/* Modal xem quyền */}
+      <Modal
+        title={`Quyền của người dùng: ${currentUser?.userName}`}
+        open={isPermissionModalVisible}
+        onCancel={handlePermissionCancel}
+        footer={[
+          <Button key="back" onClick={handlePermissionCancel}>
+            Đóng
+          </Button>
+        ]}
+        width={700}
+      >
+        <div style={{ marginBottom: 16 }}>
+          <strong>Vai trò:</strong> {currentUser?.Role?.roleName || 'Chưa phân quyền'}
+        </div>
+        
+        {userPermissions.length > 0 ? (
+          <div>
+            <div style={{ marginBottom: 8 }}><strong>Danh sách quyền:</strong></div>
+            {userPermissions.map(permission => (
+              <Tag 
+                color="blue" 
+                key={permission.permissionId}
+                style={{ margin: '0 8px 8px 0' }}
+              >
+                {permission.permissionName}
+              </Tag>
+            ))}
+          </div>
+        ) : (
+          <Empty description="Người dùng không có quyền nào" />
         )}
       </Modal>
     </div>

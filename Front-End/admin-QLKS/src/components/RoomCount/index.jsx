@@ -1,7 +1,16 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, forwardRef, useImperativeHandle } from "react";
 import { getRoomCount } from "../../services/dashboardService";
-function RoomCount() {
-    const [dataRoom, setDataRoom] = useState([]);
+
+const RoomCount = forwardRef(function RoomCount(props, ref) {
+    const [dataRoom, setDataRoom] = useState(0);
+
+    useImperativeHandle(ref, () => ({
+        getData: () => {
+            return {
+                value: dataRoom
+            };
+        }
+    }));
 
     useEffect(() => {
         const fetchApi = async () => {
@@ -17,6 +26,6 @@ function RoomCount() {
             <h2 style={{ color: '#2db7f5' }}>{dataRoom}</h2>
         </>
     )
-}
+});
 
 export default RoomCount;
