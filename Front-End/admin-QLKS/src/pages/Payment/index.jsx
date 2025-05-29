@@ -269,29 +269,36 @@ function Payment() {
             title: 'Thao tác',
             key: 'action',
             render: (_, record) => (
-                <Space size="middle">
-                    <Button 
-                        type="primary" 
-                        icon={<EyeOutlined />} 
-                        size="small" 
-                        onClick={() => showDetailsModal(record)}
-                    />
-                    {hasUpdatePermission && (
-                    <Button 
-                        type="default" 
-                        icon={<EditOutlined />} 
-                        size="small" 
-                        onClick={() => showDetailsModal(record)}
-                    />
-                    )}
-                    {hasDeletePermission && (
-                    <Button 
-                        type="primary" 
-                        danger 
-                        icon={<DeleteOutlined />} 
-                        size="small" 
-                        onClick={() => showRefundModal(record)}
-                    />
+                <Space size="small">
+                    <Tooltip title="Xem chi tiết">
+                        <Button 
+                            type="primary" 
+                            icon={<InfoCircleOutlined />}
+                            size="small"
+                            onClick={() => showDetailsModal(record)}
+                        />
+                    </Tooltip>
+                    
+                    <Tooltip title="Truy vấn trạng thái">
+                        <Button 
+                            type="default"
+                            icon={<SearchOutlined />}
+                            size="small"
+                            onClick={() => showQueryModal(record)}
+                        />
+                    </Tooltip>
+                    
+                    {/* Only show refund button for successful payments that haven't been refunded */}
+                    {record.statusPayment === 'Paid' && !record.refundAmount && (
+                        <Tooltip title="Hoàn tiền">
+                            <Button 
+                                type="default" 
+                                danger
+                                icon={<RollbackOutlined />}
+                                size="small"
+                                onClick={() => showRefundModal(record)}
+                            />
+                        </Tooltip>
                     )}
                 </Space>
             ),
@@ -308,29 +315,14 @@ function Payment() {
                     </Space>
                 }
                 extra={
-                    <Space>
-                        {hasCreatePermission && (
-                            <Button 
-                                type="primary" 
-                                icon={<PlusOutlined />}
-                                onClick={fetchPayments} 
-                                loading={loading}
-                            >
-                                Làm mới
-                            </Button>
-                        )}
-                        {hasCreatePermission && (
-                            <Button 
-                                type="primary" 
-                                icon={<PlusOutlined />}
-                                onClick={() => {
-                                    // Implement the logic to add a new payment
-                                }}
-                            >
-                                Thanh toán mới
-                            </Button>
-                        )}
-                    </Space>
+                    <Button 
+                        type="primary" 
+                        icon={<SyncOutlined />}
+                        onClick={fetchPayments} 
+                        loading={loading}
+                    >
+                        Làm mới
+                    </Button>
                 }
             >
                 <Table 

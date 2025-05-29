@@ -55,11 +55,15 @@ function Login({ visible, onCancel, onLoginSuccess, onShowRegister }) {
         // Đóng modal đăng nhập
         if (onCancel) onCancel();
       } else {
+        // Kiểm tra mã lỗi để xử lý thông báo phù hợp
+        const errorMessage = response?.EM || 'Thông tin đăng nhập không chính xác. Vui lòng kiểm tra lại email/mật khẩu!';
+        const errorTitle = response?.EC === 2 ? 'Tài khoản bị khóa' : 'Đăng nhập thất bại';
+        
         // Hiển thị thông báo lỗi từ API bằng notification thay vì message
         notiApi.error({
-          message: 'Đăng nhập thất bại',
-          description: response?.EM || 'Thông tin đăng nhập không chính xác. Vui lòng kiểm tra lại email/mật khẩu!',
-          duration: 5,
+          message: errorTitle,
+          description: errorMessage,
+          duration: response?.EC === 2 ? 8 : 5, // Hiển thị lâu hơn cho trường hợp tài khoản bị khóa
         });
       }
     } catch (error) {

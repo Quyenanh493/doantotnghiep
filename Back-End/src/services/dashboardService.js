@@ -52,50 +52,6 @@ const dashboardService = {
     }
   },
 
-  // Số phòng đã được đặt
-  getBookedRoomCount: async (year) => {
-    try {
-      if (!year || isNaN(year)) {
-        year = new Date().getFullYear();
-      }
-
-      // Đếm tổng roomCount với các trạng thái đã đặt thành công hoặc xác nhận
-      const { FactBookingDetail, FactBooking } = db;
-      const result = await FactBookingDetail.findAll({
-        attributes: [[fn('SUM', col('roomCount')), 'totalBooked']],
-        include: [{
-          model: FactBooking,
-          attributes: [],
-          where: {
-            orderDate: {
-              [Op.gte]: new Date(`${year}-01-01`),
-              [Op.lte]: new Date(`${year}-12-31`)
-            }
-          }
-        }],
-        where: {
-          bookingStatus: {
-            [Op.in]: ['Completed', 'Confirmed']
-          }
-        },
-        raw: true
-      });
-      
-      const total = result[0]?.totalBooked || 0;
-      return {
-        EM: 'Lấy số phòng đã được đặt thành công',
-        EC: 0,
-        DT: Number(total)
-      };
-    } catch (error) {
-      console.error('Error in getBookedRoomCount:', error);
-      return {
-        EM: 'Lỗi khi lấy số phòng đã được đặt',
-        EC: -1,
-        DT: 0
-      };
-    }
-  },
 
   // Số khách hàng đăng ký theo tháng trong năm
   getCustomerRegisterByMonth: async (year) => {
@@ -214,6 +170,37 @@ const dashboardService = {
         EM: 'Lỗi khi lấy doanh thu theo khách sạn',
         EC: -1,
         DT: []
+      };
+    }
+  },
+
+  // Đếm tổng số lượng đơn đặt phòng (booking count)
+  getBookingCount: async (year) => {
+    try {
+      if (!year || isNaN(year)) {
+        year = new Date().getFullYear();
+      }
+
+      const count = await db.FactBooking.count({
+        where: {
+          orderDate: {
+            [Op.gte]: new Date(`${year}-01-01`),
+            [Op.lte]: new Date(`${year}-12-31`)
+          }
+        }
+      });
+
+      return {
+        EM: 'Lấy số lượng đơn đặt phòng thành công',
+        EC: 0,
+        DT: count
+      };
+    } catch (error) {
+      console.error('Error in getBookingCount:', error);
+      return {
+        EM: 'Lỗi khi lấy số lượng đơn đặt phòng',
+        EC: -1,
+        DT: 0
       };
     }
   },

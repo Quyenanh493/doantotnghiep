@@ -13,8 +13,8 @@ router.get('/revenue', dashboardController.getTotalRevenue);
 // Lấy số lượng phòng
 router.get('/rooms', dashboardController.getRoomCount);
 
-// Lấy số lượng phòng đã được đặt
-router.get('/rooms/booked', dashboardController.getBookedRoomCount);
+// Lấy số lượng đơn đặt phòng
+router.get('/bookings/count', dashboardController.getBookingCount);
 
 // Lấy số liệu đăng ký theo tháng
 router.get('/customers/monthly', dashboardController.getCustomerRegisterByMonth);

@@ -44,6 +44,10 @@ module.exports = (sequelize, DataTypes) => {
     maxRoom: DataTypes.INTEGER,
     price: DataTypes.DECIMAL(10, 2),
     roomImage: DataTypes.STRING,
+    roomImages: {
+      type: DataTypes.JSON,
+      allowNull: true,
+    },
     averageRating: {
       type: DataTypes.DECIMAL(3, 1),
       defaultValue: 0.0

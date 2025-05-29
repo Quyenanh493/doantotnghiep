@@ -1,18 +1,17 @@
 import { useState, useEffect } from 'react';
-import { Table, Input, Button, Space, Card, Tag, Modal, Form, InputNumber, Switch, message, Descriptions, Upload } from 'antd';
+import { Table, Input, Button, Space, Card, Tag, Modal, Form, InputNumber, Switch, message, Descriptions } from 'antd';
 import { 
   SearchOutlined, 
   PlusOutlined, 
   EditOutlined, 
   DeleteOutlined, 
   ExclamationCircleOutlined,
-  UploadOutlined,
-  EyeOutlined,
-  LoadingOutlined
+  EyeOutlined
 } from '@ant-design/icons';
 import { getAllAmenities, getAmenityById, createAmenity, updateAmenity, deleteAmenity } from '../../services/amenitiesService';
-import { uploadImage } from '../../services/uploadImageService';
 import { usePermissions } from '../../contexts/PermissionContext';
+import IconSelector from '../../components/IconSelector';
+import IconRenderer from '../../components/IconSelector/IconRenderer';
 import './Amenities.scss';
 
 const { confirm } = Modal;
@@ -26,8 +25,7 @@ function Amenities() {
   const [isViewModalVisible, setIsViewModalVisible] = useState(false);
   const [currentAmenity, setCurrentAmenity] = useState(null);
   const [form] = Form.useForm();
-  const [iconUrl, setIconUrl] = useState('');
-  const [uploadLoading, setUploadLoading] = useState(false);
+  const [selectedIcon, setSelectedIcon] = useState('');
   
   // Get permission utilities
   const { canCreate, canUpdate, canDelete, isLoading: permissionLoading } = usePermissions();
@@ -63,12 +61,17 @@ function Amenities() {
         amenitiesName: amenity.amenitiesName,
         description: amenity.description,
         price: amenity.price,
-        amenitiesStatus: amenity.amenitiesStatus
+        amenitiesStatus: amenity.amenitiesStatus,
+        icon: amenity.icon || 'wifi' // Set form field value
       });
-      setIconUrl(amenity.icon || '');
+      setSelectedIcon(amenity.icon || 'wifi');
     } else {
       form.resetFields();
-      setIconUrl('');
+      form.setFieldsValue({
+        amenitiesStatus: true,
+        icon: 'wifi' // Set default icon for new amenity
+      });
+      setSelectedIcon('wifi');
     }
   };
 
@@ -92,6 +95,7 @@ function Amenities() {
     setIsModalVisible(false);
     setCurrentAmenity(null);
     form.resetFields();
+    setSelectedIcon('');
   };
 
   const handleViewCancel = () => {
@@ -100,11 +104,17 @@ function Amenities() {
   };
 
   const handleSubmit = async (values) => {
+    // Validate icon selection
+    if (!selectedIcon) {
+      message.error('Vui lòng chọn icon cho tiện nghi');
+      return;
+    }
+
     try {
       setLoading(true);
       const amenityData = {
         ...values,
-        icon: iconUrl
+        icon: selectedIcon
       };
 
       let response;
@@ -117,6 +127,9 @@ function Amenities() {
       }
 
       setIsModalVisible(false);
+      setCurrentAmenity(null);
+      form.resetFields();
+      setSelectedIcon('');
       fetchAmenities();
     } catch (error) {
       console.error('Error saving amenity:', error);
@@ -156,31 +169,10 @@ function Amenities() {
     item.description?.toLowerCase().includes(searchText.toLowerCase())
   );
 
-  // Xử lý upload ảnh icon
-  const beforeUpload = (file) => {
-    const isJpgOrPng = file.type === 'image/jpeg' || file.type === 'image/png';
-    if (!isJpgOrPng) {
-      message.error('Chỉ chấp nhận file JPG/PNG!');
-    }
-    const isLt2M = file.size / 1024 / 1024 < 2;
-    if (!isLt2M) {
-      message.error('Kích thước ảnh phải nhỏ hơn 2MB!');
-    }
-    return isJpgOrPng && isLt2M;
-  };
-
-  const customUpload = async ({ file, onSuccess, onError }) => {
-    setUploadLoading(true);
-    try {
-      const url = await uploadImage(file);
-      setIconUrl(url);
-      onSuccess();
-    } catch (error) {
-      console.error('Error uploading image:', error);
-      onError();
-    } finally {
-      setUploadLoading(false);
-    }
+  const handleIconChange = (iconValue) => {
+    setSelectedIcon(iconValue);
+    // Also update the form field
+    form.setFieldValue('icon', iconValue);
   };
 
   const columns = [
@@ -190,6 +182,17 @@ function Amenities() {
       key: 'index',
       width: 80,
       render: (_, __, index) => index + 1,
+    },
+    {
+      title: 'Icon',
+      dataIndex: 'icon',
+      key: 'icon',
+      width: 80,
+      render: (icon) => (
+        <div style={{ fontSize: 20, textAlign: 'center' }}>
+          <IconRenderer iconType={icon} />
+        </div>
+      ),
     },
     {
       title: 'Tên tiện nghi',
@@ -297,6 +300,7 @@ function Amenities() {
         visible={isModalVisible}
         onCancel={handleCancel}
         footer={null}
+        width={800}
       >
         <Form
           form={form}
@@ -341,25 +345,14 @@ function Amenities() {
           </Form.Item>
 
           <Form.Item
+            name="icon"
             label="Icon"
+            rules={[{ required: true, message: 'Vui lòng chọn icon cho tiện nghi' }]}
           >
-            <Upload
-              name="icon"
-              listType="picture-card"
-              className="avatar-uploader"
-              showUploadList={false}
-              beforeUpload={beforeUpload}
-              customRequest={customUpload}
-            >
-              {iconUrl ? (
-                <img src={iconUrl} alt="icon" style={{ width: '100%' }} />
-              ) : (
-                <div>
-                  {uploadLoading ? <LoadingOutlined /> : <UploadOutlined />}
-                  <div style={{ marginTop: 8 }}>Tải lên</div>
-                </div>
-              )}
-            </Upload>
+            <IconSelector
+              value={selectedIcon}
+              onChange={handleIconChange}
+            />
           </Form.Item>
 
           <Form.Item className="form-actions">
@@ -407,11 +400,9 @@ function Amenities() {
             </Descriptions.Item>
             {currentAmenity.icon && (
               <Descriptions.Item label="Icon">
-                <img 
-                  src={currentAmenity.icon} 
-                  alt={currentAmenity.amenitiesName} 
-                  style={{ maxWidth: '100%', maxHeight: '300px', objectFit: 'contain' }} 
-                />
+                <div style={{ fontSize: 48, textAlign: 'center', padding: '16px' }}>
+                  <IconRenderer iconType={currentAmenity.icon} />
+                </div>
               </Descriptions.Item>
             )}
           </Descriptions>

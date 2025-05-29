@@ -23,17 +23,14 @@ export const PermissionProvider = ({ children }) => {
         setLoading(true);
         // Get current user ID from localStorage
         const userData = JSON.parse(localStorage.getItem('user'));
-        console.log("DEBUG - User data from localStorage:", userData);
         
         if (!userData || !userData.accountId) {
-          console.log("DEBUG - No user ID found in localStorage");
           setLoading(false);
           return;
         }
         
         // Check if user is admin first - prioritize this condition
         if (userData.accountType === 'admin') {
-          console.log("DEBUG - User is admin, setting default admin permissions");
           // Set admin as having all permissions by default
           const adminPermissions = [
             // Users
@@ -84,11 +81,9 @@ export const PermissionProvider = ({ children }) => {
         
         // For non-admin users, fetch permissions from API
         const response = await getUserPermissions(userData.accountId);
-        console.log("DEBUG - Permissions response:", response);
         
         if (response && response.DT && response.DT.permissions) {
           setPermissions(response.DT.permissions);
-          console.log("DEBUG - Loaded permissions:", response.DT.permissions);
         } else {
           console.log("DEBUG - No permissions found in response");
         }

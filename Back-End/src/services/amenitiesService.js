@@ -110,10 +110,10 @@ const amenitiesService = {
     createAmenity: async (amenityData) => {
         try {
             const newAmenity = await db.Amenities.create({
-                amenitiesId: amenityData.amenitiesId,
                 amenitiesName: amenityData.amenitiesName,
                 description: amenityData.description,
                 price: amenityData.price,
+                icon: amenityData.icon || 'wifi', // Đặt default icon nếu không có
                 amenitiesStatus: amenityData.amenitiesStatus !== undefined ? amenityData.amenitiesStatus : true,
                 createdAt: new Date(),
                 updatedAt: new Date()
@@ -148,10 +148,10 @@ const amenitiesService = {
             }
             
             await amenity.update({
-                amenitiesId: amenityData.amenitiesId !== undefined ? amenityData.amenitiesId : amenity.amenitiesId,
                 amenitiesName: amenityData.amenitiesName !== undefined ? amenityData.amenitiesName : amenity.amenitiesName,
                 description: amenityData.description !== undefined ? amenityData.description : amenity.description,
                 price: amenityData.price !== undefined ? amenityData.price : amenity.price,
+                icon: amenityData.icon !== undefined ? amenityData.icon : amenity.icon,
                 amenitiesStatus: amenityData.amenitiesStatus !== undefined ? amenityData.amenitiesStatus : amenity.amenitiesStatus,
                 updatedAt: new Date()
             });

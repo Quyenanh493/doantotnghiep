@@ -672,6 +672,10 @@ function BookingConfirmation() {
                   <span>Tổng số tiền phải trả:</span>
                   <span>{calculateTotalAmount().toLocaleString()} vnđ</span>
                 </div>
+
+                <p className='booking-confirmation__danger-text'>
+                  <strong>Lưu ý: Hiện tại chính sách điều khoản chúng tôi chưa cho phép hủy đặt phòng khi bạn đã thanh toán đơn hàng thành công, nên hãy cân nhắc kĩ trước khi đặt phòng.Nếu bạn có lý do bất khả kháng khi không thể đến khách sạn, vui lòng liên hệ ngay với chúng tôi để được hỗ trợ.</strong>
+                </p>
               </div>
 
               <div className="booking-confirmation__actions">

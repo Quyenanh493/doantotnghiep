@@ -30,21 +30,6 @@ const dashboardController = {
     }
   },
 
-  getBookedRoomCount: async (req, res) => {
-    try {
-      const year = req.query.year || new Date().getFullYear();
-      const result = await dashboardService.getBookedRoomCount(year);
-      return res.status(result.EC === 0 ? 200 : 400).json(result);
-    } catch (err) {
-      console.error('Error in getBookedRoomCount controller:', err);
-      return res.status(500).json({
-        EM: 'Lỗi từ server',
-        EC: -1,
-        DT: 0
-      });
-    }
-  },
-
   getCustomerRegisterByMonth: async (req, res) => {
     try {
       const year = req.query.year || new Date().getFullYear();
@@ -71,6 +56,21 @@ const dashboardController = {
         EM: 'Lỗi từ server',
         EC: -1,
         DT: []
+      });
+    }
+  },
+
+  getBookingCount: async (req, res) => {
+    try {
+      const year = req.query.year || new Date().getFullYear();
+      const result = await dashboardService.getBookingCount(year);
+      return res.status(result.EC === 0 ? 200 : 400).json(result);
+    } catch (err) {
+      console.error('Error in getBookingCount controller:', err);
+      return res.status(500).json({
+        EM: 'Lỗi từ server',
+        EC: -1,
+        DT: 0
       });
     }
   },

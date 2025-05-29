@@ -3,7 +3,7 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    return queryInterface.bulkInsert('hotel', [
+    return queryInterface.bulkInsert('Hotel', [ // Sửa tên bảng thành 'Hotel'
       {
         hotelName: 'Grand Plaza Hotel',
         openDay: new Date('2018-01-15'),
@@ -11,6 +11,7 @@ module.exports = {
         hotelStatus: true,
         hotelType: 'Luxury',
         hotelImage: 'grand_plaza.jpg',
+        hotelImages: JSON.stringify(['grand_plaza.jpg', 'grand_plaza.jpg', 'grand_plaza.jpg', 'grand_plaza.jpg']),
         description: 'Khách sạn 5 sao sang trọng tại trung tâm Thành phố Hồ Chí Minh',
         createdAt: new Date(),
         updatedAt: new Date()
@@ -22,6 +23,7 @@ module.exports = {
         hotelStatus: true,
         hotelType: 'Resort',
         hotelImage: 'riverside_resort.jpg',
+        hotelImages: JSON.stringify(['riverside_resort.jpg', 'riverside_resort.jpg', 'riverside_resort.jpg', 'riverside_resort.jpg']),
         description: 'Khu nghỉ dưỡng ven sông với tầm nhìn tuyệt đẹp ra biển Đà Nẵng',
         createdAt: new Date(),
         updatedAt: new Date()
@@ -33,6 +35,7 @@ module.exports = {
         hotelStatus: true,
         hotelType: 'Business',
         hotelImage: 'capital_suites.jpg',
+        hotelImages: JSON.stringify(['capital_suites.jpg', 'capital_suites.jpg', 'capital_suites.jpg', 'capital_suites.jpg']),
         description: 'Khách sạn dành cho doanh nhân với đầy đủ tiện nghi hiện đại',
         createdAt: new Date(),
         updatedAt: new Date()
@@ -44,6 +47,7 @@ module.exports = {
         hotelStatus: true,
         hotelType: 'Beach Resort',
         hotelImage: 'ocean_view.jpg',
+        hotelImages: JSON.stringify(['ocean_view.jpg', 'ocean_view.jpg', 'ocean_view.jpg', 'ocean_view.jpg']),
         description: 'Khách sạn hướng biển với bãi biển riêng tại Nha Trang',
         createdAt: new Date(),
         updatedAt: new Date()
@@ -55,6 +59,7 @@ module.exports = {
         hotelStatus: true,
         hotelType: 'Boutique',
         hotelImage: 'mountain_retreat.jpg',
+        hotelImages: JSON.stringify(['mountain_retreat.jpg', 'mountain_retreat.jpg', 'mountain_retreat.jpg', 'mountain_retreat.jpg']),
         description: 'Khách sạn boutique yên tĩnh giữa núi đồi Đà Lạt',
         createdAt: new Date(),
         updatedAt: new Date()
@@ -66,6 +71,7 @@ module.exports = {
         hotelStatus: true,
         hotelType: 'Budget',
         hotelImage: 'city_comfort.jpg',
+        hotelImages: JSON.stringify(['city_comfort.jpg', 'city_comfort.jpg', 'city_comfort.jpg', 'city_comfort.jpg']),
         description: 'Khách sạn giá rẻ nhưng đầy đủ tiện nghi tại trung tâm thành phố',
         createdAt: new Date(),
         updatedAt: new Date()
@@ -77,6 +83,7 @@ module.exports = {
         hotelStatus: true,
         hotelType: 'Historic',
         hotelImage: 'heritage_palace.jpg',
+        hotelImages: JSON.stringify(['heritage_palace.jpg', 'heritage_palace.jpg', 'heritage_palace.jpg', 'heritage_palace.jpg']),
         description: 'Khách sạn mang phong cách kiến trúc cổ điển Hà Nội',
         createdAt: new Date(),
         updatedAt: new Date()
@@ -88,6 +95,7 @@ module.exports = {
         hotelStatus: true,
         hotelType: 'Beach Resort',
         hotelImage: 'sunset_bay.jpg',
+        hotelImages: JSON.stringify(['sunset_bay.jpg', 'sunset_bay.jpg', 'sunset_bay.jpg', 'sunset_bay.jpg']),
         description: 'Khu nghỉ dưỡng với tầm nhìn hoàng hôn tuyệt đẹp tại Phú Quốc',
         createdAt: new Date(),
         updatedAt: new Date()
@@ -99,6 +107,7 @@ module.exports = {
         hotelStatus: true,
         hotelType: 'Business',
         hotelImage: 'business_tower.jpg',
+        hotelImages: JSON.stringify(['business_tower.jpg', 'business_tower.jpg', 'business_tower.jpg', 'business_tower.jpg']),
         description: 'Khách sạn cao cấp dành cho doanh nhân tại khu vực Phú Mỹ Hưng',
         createdAt: new Date(),
         updatedAt: new Date()
@@ -110,6 +119,7 @@ module.exports = {
         hotelStatus: true,
         hotelType: 'Mountain Resort',
         hotelImage: 'highland_retreat.jpg',
+        hotelImages: JSON.stringify(['highland_retreat.jpg', 'highland_retreat.jpg', 'highland_retreat.jpg', 'highland_retreat.jpg']),
         description: 'Khu nghỉ dưỡng trên cao với tầm nhìn ra thung lũng Sapa',
         createdAt: new Date(),
         updatedAt: new Date()
@@ -118,10 +128,10 @@ module.exports = {
   },
 
   async down(queryInterface, Sequelize) {
-    return queryInterface.bulkDelete('hotel', null, {
+    return queryInterface.bulkDelete('Hotel', null, { // Sửa tên bảng thành 'Hotel'
       truncate: true,
       cascade: true,
-      restartIdentity: true, 
+      restartIdentity: true,
     });
   }
 };

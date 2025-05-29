@@ -46,7 +46,7 @@ function Dashboard() {
       ['Số Liệu Tổng Quan'],
       ['Chỉ số', 'Giá trị'],
       ['Tổng doanh thu', revenueData.value.toLocaleString('vi-VN') + ' VNĐ'],
-      ['Tổng đơn đặt phòng', bookedData.value],
+      ['Số lượng đơn đặt phòng', bookedData.value],
       ['Tổng số phòng', roomData.value],
       ['']
     ];

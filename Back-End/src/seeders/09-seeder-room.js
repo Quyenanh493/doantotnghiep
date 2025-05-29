@@ -3,7 +3,7 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    return queryInterface.bulkInsert('room', [
+    return queryInterface.bulkInsert('Room', [ // Sửa tên bảng thành 'Room'
       {
         hotelId: 1,
         roomName: 'Deluxe King 101',
@@ -13,6 +13,7 @@ module.exports = {
         maxRoom: 10,
         price: 1500000.00,
         roomImage: 'deluxe_king.jpg',
+        roomImages: JSON.stringify(['deluxe_king.jpg', 'deluxe_king.jpg', 'deluxe_king.jpg', 'deluxe_king.jpg']),
         averageRating: 4.0,
         totalReview: 5,
         description: 'Phòng sang trọng với giường King size, tầm nhìn ra thành phố và đầy đủ tiện nghi cao cấp',
@@ -28,6 +29,7 @@ module.exports = {
         maxRoom: 10,
         price: 1200000.00,
         roomImage: 'superior_twin.jpg',
+        roomImages: JSON.stringify(['superior_twin.jpg', 'superior_twin.jpg', 'superior_twin.jpg', 'superior_twin.jpg']),
         averageRating: 3.0,
         totalReview: 3,
         description: 'Phòng tiêu chuẩn với hai giường đơn, phù hợp cho bạn bè hoặc đồng nghiệp',
@@ -43,6 +45,7 @@ module.exports = {
         maxRoom: 10,
         price: 2500000.00,
         roomImage: 'executive_suite.jpg',
+        roomImages: JSON.stringify(['executive_suite.jpg', 'executive_suite.jpg', 'executive_suite.jpg', 'executive_suite.jpg']),
         averageRating: 5.0,
         totalReview: 8,
         description: 'Phòng suite rộng rãi với phòng khách riêng biệt, bồn tắm jacuzzi và dịch vụ VIP',
@@ -58,6 +61,7 @@ module.exports = {
         maxRoom: 10,
         price: 1800000.00,
         roomImage: 'garden_view.jpg',
+        roomImages: JSON.stringify(['garden_view.jpg', 'garden_view.jpg', 'garden_view.jpg', 'garden_view.jpg']),
         averageRating: 4.0,
         totalReview: 4,
         description: 'Phòng với tầm nhìn ra khu vườn nhiệt đới xinh đẹp của khu nghỉ dưỡng',
@@ -73,6 +77,7 @@ module.exports = {
         maxRoom: 10,
         price: 2200000.00,
         roomImage: 'ocean_view.jpg',
+        roomImages: JSON.stringify(['ocean_view.jpg', 'ocean_view.jpg', 'ocean_view.jpg', 'ocean_view.jpg']),
         averageRating: 5.0,
         totalReview: 6,
         description: 'Phòng cao cấp với ban công riêng và tầm nhìn ra biển tuyệt đẹp',
@@ -88,6 +93,7 @@ module.exports = {
         maxRoom: 10,
         price: 1300000.00,
         roomImage: 'business_room.jpg',
+        roomImages: JSON.stringify(['business_room.jpg', 'business_room.jpg', 'business_room.jpg', 'business_room.jpg']),
         averageRating: 3.5,
         totalReview: 2,
         description: 'Phòng thiết kế dành cho doanh nhân với bàn làm việc rộng và ghế ergonomic',
@@ -103,6 +109,7 @@ module.exports = {
         maxRoom: 10,
         price: 2000000.00,
         roomImage: 'family_room.jpg',
+        roomImages: JSON.stringify(['family_room.jpg', 'family_room.jpg', 'family_room.jpg', 'family_room.jpg']),
         averageRating: 4.5,
         totalReview: 4,
         description: 'Phòng rộng rãi dành cho gia đình với giường đôi và hai giường đơn',
@@ -118,6 +125,7 @@ module.exports = {
         maxRoom: 10,
         price: 2800000.00,
         roomImage: 'beach_front.jpg',
+        roomImages: JSON.stringify(['beach_front.jpg', 'beach_front.jpg', 'beach_front.jpg', 'beach_front.jpg']),
         averageRating: 5.0,
         totalReview: 7,
         description: 'Phòng cao cấp với lối đi trực tiếp ra bãi biển riêng của khách sạn',
@@ -133,6 +141,7 @@ module.exports = {
         maxRoom: 10,
         price: 1900000.00,
         roomImage: 'mountain_view.jpg',
+        roomImages: JSON.stringify(['mountain_view.jpg', 'mountain_view.jpg', 'mountain_view.jpg', 'mountain_view.jpg']),
         averageRating: 4.0,
         totalReview: 3,
         description: 'Phòng với tầm nhìn ra núi đồi Đà Lạt, có lò sưởi và ban công riêng',
@@ -148,6 +157,7 @@ module.exports = {
         maxRoom: 10,
         price: 900000.00,
         roomImage: 'standard_room.jpg',
+        roomImages: JSON.stringify(['standard_room.jpg', 'standard_room.jpg', 'standard_room.jpg', 'standard_room.jpg']),
         averageRating: 3.0,
         totalReview: 2,
         description: 'Phòng tiêu chuẩn với đầy đủ tiện nghi cơ bản, phù hợp cho khách du lịch tiết kiệm',
@@ -158,10 +168,10 @@ module.exports = {
   },
 
   async down(queryInterface, Sequelize) {
-    return queryInterface.bulkDelete('room', null, {
+    return queryInterface.bulkDelete('Room', null, { // Sửa tên bảng thành 'Room'
       truncate: true,
       cascade: true,
-      restartIdentity: true, 
+      restartIdentity: true,
     });
   }
 };

@@ -177,6 +177,13 @@ $transition-time: 0.3s;
     text-align: right;
     margin-top: 16px;
   }
+
+  &__danger-text {
+    color: #ff4d4f;
+    font-size: 16px;
+    font-weight: 500;
+    margin-bottom: 16px;
+  }
   
   &__actions {
     display: flex;

@@ -25,6 +25,10 @@ module.exports = (sequelize, DataTypes) => {
     },
     hotelType: DataTypes.STRING,
     hotelImage: DataTypes.STRING,
+    hotelImages: {
+      type: DataTypes.JSON,
+      allowNull: true,
+    },
     description: DataTypes.STRING,
   }, {
     sequelize,

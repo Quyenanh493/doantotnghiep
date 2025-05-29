@@ -12,14 +12,15 @@ export const getTotalRevenue = async (year) => {
   }
 };
 
-// Lấy số phòng được đặt
-export const getBookedRoomCount = async (year) => {
+
+// Lấy số lượng đơn đặt phòng
+export const getBookingCount = async (year) => {
   try {
-    const url = year ? `dashboard/rooms/booked?year=${year}` : 'dashboard/rooms/booked';
+    const url = year ? `dashboard/bookings/count?year=${year}` : 'dashboard/bookings/count';
     const response = await request.get(url);
     return response.DT;
   } catch (error) {
-    console.error('Lỗi khi lấy số lượng khách hàng:', error);
+    console.error('Lỗi khi lấy số lượng đơn đặt phòng:', error);
     throw error;
   }
 };

@@ -142,6 +142,15 @@ const handleUserLogin = async (rawData) => {
 
     // Kiểm tra tài khoản và mật khẩu
     if (account) {
+      // Kiểm tra trạng thái tài khoản trước khi kiểm tra mật khẩu
+      if (!account.accountStatus) {
+        return {
+          EM: 'Tài khoản của bạn đã bị khóa. Vui lòng liên hệ với quản trị viên để được hỗ trợ.',
+          EC: 2, // Mã lỗi riêng cho tài khoản bị khóa
+          DT: ''
+        }
+      }
+
       let isCorrectPassword = await checkPassword(rawData.password, account.password);
       if (isCorrectPassword) {
         // Lấy thông tin user hoặc customer

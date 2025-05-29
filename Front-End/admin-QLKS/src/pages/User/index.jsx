@@ -31,6 +31,7 @@ function User() {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isViewModalVisible, setIsViewModalVisible] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
+  console.log("currentUser", currentUser);
   const [form] = Form.useForm();
   const [imageUrl, setImageUrl] = useState('');
   const [uploadedImageUrl, setUploadedImageUrl] = useState('');
@@ -642,7 +643,7 @@ function User() {
 
       {/* Modal xem quyền */}
       <Modal
-        title={`Quyền của người dùng: ${currentUser?.userName}`}
+        title={`Quyền của người dùng: ${currentUser?.role.roleId}`}
         open={isPermissionModalVisible}
         onCancel={handlePermissionCancel}
         footer={[
@@ -653,7 +654,7 @@ function User() {
         width={700}
       >
         <div style={{ marginBottom: 16 }}>
-          <strong>Vai trò:</strong> {currentUser?.Role?.roleName || 'Chưa phân quyền'}
+          <strong>Vai trò:</strong> {currentUser?.role?.roleName || 'Chưa phân quyền'}
         </div>
         
         {userPermissions.length > 0 ? (

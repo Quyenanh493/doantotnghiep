@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Table, Input, Button, Space, Card, Tag, Modal, Form, DatePicker, Switch, message, Descriptions, Upload } from 'antd';
+import { Table, Input, Button, Space, Card, Tag, Modal, Form, DatePicker, Switch, message, Descriptions, Upload, List, Image, Popconfirm } from 'antd';
 import { 
   SearchOutlined, 
   PlusOutlined, 
@@ -8,12 +8,14 @@ import {
   ExclamationCircleOutlined,
   UploadOutlined,
   EyeOutlined,
-  LoadingOutlined
+  LoadingOutlined,
+  CloseOutlined
 } from '@ant-design/icons';
 import { getAllHotels, getHotelById, createHotel, updateHotel, deleteHotel } from '../../services/hotelService';
 import dayjs from 'dayjs';
 import './Hotel.scss';
 import { uploadImage } from '../../services/uploadImageService';
+import { uploadHotelImages, deleteHotelImage } from '../../services/imageUploadService';
 import { usePermissions } from '../../contexts/PermissionContext';
 
 const { confirm } = Modal;
@@ -30,12 +32,38 @@ function Hotel() {
   const [imageUrl, setImageUrl] = useState('');
   const [uploadedImageUrl, setUploadedImageUrl] = useState('');
   const [uploadLoading, setUploadLoading] = useState(false);
+  const [fileList, setFileList] = useState([]); // Danh sách file chờ upload
+  const [multipleUploadLoading, setMultipleUploadLoading] = useState(false);
 
   // Get permission utilities
   const { canCreate, canUpdate, canDelete, isLoading: permissionLoading } = usePermissions();
   const hasCreatePermission = canCreate('hotel');
   const hasUpdatePermission = canUpdate('hotel');
   const hasDeletePermission = canDelete('hotel');
+
+  // Hàm để lấy ảnh chi tiết từ currentHotel
+  const getCurrentHotelImages = () => {
+    if (!currentHotel || !currentHotel.hotelImages) return [];
+    
+    // Với DataTypes.JSON từ Sequelize, dữ liệu đã được tự động parse thành array
+    if (Array.isArray(currentHotel.hotelImages)) {
+      return currentHotel.hotelImages;
+    }
+    
+    // Fallback: nếu vẫn là string, thử parse
+    if (typeof currentHotel.hotelImages === 'string') {
+      try {
+        const parsed = JSON.parse(currentHotel.hotelImages);
+        return Array.isArray(parsed) ? parsed : [];
+      } catch (error) {
+        console.error('Error parsing hotelImages JSON:', error);
+        // Thử parse như string phân cách bằng dấu phẩy
+        return currentHotel.hotelImages.split(',').map(img => img.trim()).filter(img => img);
+      }
+    }
+    
+    return [];
+  };
 
   useEffect(() => {
     fetchHotels();
@@ -78,6 +106,7 @@ function Hotel() {
       setImageUrl('');
       setUploadedImageUrl('');
     }
+    setFileList([]);
   };
 
   const showViewModal = async (hotelId) => {
@@ -102,10 +131,12 @@ function Hotel() {
     form.resetFields();
     setImageUrl('');
     setUploadedImageUrl('');
+    setFileList([]);
   };
 
   const handleViewCancel = () => {
     setIsViewModalVisible(false);
+    setCurrentHotel(null);
   };
 
   const handleSubmit = async (values) => {
@@ -212,6 +243,81 @@ function Hotel() {
       <div style={{ marginTop: 8 }}>Tải lên</div>
     </div>
   );
+
+  // Upload nhiều ảnh cho khách sạn
+  const handleMultipleUpload = async () => {
+    if (!currentHotel || fileList.length === 0) {
+      message.warning('Vui lòng chọn ảnh để upload');
+      return;
+    }
+
+    setMultipleUploadLoading(true);
+    try {
+      const files = fileList.map(file => file.originFileObj);
+      const response = await uploadHotelImages(currentHotel.hotelId, files);
+      
+      if (response && response.EC === 0) {
+        message.success(`Upload thành công ${response.DT.totalImages} ảnh`);
+        // Refresh thông tin khách sạn để cập nhật ảnh mới
+        const updatedHotel = await getHotelById(currentHotel.hotelId);
+        if (updatedHotel && updatedHotel.DT) {
+          setCurrentHotel(updatedHotel.DT);
+        }
+        setFileList([]);
+      } else {
+        message.error(response.EM || 'Upload ảnh thất bại');
+      }
+    } catch (error) {
+      console.error('Error uploading multiple images:', error);
+      message.error('Có lỗi xảy ra khi upload ảnh');
+    } finally {
+      setMultipleUploadLoading(false);
+    }
+  };
+
+  // Xóa ảnh cụ thể
+  const handleDeleteImage = async (imageUrl) => {
+    if (!currentHotel) return;
+
+    try {
+      const response = await deleteHotelImage(currentHotel.hotelId, imageUrl);
+      if (response && response.EC === 0) {
+        message.success('Xóa ảnh thành công');
+        // Refresh thông tin khách sạn để cập nhật ảnh
+        const updatedHotel = await getHotelById(currentHotel.hotelId);
+        if (updatedHotel && updatedHotel.DT) {
+          setCurrentHotel(updatedHotel.DT);
+        }
+      } else {
+        message.error(response.EM || 'Xóa ảnh thất bại');
+      }
+    } catch (error) {
+      console.error('Error deleting image:', error);
+      message.error('Có lỗi xảy ra khi xóa ảnh');
+    }
+  };
+
+  // Xử lý multiple file upload
+  const handleMultipleFileChange = ({ fileList: newFileList }) => {
+    // Giới hạn tối đa 15 ảnh
+    const limitedFileList = newFileList.slice(0, 15);
+    setFileList(limitedFileList);
+  };
+
+  // Validate file trước khi thêm vào list
+  const beforeUploadMultiple = (file) => {
+    const isJpgOrPng = file.type === 'image/jpeg' || file.type === 'image/png';
+    if (!isJpgOrPng) {
+      message.error('Chỉ chấp nhận file JPG/PNG!');
+      return false;
+    }
+    const isLt5M = file.size / 1024 / 1024 < 5;
+    if (!isLt5M) {
+      message.error('Kích thước ảnh phải nhỏ hơn 5MB!');
+      return false;
+    }
+    return false; // Ngăn auto upload, chỉ add vào fileList
+  };
 
   const columns = [
     {
@@ -374,7 +480,7 @@ function Hotel() {
           
           <Form.Item
             name="hotelImage"
-            label="Hình ảnh"
+            label="Hình ảnh chính"
             getValueFromEvent={() => uploadedImageUrl} // Giá trị form là URL đã upload
           >
             <Upload
@@ -394,6 +500,72 @@ function Hotel() {
               ) : uploadButton}
             </Upload>
           </Form.Item>
+
+          {/* Phần upload nhiều ảnh (chỉ hiển thị khi đang edit) */}
+          {currentHotel && (
+            <Form.Item label="Ảnh khách sạn chi tiết">
+              <div style={{ marginBottom: 16 }}>
+                <Upload
+                  multiple
+                  listType="picture-card"
+                  fileList={fileList}
+                  onChange={handleMultipleFileChange}
+                  beforeUpload={beforeUploadMultiple}
+                  accept="image/*"
+                >
+                  {fileList.length >= 15 ? null : (
+                    <div>
+                      <UploadOutlined />
+                      <div style={{ marginTop: 8 }}>Chọn ảnh</div>
+                    </div>
+                  )}
+                </Upload>
+                
+                {fileList.length > 0 && (
+                  <Button 
+                    type="primary" 
+                    onClick={handleMultipleUpload}
+                    loading={multipleUploadLoading}
+                    style={{ marginTop: 8 }}
+                  >
+                    Upload {fileList.length} ảnh
+                  </Button>
+                )}
+                
+                <div style={{ fontSize: '12px', color: '#999', marginTop: 4 }}>
+                  Tối đa 15 ảnh, mỗi ảnh không quá 5MB
+                </div>
+              </div>
+
+              {/* Hiển thị ảnh hiện có */}
+              {getCurrentHotelImages().length > 0 && (
+                <div style={{ marginTop: 16 }}>
+                  <div style={{ marginBottom: 8, fontWeight: 'bold' }}>
+                    Ảnh hiện có ({getCurrentHotelImages().length}):
+                  </div>
+                  <div className="hotel-images-container">
+                    {getCurrentHotelImages().map((imageUrl, index) => (
+                      <div key={index} className="hotel-image-item">
+                        <Image
+                        key={index}
+                        width={80}
+                        height={80}
+                        src={imageUrl}
+                        style={{ objectFit: 'cover', borderRadius: '4px' }}
+                        fallback="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMIAAADDCAYAAADQvc6UAAABRWlDQ1BJQ0MgUHJvZmlsZQAAKJFjYGASSSwoyGFhYGDIzSspCnJ3UoiIjFJgf8LAwSDCIMogwMCcmFxc4BgQ4ANUwgCjUcG3awyMIPqyLsis7PPOq3QdDFcvjV3jOD1boQVTPQrgSkktTgbSf4A4LbmgqISBgTEFyFYuLykAsTuAbJEioKOA7DkgdjqEvQHEToKwj4DVhAQ5A9k3gGyB5IxEoBmML4BsnSQk8XQkNtReEOBxcfXxUQg1Mjc0dyHgXNJBSWpFCYh2zi+oLMpMzyhRcASGUqqCZ16yno6CkYGRAQMDKMwhqj/fAIcloxgHQqxAjIHBEugw5sUIsSQpBobtQPdLciLEVJYzMPBHMDBsayhILEqEO4DxG0txmrERhM29nYGBddr//5/DGRjYNRkY/l7////39v///y4Dmn+LgeHANwDrkl1AuO+pmgAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAwqADAAQAAAABAAAAwwAAAAD9b/HnAAAHlklEQVR4Ae3dP3Ik1RnG4W+FgYxN"
+                      />
+                        <CloseOutlined 
+                          className="image-remove" 
+                          onClick={() => handleDeleteImage(imageUrl)}
+                          title="Xóa ảnh"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </Form.Item>
+          )}
           
           <Form.Item
             name="description"
@@ -425,9 +597,9 @@ function Hotel() {
       <Modal
         title="Chi tiết khách sạn"
         visible={isViewModalVisible}
-        onCancel={() => setIsViewModalVisible(false)}
+        onCancel={handleViewCancel}
         footer={[
-          <Button key="back" onClick={() => setIsViewModalVisible(false)}>
+          <Button key="back" onClick={handleViewCancel}>
             Đóng
           </Button>,
           hasUpdatePermission && (
@@ -458,12 +630,30 @@ function Hotel() {
             </Descriptions.Item>
             <Descriptions.Item label="Mô tả">{currentHotel.description || 'Không có mô tả'}</Descriptions.Item>
             {currentHotel.hotelImage && (
-              <Descriptions.Item label="Hình ảnh">
+              <Descriptions.Item label="Hình ảnh chính">
                 <img 
                   src={currentHotel.hotelImage} 
                   alt={currentHotel.hotelName} 
-                  style={{ maxWidth: '100%', maxHeight: '300px', objectFit: 'contain' }} 
+                  className="hotel-detail-image"
                 />
+              </Descriptions.Item>
+            )}
+            {getCurrentHotelImages().length > 0 && (
+              <Descriptions.Item label={`Ảnh chi tiết (${getCurrentHotelImages().length})`}>
+                <Image.PreviewGroup>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                    {getCurrentHotelImages().map((imageUrl, index) => (
+                      <Image
+                        key={index}
+                        width={80}
+                        height={80}
+                        src={imageUrl}
+                        style={{ objectFit: 'cover', borderRadius: '4px' }}
+                        fallback="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMIAAADDCAYAAADQvc6UAAABRWlDQ1BJQ0MgUHJvZmlsZQAAKJFjYGASSSwoyGFhYGDIzSspCnJ3UoiIjFJgf8LAwSDCIMogwMCcmFxc4BgQ4ANUwgCjUcG3awyMIPqyLsis7PPOq3QdDFcvjV3jOD1boQVTPQrgSkktTgbSf4A4LbmgqISBgTEFyFYuLykAsTuAbJEioKOA7DkgdjqEvQHEToKwj4DVhAQ5A9k3gGyB5IxEoBmML4BsnSQk8XQkNtReEOBxcfXxUQg1Mjc0dyHgXNJBSWpFCYh2zi+oLMpMzyhRcASGUqqCZ16yno6CkYGRAQMDKMwhqj/fAIcloxgHQqxAjIHBEugw5sUIsSQpBobtQPdLciLEVJYzMPBHMDBsayhILEqEO4DxG0txmrERhM29nYGBddr//5/DGRjYNRkY/l7////39v///y4Dmn+LgeHANwDrkl1AuO+pmgAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAwqADAAQAAAABAAAAwwAAAAD9b/HnAAAHlklEQVR4Ae3dP3Ik1RnG4W+FgYxN"
+                      />
+                    ))}
+                  </div>
+                </Image.PreviewGroup>
               </Descriptions.Item>
             )}
           </Descriptions>

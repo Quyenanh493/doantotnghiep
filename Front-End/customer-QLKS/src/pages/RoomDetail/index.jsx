@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { Row, Col, Card, Rate, Divider, Spin, Image, Tag, List, Typography, Avatar } from 'antd';
-import { WifiOutlined, CoffeeOutlined, CarOutlined, ShoppingOutlined, UserOutlined } from '@ant-design/icons';
+import { Row, Col, Card, Rate, Divider, Spin, Image, Tag, List, Typography, Avatar, Carousel, Modal } from 'antd';
+import { WifiOutlined, CoffeeOutlined, CarOutlined, ShoppingOutlined, UserOutlined, LeftOutlined, RightOutlined } from '@ant-design/icons';
 import { getRoomById } from '../../services/roomService';
-import { getAmenityByRoomId } from '../../services/amenitiesService';
+import { getAmenityByRoomId } from '../../services/amenitiesService'; 
 import { getRoomReviewsByRoomId } from '../../services/roomReviewService';
 import dayjs from 'dayjs';
 import './RoomDetail.scss';
@@ -25,6 +25,23 @@ const getAmenityIcon = (amenityName) => {
   }
 };
 
+// Function to parse roomImages from JSON string to array
+const parseRoomImages = (roomImages, fallbackImage) => {
+  if (!roomImages) return fallbackImage ? [fallbackImage] : [];
+  
+  try {
+    const parsed = JSON.parse(roomImages);
+    if (Array.isArray(parsed) && parsed.length > 0) {
+      return parsed;
+    }
+  } catch (error) {
+    console.log('Error parsing roomImages:', error);
+  }
+  
+  // Fallback to single image if parsing fails or array is empty
+  return fallbackImage ? [fallbackImage] : [];
+};
+
 function RoomDetail() {
   const { roomId } = useParams();
   const [room, setRoom] = useState(null);
@@ -32,6 +49,9 @@ function RoomDetail() {
   const [amenities, setAmenities] = useState([]);
   const [reviews, setReviews] = useState([]);
   const [reviewsLoading, setReviewsLoading] = useState(true);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [roomImages, setRoomImages] = useState([]);
+  const [isModalVisible, setIsModalVisible] = useState(false);
 
   useEffect(() => {
     const fetchRoomDetail = async () => {
@@ -42,6 +62,9 @@ function RoomDetail() {
         const roomResponse = await getRoomById(roomId);
         if (roomResponse && roomResponse.DT) {
           setRoom(roomResponse.DT);
+          // Parse room images
+          const images = parseRoomImages(roomResponse.DT.roomImages, roomResponse.DT.roomImage);
+          setRoomImages(images);
         }
         
         // Lấy tiện ích của phòng
@@ -67,6 +90,14 @@ function RoomDetail() {
       fetchRoomDetail();
     }
   }, [roomId]);
+
+  const handleImageClick = () => {
+    setIsModalVisible(true);
+  };
+
+  const handleModalClose = () => {
+    setIsModalVisible(false);
+  };
 
   if (loading) {
     return (
@@ -105,13 +136,81 @@ function RoomDetail() {
           </Col>
           
           <Col xs={24}>
-            <div className="room-detail__image-container">
-              <Image
-                className="room-detail__image"
-                src={room.roomImage}
-                alt={room.roomName}
-                preview={true}
-              />
+            <div className="room-detail__image-gallery">
+              {roomImages.length > 0 ? (
+                <div className="room-detail__gallery-container">
+                  {/* Main Image Display */}
+                  <div className="room-detail__main-image-container">
+                    <img
+                      className="room-detail__main-image"
+                      src={roomImages[currentImageIndex]}
+                      alt={`${room.roomName} - Ảnh ${currentImageIndex + 1}`}
+                      onClick={handleImageClick}
+                    />
+                    
+                    {/* Navigation arrows for main image */}
+                    {roomImages.length > 1 && (
+                      <>
+                        <div 
+                          className="room-detail__image-nav room-detail__image-nav--prev"
+                          onClick={() => setCurrentImageIndex(prev => 
+                            prev === 0 ? roomImages.length - 1 : prev - 1
+                          )}
+                        >
+                          <LeftOutlined />
+                        </div>
+                        <div 
+                          className="room-detail__image-nav room-detail__image-nav--next"
+                          onClick={() => setCurrentImageIndex(prev => 
+                            prev === roomImages.length - 1 ? 0 : prev + 1
+                          )}
+                        >
+                          <RightOutlined />
+                        </div>
+                      </>
+                    )}
+                    
+                    {/* Image counter */}
+                    <div className="room-detail__image-counter">
+                      {currentImageIndex + 1} / {roomImages.length}
+                    </div>
+                  </div>
+
+                  {/* Thumbnail Grid */}
+                  {roomImages.length > 1 && (
+                    <div className="room-detail__thumbnails">
+                      <Row gutter={[8, 8]}>
+                        {roomImages.map((image, index) => (
+                          <Col xs={6} sm={4} md={3} key={index}>
+                            <div 
+                              className={`room-detail__thumbnail ${
+                                index === currentImageIndex ? 'room-detail__thumbnail--active' : ''
+                              }`}
+                              onClick={() => setCurrentImageIndex(index)}
+                            >
+                              <img
+                                src={image}
+                                alt={`${room.roomName} - Thumbnail ${index + 1}`}
+                                className="room-detail__thumbnail-image"
+                              />
+                            </div>
+                          </Col>
+                        ))}
+                      </Row>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="room-detail__no-image">
+                  <div className="room-detail__no-image-placeholder">
+                    <Image 
+                      src="https://via.placeholder.com/800x400?text=No+Image+Available"
+                      alt="No image available"
+                      preview={false}
+                    />
+                  </div>
+                </div>
+              )}
             </div>
           </Col>
           
@@ -219,6 +318,96 @@ function RoomDetail() {
           </Col>
         </Row>
       </Card>
+
+      {/* Image Preview Modal */}
+      <Modal
+        open={isModalVisible}
+        onCancel={handleModalClose}
+        footer={null}
+        width="90%"
+        style={{ top: 20 }}
+        bodyStyle={{ padding: 0 }}
+      >
+        <div style={{ position: 'relative' }}>
+          <img
+            src={roomImages[currentImageIndex]}
+            alt={`${room.roomName} - Ảnh ${currentImageIndex + 1}`}
+            style={{
+              width: '100%',
+              height: 'auto',
+              maxHeight: '80vh',
+              objectFit: 'contain'
+            }}
+          />
+          
+          {/* Navigation in modal */}
+          {roomImages.length > 1 && (
+            <>
+              <div 
+                style={{
+                  position: 'absolute',
+                  left: '20px',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  background: 'rgba(0,0,0,0.6)',
+                  color: 'white',
+                  width: '50px',
+                  height: '50px',
+                  borderRadius: '50%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: 'pointer',
+                  zIndex: 1000
+                }}
+                onClick={() => setCurrentImageIndex(prev => 
+                  prev === 0 ? roomImages.length - 1 : prev - 1
+                )}
+              >
+                <LeftOutlined />
+              </div>
+              <div 
+                style={{
+                  position: 'absolute',
+                  right: '20px',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  background: 'rgba(0,0,0,0.6)',
+                  color: 'white',
+                  width: '50px',
+                  height: '50px',
+                  borderRadius: '50%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: 'pointer',
+                  zIndex: 1000
+                }}
+                onClick={() => setCurrentImageIndex(prev => 
+                  prev === roomImages.length - 1 ? 0 : prev + 1
+                )}
+              >
+                <RightOutlined />
+              </div>
+            </>
+          )}
+          
+          {/* Image counter in modal */}
+          <div style={{
+            position: 'absolute',
+            bottom: '20px',
+            right: '20px',
+            background: 'rgba(0,0,0,0.7)',
+            color: 'white',
+            padding: '8px 16px',
+            borderRadius: '20px',
+            fontSize: '16px',
+            fontWeight: '500'
+          }}>
+            {currentImageIndex + 1} / {roomImages.length}
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }

@@ -4,7 +4,6 @@ import {
   Col, 
   Typography, 
   Divider, 
-  Image, 
   Card, 
   Carousel, 
   Statistic, 
@@ -213,11 +212,14 @@ function Introduce() {
             </Col>
             <Col xs={24} md={12}>
               <div className="image-container">
-                <Image
-                  src={hotel.hotelImage}
+                <img
+                  src={hotel.hotelImage || 'https://via.placeholder.com/600x400/f0f0f0/999999?text=Hotel+Image'}
                   alt={hotel.hotelName}
                   className="featured-image"
-                  preview={false}
+                  onError={(e) => {
+                    e.target.src = 'https://via.placeholder.com/600x400/f0f0f0/999999?text=No+Image+Available';
+                  }}
+                  loading="lazy"
                 />
               </div>
             </Col>

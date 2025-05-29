@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import { Row, Col, Card, Button, Checkbox, Typography, Divider, Image, Spin, Empty, Result } from 'antd';
+import { Row, Col, Card, Button, Checkbox, Typography, Divider, Spin, Empty, Result } from 'antd';
 import { ArrowLeftOutlined, ShoppingCartOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
 import { getAllAmenities } from '../../services/amenitiesService';
 import { addAmenity, removeAmenity } from '../../redux/booking/bookingSlice';
+import IconRenderer from '../../components/IconRenderer';
 import './BookingAmenities.scss';
 
 const { Title, Text } = Typography;
@@ -220,22 +221,25 @@ function BookingAmenities() {
                   >
                     <div className="booking-amenities__item-content">
                       <div className="booking-amenities__item-image">
-                        <Image
-                          src={
-                            amenity.icon ||
-                            `https://via.placeholder.com/100?text=${encodeURIComponent(
-                              amenity.amenitiesName
-                            )}`
-                          }
-                          alt={amenity.amenitiesName}
-                          preview={false}
-                        />
+                        <div style={{ 
+                          display: 'flex', 
+                          justifyContent: 'center', 
+                          alignItems: 'center',
+                          height: '60px',
+                          fontSize: '32px',
+                          color: '#1890ff'
+                        }}>
+                          <IconRenderer iconType={amenity.icon} />
+                        </div>
                       </div>
                       <div className="booking-amenities__item-info">
                         <h3 className="booking-amenities__item-name">{amenity.amenitiesName}</h3>
                         <p className="booking-amenities__item-price">
                           {Number(amenity.price).toLocaleString()} vnđ
                         </p>
+                        {amenity.description && (
+                          <p className="booking-amenities__item-description">{amenity.description}</p>
+                        )}
                         {isIncluded && <Text type="success">Đã bao gồm trong phòng</Text>}
                       </div>
                       <Checkbox

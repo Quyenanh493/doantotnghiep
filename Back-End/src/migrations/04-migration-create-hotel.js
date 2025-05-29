@@ -28,6 +28,9 @@ module.exports = {
       hotelImage: {
         type: Sequelize.STRING
       },
+      hotelImages: {
+        type: Sequelize.JSON
+      },
       description: {
         type: Sequelize.STRING
       },

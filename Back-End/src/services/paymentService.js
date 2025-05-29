@@ -9,7 +9,7 @@ const vnpConfig = {
   tmnCode: "18ROR1Z7", // Mã website tại VNPay
   secureSecret: "HST957DH47R22A0YSZRECCRN4WF6YSQE", // Chuỗi bí mật
   vnpUrl: "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html", // URL thanh toán VNPay
-  returnUrl: "https://4c51-2402-800-61ca-1184-68c0-8c87-ff5-194f.ngrok-free.app/api/v1/payment/vnpay-return" // URL callback
+  returnUrl: "https://92fa-2402-800-61ca-1184-cdad-77b8-d27a-6c80.ngrok-free.app/api/v1/payment/vnpay-return" // URL callback
 };
 
 // Thử khởi tạo lại đối tượng VNPay với cấu hình đúng

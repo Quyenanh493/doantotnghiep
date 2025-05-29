@@ -39,6 +39,9 @@ module.exports = {
       roomImage: {
         type: Sequelize.STRING
       },
+      roomImages: {
+        type: Sequelize.JSON
+      },
       averageRating: {
         type: Sequelize.DECIMAL(3, 1),
         defaultValue: 0.0

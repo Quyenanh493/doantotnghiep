@@ -8,7 +8,7 @@ module.exports = {
         amenitiesName: 'Wi-Fi',
         description: 'High-speed wireless internet',
         price: 0.00,
-        icon: 'fa-swimming-pool',
+        icon: 'wifi',
         amenitiesStatus: true,
         createdAt: new Date(),
         updatedAt: new Date()
@@ -17,7 +17,7 @@ module.exports = {
         amenitiesName: 'Breakfast',
         description: 'Continental breakfast buffet',
         price: 150000.00,
-        icon: 'fa-swimming-pool',
+        icon: 'coffee',
         amenitiesStatus: true,
         createdAt: new Date(),
         updatedAt: new Date()
@@ -26,7 +26,7 @@ module.exports = {
         amenitiesName: 'Airport Transfer',
         description: 'Private car service to/from airport',
         price: 350000.00,
-        icon: 'fa-swimming-pool',
+        icon: 'car',
         amenitiesStatus: true,
         createdAt: new Date(),
         updatedAt: new Date()
@@ -35,7 +35,7 @@ module.exports = {
         amenitiesName: 'Spa Service',
         description: 'Full-service spa treatment',
         price: 500000.00,
-        icon: 'fa-swimming-pool',
+        icon: 'spa',
         amenitiesStatus: true,
         createdAt: new Date(),
         updatedAt: new Date()
@@ -44,7 +44,7 @@ module.exports = {
         amenitiesName: 'Laundry',
         description: 'Same-day laundry service',
         price: 200000.00,
-        icon: 'fa-swimming-pool',
+        icon: 'laundry',
         amenitiesStatus: true,
         createdAt: new Date(),
         updatedAt: new Date()
@@ -53,7 +53,7 @@ module.exports = {
         amenitiesName: 'Mini Bar',
         description: 'In-room mini bar with snacks and drinks',
         price: 250000.00,
-        icon: 'fa-swimming-pool',
+        icon: 'minibar',
         amenitiesStatus: true,
         createdAt: new Date(),
         updatedAt: new Date()
@@ -62,7 +62,7 @@ module.exports = {
         amenitiesName: 'Room Service',
         description: '24-hour room service',
         price: 50000.00,
-        icon: 'fa-swimming-pool',
+        icon: 'room-service',
         amenitiesStatus: true,
         createdAt: new Date(),
         updatedAt: new Date()
@@ -71,7 +71,7 @@ module.exports = {
         amenitiesName: 'Gym Access',
         description: 'Access to hotel fitness center',
         price: 100000.00,
-        icon: 'fa-swimming-pool',
+        icon: 'gym',
         amenitiesStatus: true,
         createdAt: new Date(),
         updatedAt: new Date()
@@ -80,7 +80,7 @@ module.exports = {
         amenitiesName: 'Swimming Pool',
         description: 'Access to hotel swimming pool',
         price: 100000.00,
-        icon: 'fa-swimming-pool',
+        icon: 'pool',
         amenitiesStatus: true,
         createdAt: new Date(),
         updatedAt: new Date()
@@ -89,7 +89,7 @@ module.exports = {
         amenitiesName: 'Extra Bed',
         description: 'Additional bed for room',
         price: 300000.00,
-        icon: 'fa-swimming-pool',
+        icon: 'bed',
         amenitiesStatus: true,
         createdAt: new Date(),
         updatedAt: new Date()
