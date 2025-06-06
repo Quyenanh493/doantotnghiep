@@ -309,6 +309,7 @@
 .home__contact {
   padding: 60px 0;
   background-color: #f8f9fa;
+  background-color: transparent;
 
   &-container {
     width: 100%;
@@ -402,6 +403,7 @@
       &:hover {
         color: #1890ff;
       }
+
     }
   }
 }

@@ -643,7 +643,6 @@ function User() {
 
       {/* Modal xem quyền */}
       <Modal
-        title={`Quyền của người dùng: ${currentUser?.role.roleId}`}
         open={isPermissionModalVisible}
         onCancel={handlePermissionCancel}
         footer={[

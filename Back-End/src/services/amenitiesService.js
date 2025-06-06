@@ -113,7 +113,7 @@ const amenitiesService = {
                 amenitiesName: amenityData.amenitiesName,
                 description: amenityData.description,
                 price: amenityData.price,
-                icon: amenityData.icon || 'wifi', // Đặt default icon nếu không có
+                icon: amenityData.icon || 'wifi', 
                 amenitiesStatus: amenityData.amenitiesStatus !== undefined ? amenityData.amenitiesStatus : true,
                 createdAt: new Date(),
                 updatedAt: new Date()

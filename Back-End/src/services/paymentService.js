@@ -3,13 +3,15 @@ import { VNPay } from 'vnpay';
 import crypto from 'crypto';
 import moment from 'moment';
 import nodemailer from 'nodemailer';
+import dotenv from 'dotenv';
+dotenv.config();
 
 // Thông tin cấu hình VNPay
 const vnpConfig = {
   tmnCode: "18ROR1Z7", // Mã website tại VNPay
   secureSecret: "HST957DH47R22A0YSZRECCRN4WF6YSQE", // Chuỗi bí mật
   vnpUrl: "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html", // URL thanh toán VNPay
-  returnUrl: "https://92fa-2402-800-61ca-1184-cdad-77b8-d27a-6c80.ngrok-free.app/api/v1/payment/vnpay-return" // URL callback
+  returnUrl: "https://8336-2402-800-61ca-7c9b-14fc-bcc6-9b83-1b44.ngrok-free.app/vnpay-return" // URL callback
 };
 
 // Thử khởi tạo lại đối tượng VNPay với cấu hình đúng
@@ -26,8 +28,8 @@ const vnpay = new VNPay({
 const emailTransporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
-    user: process.env.EMAIL_USER || 'phamhquyenanh@gmail.com',
-    pass: process.env.EMAIL_PASSWORD || 'smso yxob efdw cxlf',
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASSWORD,
   }
 });
 

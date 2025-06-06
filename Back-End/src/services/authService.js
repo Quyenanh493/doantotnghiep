@@ -25,11 +25,7 @@ const hashPassword = async (password) => {
 };
 
 const authService = {
-  /**
-   * Xử lý yêu cầu quên mật khẩu
-   * @param {string} email - Email của người dùng
-   * @returns {Object} - Kết quả xử lý
-   */
+
   forgotPassword: async (email) => {
     try {
       // Tìm tài khoản theo email
@@ -102,12 +98,7 @@ const authService = {
     }
   },
   
-  /**
-   * Xác thực mã reset
-   * @param {string} email - Email của người dùng
-   * @param {string} code - Mã xác nhận
-   * @returns {Object} - Kết quả xác thực
-   */
+
   verifyResetCode: async (email, code) => {
     try {
       // Tạo token từ mã và email để tìm trong DB
@@ -148,13 +139,7 @@ const authService = {
     }
   },
   
-  /**
-   * Đặt lại mật khẩu
-   * @param {string} email - Email của người dùng
-   * @param {string} token - Token xác thực
-   * @param {string} newPassword - Mật khẩu mới
-   * @returns {Object} - Kết quả xử lý
-   */
+
   resetPassword: async (email, token, newPassword) => {
     try {
       // Tìm tài khoản với token và chưa hết hạn

@@ -23,6 +23,10 @@
     overflow: hidden;
   }
   
+  .ant-modal-content .ant-modal-header{
+    background-color: transparent;
+  }
+  
   .ant-modal-header {
     border-bottom: none;
     padding-bottom: 0;

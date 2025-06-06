@@ -12,9 +12,6 @@ router.post(
   paymentController.createPaymentUrl
 );
 
-// Xử lý kết quả thanh toán từ VNPay
-router.get('/vnpay-return', paymentController.vnpayReturn);
-
 // Truy vấn kết quả giao dịch VNPay
 router.get('/query-dr/:transactionCode', 
   authMiddleware.verifyToken,

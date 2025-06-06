@@ -1,8 +1,7 @@
 import db from '../models/index';
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
-// Giả định rằng bạn đã có một số utility để xử lý email
-// import emailUtils from '../utils/emailUtils';
+
 
 const accountService = {
     // Lấy tất cả tài khoản

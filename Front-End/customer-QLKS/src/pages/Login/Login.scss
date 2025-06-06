@@ -3,6 +3,10 @@
     border-radius: 8px;
     overflow: hidden;
   }
+
+  .ant-modal-content .ant-modal-header {
+    background-color: transparent;
+  }
   
   .ant-modal-header {
     border-bottom: none;

@@ -1,12 +1,13 @@
 import nodemailer from 'nodemailer';
+import dotenv from 'dotenv';
+dotenv.config();
 
-// Khởi tạo transporter (cấu hình kết nối SMTP)
-// Lưu ý: Trong môi trường thực tế, bạn nên lưu thông tin này trong biến môi trường
+
 const transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
-    user: process.env.EMAIL_USER || 'phamhquyenanh@gmail.com', // Email của bạn
-    pass: process.env.EMAIL_PASSWORD || 'smso yxob efdw cxlf', // Mật khẩu ứng dụng (không phải mật khẩu Gmail)
+    user: process.env.EMAIL_USER, 
+    pass: process.env.EMAIL_PASSWORD, 
   },
 });
 
