@@ -123,6 +123,128 @@ module.exports = {
         description: 'Khu nghỉ dưỡng trên cao với tầm nhìn ra thung lũng Sapa',
         createdAt: new Date(),
         updatedAt: new Date()
+      },
+      // Thêm khách sạn TP.HCM
+      {
+        hotelName: 'Saigon Pearl Hotel',
+        openDay: new Date('2020-06-15'),
+        address: '92 Nguyễn Huệ, Quận 1, TP.HCM',
+        hotelStatus: true,
+        hotelType: 'Luxury',
+        hotelImage: 'saigon_pearl.jpg',
+        hotelImages: JSON.stringify(['saigon_pearl.jpg', 'saigon_pearl.jpg', 'saigon_pearl.jpg', 'saigon_pearl.jpg']),
+        description: 'Khách sạn cao cấp tại trung tâm Sài Gòn với thiết kế hiện đại',
+        createdAt: new Date(),
+        updatedAt: new Date()
+      },
+      {
+        hotelName: 'Landmark 81 Suites',
+        openDay: new Date('2021-03-20'),
+        address: '208 Nguyễn Hữu Cảnh, Bình Thạnh, TP.HCM',
+        hotelStatus: true,
+        hotelType: 'Premium',
+        hotelImage: 'landmark81.jpg',
+        hotelImages: JSON.stringify(['landmark81.jpg', 'landmark81.jpg', 'landmark81.jpg', 'landmark81.jpg']),
+        description: 'Căn hộ khách sạn sang trọng tại tòa nhà cao nhất Việt Nam',
+        createdAt: new Date(),
+        updatedAt: new Date()
+      },
+      {
+        hotelName: 'Ben Thanh Premium Hotel',
+        openDay: new Date('2019-11-05'),
+        address: '136 Lê Thị Hồng Gấm, Quận 1, TP.HCM',
+        hotelStatus: true,
+        hotelType: 'Business',
+        hotelImage: 'benthanh_premium.jpg',
+        hotelImages: JSON.stringify(['benthanh_premium.jpg', 'benthanh_premium.jpg', 'benthanh_premium.jpg', 'benthanh_premium.jpg']),
+        description: 'Khách sạn cao cấp gần chợ Bến Thành và nhà hát thành phố',
+        createdAt: new Date(),
+        updatedAt: new Date()
+      },
+      {
+        hotelName: 'Bitexco Sky Hotel',
+        openDay: new Date('2020-09-12'),
+        address: '45 Hai Bà Trưng, Quận 1, TP.HCM',
+        hotelStatus: true,
+        hotelType: 'Luxury',
+        hotelImage: 'bitexco_sky.jpg',
+        hotelImages: JSON.stringify(['bitexco_sky.jpg', 'bitexco_sky.jpg', 'bitexco_sky.jpg', 'bitexco_sky.jpg']),
+        description: 'Khách sạn trên cao với tầm nhìn panorama toàn thành phố',
+        createdAt: new Date(),
+        updatedAt: new Date()
+      },
+      {
+        hotelName: 'Saigon Riverside Hotel',
+        openDay: new Date('2018-08-25'),
+        address: '18 Tôn Đức Thắng, Quận 1, TP.HCM',
+        hotelStatus: true,
+        hotelType: 'Resort',
+        hotelImage: 'saigon_riverside.jpg',
+        hotelImages: JSON.stringify(['saigon_riverside.jpg', 'saigon_riverside.jpg', 'saigon_riverside.jpg', 'saigon_riverside.jpg']),
+        description: 'Khách sạn ven sông Sài Gòn với không gian yên tĩnh giữa lòng thành phố',
+        createdAt: new Date(),
+        updatedAt: new Date()
+      },
+      // Thêm khách sạn Hà Nội
+      {
+        hotelName: 'Hanoi Golden Palace',
+        openDay: new Date('2019-04-18'),
+        address: '47 Hàng Bạc, Hoàn Kiếm, Hà Nội',
+        hotelStatus: true,
+        hotelType: 'Boutique',
+        hotelImage: 'hanoi_golden.jpg',
+        hotelImages: JSON.stringify(['hanoi_golden.jpg', 'hanoi_golden.jpg', 'hanoi_golden.jpg', 'hanoi_golden.jpg']),
+        description: 'Khách sạn boutique trong khu phố cổ Hà Nội',
+        createdAt: new Date(),
+        updatedAt: new Date()
+      },
+      {
+        hotelName: 'Lotte Center Hanoi Hotel',
+        openDay: new Date('2020-12-10'),
+        address: '54 Liễu Giai, Ba Đình, Hà Nội',
+        hotelStatus: true,
+        hotelType: 'Luxury',
+        hotelImage: 'lotte_hanoi.jpg',
+        hotelImages: JSON.stringify(['lotte_hanoi.jpg', 'lotte_hanoi.jpg', 'lotte_hanoi.jpg', 'lotte_hanoi.jpg']),
+        description: 'Khách sạn 5 sao trong tòa nhà Lotte Center với dịch vụ đẳng cấp quốc tế',
+        createdAt: new Date(),
+        updatedAt: new Date()
+      },
+      {
+        hotelName: 'Old Quarter Heritage Hotel',
+        openDay: new Date('2017-07-30'),
+        address: '25 Hàng Gai, Hoàn Kiếm, Hà Nội',
+        hotelStatus: true,
+        hotelType: 'Historic',
+        hotelImage: 'old_quarter.jpg',
+        hotelImages: JSON.stringify(['old_quarter.jpg', 'old_quarter.jpg', 'old_quarter.jpg', 'old_quarter.jpg']),
+        description: 'Khách sạn mang đậm nét kiến trúc cổ trong tim phố cổ Hà Nội',
+        createdAt: new Date(),
+        updatedAt: new Date()
+      },
+      {
+        hotelName: 'West Lake Luxury Resort',
+        openDay: new Date('2021-05-22'),
+        address: '58 Quảng An, Tây Hồ, Hà Nội',
+        hotelStatus: true,
+        hotelType: 'Resort',
+        hotelImage: 'west_lake.jpg',
+        hotelImages: JSON.stringify(['west_lake.jpg', 'west_lake.jpg', 'west_lake.jpg', 'west_lake.jpg']),
+        description: 'Khu nghỉ dưỡng cao cấp bên hồ Tây với không gian xanh mát',
+        createdAt: new Date(),
+        updatedAt: new Date()
+      },
+      {
+        hotelName: 'Hanoi Opera House Hotel',
+        openDay: new Date('2018-03-14'),
+        address: '29 Tràng Tiền, Hoàn Kiếm, Hà Nội',
+        hotelStatus: true,
+        hotelType: 'Premium',
+        hotelImage: 'opera_house.jpg',
+        hotelImages: JSON.stringify(['opera_house.jpg', 'opera_house.jpg', 'opera_house.jpg', 'opera_house.jpg']),
+        description: 'Khách sạn sang trọng đối diện nhà hát lớn Hà Nội',
+        createdAt: new Date(),
+        updatedAt: new Date()
       }
     ]);
   },

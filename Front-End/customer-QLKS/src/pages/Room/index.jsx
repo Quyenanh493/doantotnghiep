@@ -3,6 +3,7 @@ import { Row, Col, Card, Button, DatePicker, Form, Input, Select, Divider, Tag, 
 import { SearchOutlined } from '@ant-design/icons';
 import { getAllRooms, checkRoomAvailability, searchAvailableRooms } from '../../services/roomService';
 import { getAllAmenities, getAmenityByRoomId } from '../../services/amenitiesService';
+import { getCities, getHotelsByCity } from '../../services/hotelService';
 import './Room.scss';
 import dayjs from 'dayjs';
 import { useNavigate } from 'react-router-dom';
@@ -20,6 +21,9 @@ function Room() {
   const [rooms, setRooms] = useState([]);
   const [allRooms, setAllRooms] = useState([]);
   const [amenities, setAmenities] = useState([]);
+  const [cities, setCities] = useState([]);
+  const [hotels, setHotels] = useState([]);
+  const [selectedCity, setSelectedCity] = useState(null);
   const [loading, setLoading] = useState(false);
   const [notiApi, contextHolder] = notification.useNotification();
   const [selectedDates, setSelectedDates] = useState(null);
@@ -102,6 +106,9 @@ function Room() {
       // Lấy dữ liệu tiện nghi
       const amenitiesResponse = await getAllAmenities();
       
+      // Lấy danh sách thành phố
+      const citiesResponse = await getCities();
+      
       if (roomsResponse && roomsResponse.DT) {
         // Hiển thị tất cả phòng có trạng thái available
         const availableRooms = roomsResponse.DT.filter(room => room.roomStatus === 'Available');
@@ -120,6 +127,10 @@ function Room() {
       if (amenitiesResponse && amenitiesResponse.DT) {
         setAmenities(amenitiesResponse.DT);
       }
+
+      if (citiesResponse && citiesResponse.DT) {
+        setCities(citiesResponse.DT);
+      }
     } catch (error) {
       console.error('Lỗi khi lấy dữ liệu:', error);
       notiApi.error({
@@ -128,6 +139,29 @@ function Room() {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Xử lý khi chọn thành phố
+  const handleCityChange = async (city) => {
+    setSelectedCity(city);
+    form.setFieldsValue({ hotel: undefined }); // Reset hotel selection
+    
+    if (city) {
+      try {
+        const hotelsResponse = await getHotelsByCity(city);
+        if (hotelsResponse && hotelsResponse.DT) {
+          setHotels(hotelsResponse.DT);
+        }
+      } catch (error) {
+        console.error('Lỗi khi lấy danh sách khách sạn:', error);
+        notiApi.error({
+          message: 'Lỗi',
+          description: 'Không thể tải danh sách khách sạn.'
+        });
+      }
+    } else {
+      setHotels([]);
     }
   };
 
@@ -144,17 +178,26 @@ function Room() {
       form.setFieldsValue({
         dates: [dateIn, dateOut],
         guestInfo: `${searchData.guestCounts.rooms} phòng, ${searchData.guestCounts.adults + searchData.guestCounts.children} khách`,
-        roomType: searchData.roomType || undefined
+        roomType: searchData.roomType || undefined,
+        city: searchData.city || undefined,
+        hotel: searchData.hotelId || undefined
       });
       
       setSelectedDates([dateIn, dateOut]);
       setGuestCounts(searchData.guestCounts);
       
+      // Load hotels if city is available
+      if (searchData.city) {
+        handleCityChange(searchData.city);
+      }
+      
       // Thực hiện tìm kiếm với dữ liệu từ Redux
       handleSearch({
         dates: [dateIn, dateOut],
         guestInfo: `${searchData.guestCounts.rooms} phòng, ${searchData.guestCounts.adults + searchData.guestCounts.children} khách`,
-        roomType: searchData.roomType || undefined
+        roomType: searchData.roomType || undefined,
+        city: searchData.city || undefined,
+        hotel: searchData.hotelId || undefined
       });
       
       // Đặt lại dữ liệu tìm kiếm trong Redux sau khi sử dụng
@@ -184,19 +227,27 @@ function Room() {
       
       // Lấy số lượng khách
       const guestCount = values.guestInfo ? (guestCounts.adults + guestCounts.children) : null;
+      
+      // Lấy thông tin city và hotel ID
+      const city = values.city || null;
+      const hotelId = values.hotel || null;
     
       // Gọi API tìm kiếm phòng trống
       console.log('Thông tin tìm kiếm:', {
         dateIn,
         dateOut,
         roomType: values.roomType || null,
-        guestCount
+        guestCount,
+        city,
+        hotelId
       });
       const response = await searchAvailableRooms(
         dateIn,
         dateOut,
         values.roomType || null,
-        guestCount
+        guestCount,
+        city,
+        hotelId
       );
       console.log('Dữ liệu trả về từ API:', response); 
       
@@ -216,6 +267,17 @@ function Room() {
           notiApi.info({
             message: 'Không tìm thấy phòng',
             description: 'Không có phòng nào phù hợp với tiêu chí tìm kiếm của bạn.'
+          });
+        } else {
+          // Hiển thị thông báo thành công
+          const locationText = city ? ` tại ${city}` : '';
+          const hotelText = hotelId && hotels.find(h => h.hotelId === hotelId) 
+            ? ` trong khách sạn ${hotels.find(h => h.hotelId === hotelId).hotelName}` 
+            : '';
+          
+          notiApi.success({
+            message: 'Tìm kiếm thành công',
+            description: `Tìm thấy ${response.DT.length} phòng${locationText}${hotelText}.`
           });
         }
       }
@@ -315,8 +377,51 @@ function Room() {
             layout="vertical"
             className="room__search-form"
           >
-            <Row gutter={[16, 16]}>
-              <Col xs={24} sm={24} md={8} lg={8}>
+            {/* Dòng 1: Thành phố và Khách sạn */}
+            <Row gutter={[16, 16]} justify="center">
+              <Col xs={24} sm={12} md={12} lg={12}>
+                <Form.Item
+                  name="city"
+                  label="Thành phố"
+                >
+                  <Select
+                    placeholder="Chọn thành phố"
+                    style={{ width: '100%' }}
+                    allowClear
+                    onChange={handleCityChange}
+                    size="large"
+                  >
+                    {cities.map(city => (
+                      <Option key={city} value={city}>{city}</Option>
+                    ))}
+                  </Select>
+                </Form.Item>
+              </Col>
+              <Col xs={24} sm={12} md={12} lg={12}>
+                <Form.Item
+                  name="hotel"
+                  label="Khách sạn"
+                >
+                  <Select
+                    placeholder="Chọn khách sạn"
+                    style={{ width: '100%' }}
+                    allowClear
+                    disabled={!selectedCity}
+                    size="large"
+                  >
+                    {hotels.map(hotel => (
+                      <Option key={hotel.hotelId} value={hotel.hotelId}>
+                        {hotel.hotelName}
+                      </Option>
+                    ))}
+                  </Select>
+                </Form.Item>
+              </Col>
+            </Row>
+
+            {/* Dòng 2: Ngày nhận phòng, trả phòng, số phòng khách, loại phòng */}
+            <Row gutter={[16, 16]} justify="center">
+              <Col xs={24} sm={12} md={6} lg={6}>
                 <Form.Item
                   name="dates"
                   label="Ngày nhận phòng, ngày trả phòng"
@@ -329,39 +434,20 @@ function Room() {
                     style={{ width: '100%' }}
                     disabledDate={disabledDate}
                     onChange={(dates) => setSelectedDates(dates)}
+                    size="large"
                   />
                 </Form.Item>
               </Col>
-              <Col xs={24} sm={12} md={8} lg={8}>
-                <Form.Item
-                  name="roomType"
-                  label="Loại phòng"
-                >
-                  <Select
-                    placeholder="Chọn Loại phòng"
-                    style={{ width: '100%' }}
-                    allowClear
-                  >
-                    {/* Lấy danh sách loại phòng duy nhất từ dữ liệu */}
-                    {Array.from(new Set(allRooms.map(room => room.roomType)))
-                      .filter(Boolean)
-                      .map(type => (
-                        <Option key={type} value={type}>{type}</Option>
-                      ))
-                    }
-                  </Select>
-                </Form.Item>
-              </Col>
-              <Col xs={24} sm={12} md={8} lg={8}>
+              <Col xs={24} sm={12} md={6} lg={6}>
                 <Form.Item
                   label="Số phòng và khách"
                   name="guestInfo"
-                  initialValue={guestSummary} // Thêm giá trị mặc định
+                  initialValue={guestSummary}
                   rules={[{ required: true, message: 'Vui lòng chọn số phòng và khách!' }]}
                 >
                   <div className="room__guest-selector">
                     <div 
-                      className="room__guest-display"
+                      className="room__guest-display room__guest-display--large"
                       onClick={() => setGuestSelectorVisible(!guestSelectorVisible)}
                     >
                       <span>{guestSummary}</span>
@@ -418,19 +504,43 @@ function Room() {
                   </div>
                 </Form.Item>
               </Col>
-            </Row>
-            <Row>
-              <Col span={24} style={{ textAlign: 'center', marginTop: '10px' }}>
-                <Button 
-                  type="primary" 
-                  htmlType="submit" 
-                  icon={<SearchOutlined />}
-                  className="room__search-btn"
-                  loading={loading}
+              <Col xs={24} sm={12} md={6} lg={6}>
+                <Form.Item
+                  name="roomType"
+                  label="Loại phòng"
                 >
-                  Tìm Kiếm
-                </Button>
+                  <Select
+                    placeholder="Chọn Loại phòng"
+                    style={{ width: '100%' }}
+                    allowClear
+                    size="large"
+                  >
+                    {Array.from(new Set(allRooms.map(room => room.roomType)))
+                      .filter(Boolean)
+                      .map(type => (
+                        <Option key={type} value={type}>{type}</Option>
+                      ))
+                    }
+                  </Select>
+                </Form.Item>
+              </Col>
+            </Row>
 
+            {/* Dòng 3: Nút tìm kiếm căn giữa */}
+            <Row justify="center" style={{ marginTop: '24px' }}>
+              <Col xs={24} sm={12} md={8} lg={6}>
+                <Form.Item>
+                  <Button 
+                    type="primary" 
+                    htmlType="submit" 
+                    icon={<SearchOutlined />}
+                    className="room__search-btn room__search-btn--large"
+                    loading={loading}
+                    style={{ width: '100%', height: '48px', fontSize: '16px', fontWeight: '500' }}
+                  >
+                    Tìm Kiếm
+                  </Button>
+                </Form.Item>
               </Col>
             </Row>
           </Form>
@@ -450,6 +560,18 @@ function Room() {
                     <h2 className="room__card-name">{room.roomName}</h2>
                     <div className="room__card-price">{Number(room.price).toLocaleString()} vnđ mỗi đêm</div>
                   </div>
+                  
+                  {room.Hotel && (
+                    <div className="room__card-hotel-info">
+                      <h3 className="room__card-hotel-name">{room.Hotel.hotelName}</h3>
+                      {room.Hotel.address && (
+                        <div className="room__card-location">
+                          <span className="room__card-location-icon">📍</span>
+                          <span className="room__card-location-text">{room.Hotel.address}</span>
+                        </div>
+                      )}
+                    </div>
+                  )}
                   
                   <div className="room__card-rating">
                     <Rate disabled value={room.averageRating || 0} allowHalf />

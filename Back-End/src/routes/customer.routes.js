@@ -28,7 +28,6 @@ router.post(
 router.put(
   '/:id', 
   authMiddleware.verifyToken,
-  permissionMiddleware.canUpdate('customers'),
   customerController.updateCustomer
 );
 

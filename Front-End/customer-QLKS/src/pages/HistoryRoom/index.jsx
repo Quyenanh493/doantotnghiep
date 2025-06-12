@@ -255,52 +255,61 @@ function HistoryRoom() {
     try {
       if (!customerId) {
         console.warn('customerId không xác định khi kiểm tra đánh giá:', customerId);
+        // Khởi tạo userReviews rỗng nếu không có customerId
+        setUserReviews({});
         return;
       }
       
+      // Khởi tạo reviewsInfo với tất cả roomId có trong booking = false (chưa đánh giá)
       const reviewsInfo = {};
-      console.log('Đang kiểm tra đánh giá cho customer:', customerId);
+      
+      // Khởi tạo tất cả các phòng có trong booking là chưa đánh giá
+      bookings.forEach(booking => {
+        if (booking.FactBookingDetails && booking.FactBookingDetails.length > 0) {
+          booking.FactBookingDetails.forEach(detail => {
+            const roomId = detail.roomId;
+            if (roomId) {
+              reviewsInfo[roomId] = false; // Mặc định chưa đánh giá
+            }
+          });
+        }
+      });
+      
+      console.log('Khởi tạo reviewsInfo với tất cả roomId:', reviewsInfo);
       
       try {
         // Gọi API để lấy tất cả đánh giá của khách hàng
         const response = await getRoomReviewsByCustomerId(customerId);
         console.log('Kết quả đánh giá từ API:', response);
         
-        if (response && response.EC === 0 && response.DT) {
+        if (response && response.EC === 0 && response.DT && Array.isArray(response.DT)) {
           const userReviews = response.DT;
           
           // Log tất cả đánh giá
           console.log('Tất cả đánh giá của người dùng:', userReviews);
           
-          // Gán trạng thái đã đánh giá cho từng phòng
-          for (const booking of bookings) {
-            if (booking.FactBookingDetails && booking.FactBookingDetails.length > 0) {
-              for (const detail of booking.FactBookingDetails) {
-                // Lấy roomId trực tiếp từ detail
-                const roomId = detail.roomId;
-                if (roomId) {
-                  // Kiểm tra xem phòng này đã được đánh giá chưa
-                  const hasReviewed = userReviews.some(review => 
-                    parseInt(review.roomId) === parseInt(roomId)
-                  );
-                  
-                  reviewsInfo[roomId] = hasReviewed;
-                  console.log(`Phòng ${roomId} đã đánh giá: ${hasReviewed}`, {
-                    reviewsForThisRoom: userReviews.filter(r => parseInt(r.roomId) === parseInt(roomId))
-                  });
-                }
-              }
+          // Cập nhật trạng thái đã đánh giá cho các phòng có trong danh sách đánh giá
+          userReviews.forEach(review => {
+            const roomId = parseInt(review.roomId);
+            if (reviewsInfo.hasOwnProperty(roomId)) {
+              reviewsInfo[roomId] = true;
+              console.log(`Đánh dấu phòng ${roomId} đã được đánh giá`);
             }
-          }
+          });
+        } else {
+          console.log('Không có đánh giá nào từ API hoặc API trả về lỗi');
         }
       } catch (apiError) {
         console.error('Lỗi khi gọi API đánh giá:', apiError);
+        // Giữ nguyên reviewsInfo với tất cả = false nếu API lỗi
       }
       
-      console.log('Cập nhật trạng thái đánh giá:', reviewsInfo);
+      console.log('Cập nhật trạng thái đánh giá cuối cùng:', reviewsInfo);
       setUserReviews(reviewsInfo);
     } catch (error) {
       console.error('Lỗi khi kiểm tra đánh giá:', error);
+      // Nếu có lỗi, set tất cả là chưa đánh giá
+      setUserReviews({});
     }
   };
 
@@ -325,23 +334,39 @@ function HistoryRoom() {
 
   // Hàm xử lý sau khi đánh giá thành công
   const handleReviewSuccess = async () => {
+    console.log('Đánh giá thành công, đang cập nhật lại dữ liệu...');
+    
+    // Đóng modal đánh giá
+    setReviewModalVisible(false);
+    setSelectedRoomForReview(null);
+    
     // Cập nhật lại trạng thái đánh giá của người dùng
     const userData = JSON.parse(localStorage.getItem('user') || '{}');
     
-    // Fetch lại toàn bộ dữ liệu
+    // Fetch lại toàn bộ dữ liệu để đảm bảo đồng bộ
     await fetchBookingHistory();
     
     // Thông báo thành công
-    message.success('Đánh giá của bạn đã được ghi nhận!');
+    messageApi.success('Đánh giá của bạn đã được ghi nhận!');
+    
+    console.log('Đã cập nhật lại dữ liệu sau khi đánh giá thành công');
   };
 
-  // Hàm kiểm tra điều kiện để hiển thị nút đánh giá (checkout date <= today)
+  // Hàm kiểm tra điều kiện để hiển thị nút đánh giá
   const canReviewBooking = (dateOut) => {
+    // OPTION 1: Cho phép đánh giá ngay sau khi thanh toán thành công (RECOMMENDED)
+    const ALLOW_IMMEDIATE_REVIEW = true;
+    
+    if (ALLOW_IMMEDIATE_REVIEW) {
+      return true;
+    }
+    
+    // OPTION 2: Chỉ cho phép đánh giá sau checkout (logic cũ)
     const today = dayjs();
     const checkoutDate = dayjs(dateOut);
     const canReview = today.isAfter(checkoutDate) || today.isSame(checkoutDate, 'day');
     
-    console.log('Kiểm tra điều kiện đánh giá:', {
+    console.log('Kiểm tra điều kiện đánh giá (sau checkout):', {
       dateOut: dateOut,
       today: today.format('YYYY-MM-DD'),
       checkoutDate: checkoutDate.format('YYYY-MM-DD'),
@@ -469,6 +494,7 @@ function HistoryRoom() {
                       type="primary"
                       className={isPaid ? "paid-btn" : "pay-btn"}
                       disabled={isPaid}
+                      onClick={isPaid ? undefined : () => handlePayNow(booking.bookingId)}
                     >
                       {isPaid ? "Đã Đặt" : "Đặt Lại"}
                     </Button>
@@ -488,17 +514,33 @@ function HistoryRoom() {
                       const roomId = detail.roomId;
                       if (!roomId) return null;
                       
-                      // Kiểm tra điều kiện đánh giá với thông tin chi tiết
-                      const canReview = true; // Bỏ qua kiểm tra ngày để test
-                      const hasReviewed = userReviews[roomId] || false;
+                      // Chỉ hiển thị nút đánh giá khi:
+                      // 1. Đã thanh toán thành công
+                      // 2. Được phép đánh giá (logic mới: luôn true nếu đã thanh toán)
+                      const canReview = isPaid && canReviewBooking(booking.dateOut);
+                      const hasReviewed = userReviews[roomId] === true; // Explicit check
                       
-                      console.log(`Nút đánh giá - Phòng ${roomId}:`, {
-                        hasReviewed,
+                      console.log(`🔍 FIXED DEBUG - BookingID: ${booking.bookingId}, RoomID: ${roomId}:`, {
+                        isPaid,
                         canReview,
+                        canReviewBooking: canReviewBooking(booking.dateOut),
+                        hasReviewed,
+                        userReviewsValue: userReviews[roomId],
+                        allUserReviews: userReviews,
                         dateOut: booking.dateOut,
-                        disabled: !canReview || hasReviewed,
-                        userReviews
+                        paymentStatus: booking.Payment?.statusPayment,
+                        finalButtonState: {
+                          show: isPaid,
+                          enabled: canReview && !hasReviewed,
+                          text: hasReviewed ? 'Đã đánh giá' : 'Đánh giá'
+                        }
                       });
+                      
+                      // Chỉ hiển thị nút đánh giá nếu đã thanh toán
+                      if (!isPaid) {
+                        console.log(`Không hiển thị nút đánh giá cho room ${roomId} vì chưa thanh toán`);
+                        return null;
+                      }
                       
                       // Chuẩn bị dữ liệu room để truyền vào hàm handleOpenReview
                       const roomData = {
@@ -508,6 +550,11 @@ function HistoryRoom() {
                         totalAmount: detail.totalAmount
                       };
                       
+                      const buttonText = hasReviewed ? 'Đã đánh giá' : 'Đánh giá';
+                      const isButtonDisabled = !canReview || hasReviewed;
+                      
+                      console.log(`Nút ${buttonText} - Disabled: ${isButtonDisabled} (canReview: ${canReview}, hasReviewed: ${hasReviewed})`);
+                      
                       return (
                         <Button
                           key={detail.bookingDetailId}
@@ -515,9 +562,9 @@ function HistoryRoom() {
                           icon={<CommentOutlined />}
                           className="history-room__review-btn"
                           onClick={() => handleOpenReview(roomData)}
-                          disabled={hasReviewed} // Tạm thời bỏ điều kiện canReview để kiểm tra
+                          disabled={isButtonDisabled}
                         >
-                          {hasReviewed ? 'Đã đánh giá' : 'Đánh giá'}
+                          {buttonText}
                         </Button>
                       );
                     })}

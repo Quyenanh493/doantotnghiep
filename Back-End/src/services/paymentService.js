@@ -11,7 +11,7 @@ const vnpConfig = {
   tmnCode: process.env.TMN_CODE, // Mã website tại VNPay
   secureSecret: process.env.SECURE_SECRET, // Chuỗi bí mật
   vnpUrl: "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html", // URL thanh toán VNPay
-  returnUrl: "https://8336-2402-800-61ca-7c9b-14fc-bcc6-9b83-1b44.ngrok-free.app/vnpay-return" // URL callback
+  returnUrl: "https://31a0-59-153-251-201.ngrok-free.app/vnpay-return" // URL callback
 };
 
 // Thử khởi tạo lại đối tượng VNPay với cấu hình đúng

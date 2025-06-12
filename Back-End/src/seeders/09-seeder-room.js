@@ -163,6 +163,296 @@ module.exports = {
         description: 'Phòng tiêu chuẩn với đầy đủ tiện nghi cơ bản, phù hợp cho khách du lịch tiết kiệm',
         createdAt: new Date(),
         updatedAt: new Date()
+      },
+      // Phòng cho các khách sạn mới ở TP.HCM
+      {
+        hotelId: 11, // Saigon Pearl Hotel
+        roomName: 'Pearl Deluxe 1101',
+        roomType: 'Deluxe',
+        roomStatus: 'Available',
+        maxCustomer: 2,
+        maxRoom: 12,
+        price: 1800000.00,
+        roomImage: 'pearl_deluxe.jpg',
+        roomImages: JSON.stringify(['pearl_deluxe.jpg', 'pearl_deluxe.jpg', 'pearl_deluxe.jpg', 'pearl_deluxe.jpg']),
+        averageRating: 4.5,
+        totalReview: 12,
+        description: 'Phòng deluxe hiện đại với view thành phố Sài Gòn, nội thất cao cấp',
+        createdAt: new Date(),
+        updatedAt: new Date()
+      },
+      {
+        hotelId: 11, // Saigon Pearl Hotel
+        roomName: 'Pearl Executive 1102',
+        roomType: 'Executive',
+        roomStatus: 'Available',
+        maxCustomer: 2,
+        maxRoom: 8,
+        price: 2200000.00,
+        roomImage: 'pearl_executive.jpg',
+        roomImages: JSON.stringify(['pearl_executive.jpg', 'pearl_executive.jpg', 'pearl_executive.jpg', 'pearl_executive.jpg']),
+        averageRating: 4.8,
+        totalReview: 8,
+        description: 'Phòng executive với dịch vụ riêng biệt và không gian làm việc chuyên nghiệp',
+        createdAt: new Date(),
+        updatedAt: new Date()
+      },
+      {
+        hotelId: 12, // Landmark 81 Suites
+        roomName: 'Sky Suite 8101',
+        roomType: 'Suite',
+        roomStatus: 'Available',
+        maxCustomer: 4,
+        maxRoom: 6,
+        price: 3500000.00,
+        roomImage: 'sky_suite.jpg',
+        roomImages: JSON.stringify(['sky_suite.jpg', 'sky_suite.jpg', 'sky_suite.jpg', 'sky_suite.jpg']),
+        averageRating: 5.0,
+        totalReview: 15,
+        description: 'Suite cao cấp tại tầng 81 với tầm nhìn 360 độ toàn thành phố',
+        createdAt: new Date(),
+        updatedAt: new Date()
+      },
+      {
+        hotelId: 12, // Landmark 81 Suites
+        roomName: 'Premium Studio 7501',
+        roomType: 'Premium',
+        roomStatus: 'Available',
+        maxCustomer: 2,
+        maxRoom: 10,
+        price: 2800000.00,
+        roomImage: 'premium_studio.jpg',
+        roomImages: JSON.stringify(['premium_studio.jpg', 'premium_studio.jpg', 'premium_studio.jpg', 'premium_studio.jpg']),
+        averageRating: 4.7,
+        totalReview: 11,
+        description: 'Studio cao cấp với bếp mini và không gian sống hiện đại',
+        createdAt: new Date(),
+        updatedAt: new Date()
+      },
+      {
+        hotelId: 13, // Ben Thanh Premium Hotel
+        roomName: 'Heritage Deluxe 301',
+        roomType: 'Deluxe',
+        roomStatus: 'Available',
+        maxCustomer: 2,
+        maxRoom: 15,
+        price: 1650000.00,
+        roomImage: 'heritage_deluxe.jpg',
+        roomImages: JSON.stringify(['heritage_deluxe.jpg', 'heritage_deluxe.jpg', 'heritage_deluxe.jpg', 'heritage_deluxe.jpg']),
+        averageRating: 4.3,
+        totalReview: 18,
+        description: 'Phòng deluxe gần chợ Bến Thành, thuận tiện mua sắm và tham quan',
+        createdAt: new Date(),
+        updatedAt: new Date()
+      },
+      {
+        hotelId: 13, // Ben Thanh Premium Hotel
+        roomName: 'Business Superior 401',
+        roomType: 'Business',
+        roomStatus: 'Available',
+        maxCustomer: 2,
+        maxRoom: 12,
+        price: 1400000.00,
+        roomImage: 'business_superior.jpg',
+        roomImages: JSON.stringify(['business_superior.jpg', 'business_superior.jpg', 'business_superior.jpg', 'business_superior.jpg']),
+        averageRating: 4.1,
+        totalReview: 9,
+        description: 'Phòng business với không gian làm việc rộng rãi và wifi tốc độ cao',
+        createdAt: new Date(),
+        updatedAt: new Date()
+      },
+      {
+        hotelId: 14, // Bitexco Sky Hotel
+        roomName: 'Sky View Deluxe 4501',
+        roomType: 'Deluxe',
+        roomStatus: 'Available',
+        maxCustomer: 2,
+        maxRoom: 8,
+        price: 2600000.00,
+        roomImage: 'sky_view_deluxe.jpg',
+        roomImages: JSON.stringify(['sky_view_deluxe.jpg', 'sky_view_deluxe.jpg', 'sky_view_deluxe.jpg', 'sky_view_deluxe.jpg']),
+        averageRating: 4.9,
+        totalReview: 14,
+        description: 'Phòng deluxe tầng cao với tầm nhìn panorama tuyệt đẹp ra thành phố',
+        createdAt: new Date(),
+        updatedAt: new Date()
+      },
+      {
+        hotelId: 15, // Saigon Riverside Hotel
+        roomName: 'River View Premium 201',
+        roomType: 'Premium',
+        roomStatus: 'Available',
+        maxCustomer: 3,
+        maxRoom: 10,
+        price: 2100000.00,
+        roomImage: 'river_view_premium.jpg',
+        roomImages: JSON.stringify(['river_view_premium.jpg', 'river_view_premium.jpg', 'river_view_premium.jpg', 'river_view_premium.jpg']),
+        averageRating: 4.4,
+        totalReview: 10,
+        description: 'Phòng premium với ban công riêng nhìn ra sông Sài Gòn',
+        createdAt: new Date(),
+        updatedAt: new Date()
+      },
+      // Phòng cho các khách sạn mới ở Hà Nội
+      {
+        hotelId: 16, // Hanoi Golden Palace
+        roomName: 'Golden Deluxe 201',
+        roomType: 'Deluxe',
+        roomStatus: 'Available',
+        maxCustomer: 2,
+        maxRoom: 12,
+        price: 1550000.00,
+        roomImage: 'golden_deluxe.jpg',
+        roomImages: JSON.stringify(['golden_deluxe.jpg', 'golden_deluxe.jpg', 'golden_deluxe.jpg', 'golden_deluxe.jpg']),
+        averageRating: 4.2,
+        totalReview: 16,
+        description: 'Phòng deluxe mang phong cách kiến trúc cổ Hà Nội, gần hồ Hoàn Kiếm',
+        createdAt: new Date(),
+        updatedAt: new Date()
+      },
+      {
+        hotelId: 16, // Hanoi Golden Palace
+        roomName: 'Heritage Suite 301',
+        roomType: 'Suite',
+        roomStatus: 'Available',
+        maxCustomer: 4,
+        maxRoom: 5,
+        price: 2800000.00,
+        roomImage: 'heritage_suite.jpg',
+        roomImages: JSON.stringify(['heritage_suite.jpg', 'heritage_suite.jpg', 'heritage_suite.jpg', 'heritage_suite.jpg']),
+        averageRating: 4.7,
+        totalReview: 8,
+        description: 'Suite rộng rãi với thiết kế truyền thống và tiện nghi hiện đại',
+        createdAt: new Date(),
+        updatedAt: new Date()
+      },
+      {
+        hotelId: 17, // Lotte Center Hanoi Hotel
+        roomName: 'Lotte Executive 3501',
+        roomType: 'Executive',
+        roomStatus: 'Available',
+        maxCustomer: 2,
+        maxRoom: 15,
+        price: 2400000.00,
+        roomImage: 'lotte_executive.jpg',
+        roomImages: JSON.stringify(['lotte_executive.jpg', 'lotte_executive.jpg', 'lotte_executive.jpg', 'lotte_executive.jpg']),
+        averageRating: 4.8,
+        totalReview: 20,
+        description: 'Phòng executive cao cấp với dịch vụ 5 sao quốc tế',
+        createdAt: new Date(),
+        updatedAt: new Date()
+      },
+      {
+        hotelId: 17, // Lotte Center Hanoi Hotel
+        roomName: 'Lotte Presidential Suite 4001',
+        roomType: 'Suite',
+        roomStatus: 'Available',
+        maxCustomer: 6,
+        maxRoom: 2,
+        price: 5000000.00,
+        roomImage: 'lotte_presidential.jpg',
+        roomImages: JSON.stringify(['lotte_presidential.jpg', 'lotte_presidential.jpg', 'lotte_presidential.jpg', 'lotte_presidential.jpg']),
+        averageRating: 5.0,
+        totalReview: 5,
+        description: 'Suite tổng thống với không gian siêu rộng và dịch vụ butler riêng',
+        createdAt: new Date(),
+        updatedAt: new Date()
+      },
+      {
+        hotelId: 18, // Old Quarter Heritage Hotel
+        roomName: 'Quarter Deluxe 201',
+        roomType: 'Deluxe',
+        roomStatus: 'Available',
+        maxCustomer: 2,
+        maxRoom: 10,
+        price: 1200000.00,
+        roomImage: 'quarter_deluxe.jpg',
+        roomImages: JSON.stringify(['quarter_deluxe.jpg', 'quarter_deluxe.jpg', 'quarter_deluxe.jpg', 'quarter_deluxe.jpg']),
+        averageRating: 4.0,
+        totalReview: 22,
+        description: 'Phòng deluxe trong lòng phố cổ với kiến trúc truyền thống',
+        createdAt: new Date(),
+        updatedAt: new Date()
+      },
+      {
+        hotelId: 18, // Old Quarter Heritage Hotel
+        roomName: 'Heritage Standard 101',
+        roomType: 'Standard',
+        roomStatus: 'Available',
+        maxCustomer: 2,
+        maxRoom: 15,
+        price: 800000.00,
+        roomImage: 'heritage_standard.jpg',
+        roomImages: JSON.stringify(['heritage_standard.jpg', 'heritage_standard.jpg', 'heritage_standard.jpg', 'heritage_standard.jpg']),
+        averageRating: 3.8,
+        totalReview: 12,
+        description: 'Phòng tiêu chuẩn ấm cúng với thiết kế cổ điển Hà Nội',
+        createdAt: new Date(),
+        updatedAt: new Date()
+      },
+      {
+        hotelId: 19, // West Lake Luxury Resort
+        roomName: 'Lake View Premium 101',
+        roomType: 'Premium',
+        roomStatus: 'Available',
+        maxCustomer: 2,
+        maxRoom: 8,
+        price: 2200000.00,
+        roomImage: 'lake_view_premium.jpg',
+        roomImages: JSON.stringify(['lake_view_premium.jpg', 'lake_view_premium.jpg', 'lake_view_premium.jpg', 'lake_view_premium.jpg']),
+        averageRating: 4.6,
+        totalReview: 13,
+        description: 'Phòng premium với tầm nhìn thơ mộng ra hồ Tây',
+        createdAt: new Date(),
+        updatedAt: new Date()
+      },
+      {
+        hotelId: 19, // West Lake Luxury Resort
+        roomName: 'Garden Villa Suite 201',
+        roomType: 'Suite',
+        roomStatus: 'Available',
+        maxCustomer: 4,
+        maxRoom: 6,
+        price: 3200000.00,
+        roomImage: 'garden_villa.jpg',
+        roomImages: JSON.stringify(['garden_villa.jpg', 'garden_villa.jpg', 'garden_villa.jpg', 'garden_villa.jpg']),
+        averageRating: 4.9,
+        totalReview: 7,
+        description: 'Villa suite với khu vườn riêng và bể bơi mini',
+        createdAt: new Date(),
+        updatedAt: new Date()
+      },
+      {
+        hotelId: 20, // Hanoi Opera House Hotel
+        roomName: 'Opera Deluxe 401',
+        roomType: 'Deluxe',
+        roomStatus: 'Available',
+        maxCustomer: 2,
+        maxRoom: 12,
+        price: 1750000.00,
+        roomImage: 'opera_deluxe.jpg',
+        roomImages: JSON.stringify(['opera_deluxe.jpg', 'opera_deluxe.jpg', 'opera_deluxe.jpg', 'opera_deluxe.jpg']),
+        averageRating: 4.3,
+        totalReview: 19,
+        description: 'Phòng deluxe với view nhà hát lớn Hà Nội và phố Tràng Tiền',
+        createdAt: new Date(),
+        updatedAt: new Date()
+      },
+      {
+        hotelId: 20, // Hanoi Opera House Hotel
+        roomName: 'Cultural Premium 501',
+        roomType: 'Premium',
+        roomStatus: 'Available',
+        maxCustomer: 3,
+        maxRoom: 8,
+        price: 2100000.00,
+        roomImage: 'cultural_premium.jpg',
+        roomImages: JSON.stringify(['cultural_premium.jpg', 'cultural_premium.jpg', 'cultural_premium.jpg', 'cultural_premium.jpg']),
+        averageRating: 4.5,
+        totalReview: 11,
+        description: 'Phòng premium với thiết kế văn hóa và nghệ thuật Việt Nam',
+        createdAt: new Date(),
+        updatedAt: new Date()
       }
     ]);
   },

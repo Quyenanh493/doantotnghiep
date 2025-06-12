@@ -26,7 +26,6 @@ const checkPhoneExist = async (userPhone) => {
   return !!user;
 }
 
-
 const registerNewUser = async (rawUserData) => {
   try {
     // check email exist

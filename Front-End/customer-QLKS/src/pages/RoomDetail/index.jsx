@@ -123,6 +123,18 @@ function RoomDetail() {
           <Col xs={24} md={24}>
             <div className="room-detail__header">
               <h1 className="room-detail__title">{room.roomName}</h1>
+              
+              {room.Hotel && (
+                <div className="room-detail__hotel-info">
+                  <h2 className="room-detail__hotel-name">{room.Hotel.hotelName}</h2>
+                  {room.Hotel.address && (
+                    <div className="room-detail__hotel-address">
+                      <span>Địa chỉ khách sạn: {room.Hotel.address}</span>
+                    </div>
+                  )}
+                </div>
+              )}
+              
               <div className="room-detail__meta">
                 <div className="room-detail__rating">
                   <Rate disabled defaultValue={room.averageRating || 0} allowHalf />

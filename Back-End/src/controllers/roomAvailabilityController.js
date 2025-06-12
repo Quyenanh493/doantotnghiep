@@ -108,9 +108,9 @@ const roomAvailabilityController = {
     // Tìm kiếm phòng trống theo tiêu chí
     searchAvailableRooms: async (req, res, next) => {
         try {
-            const { dateIn, dateOut, roomType, guestCount } = req.body;
+            const { dateIn, dateOut, roomType, guestCount, city, hotelId } = req.body;
             
-            let data = await roomAvailabilityService.searchAvailableRooms(dateIn, dateOut, roomType, guestCount);
+            let data = await roomAvailabilityService.searchAvailableRooms(dateIn, dateOut, roomType, guestCount, city, hotelId);
             
             return res.status(200).json({
                 EM: data.EM,

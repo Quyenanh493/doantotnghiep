@@ -9,7 +9,9 @@ const initialState = {
     adults: 2,
     children: 0
   },
-  roomType: null
+  roomType: null,
+  city: null,
+  hotelId: null
 };
 
 const searchSlice = createSlice({
@@ -44,9 +46,25 @@ const searchSlice = createSlice({
       }
       state.roomType = roomType;
     },
+    setCity: (state, action) => {
+      const city = action.payload;
+      // Kiểm tra city là chuỗi hợp lệ hoặc null
+      if (city !== null && typeof city !== 'string') {
+        throw new Error('Thành phố phải là chuỗi hoặc null');
+      }
+      state.city = city;
+    },
+    setHotelId: (state, action) => {
+      const hotelId = action.payload;
+      // Kiểm tra hotelId là số hoặc null
+      if (hotelId !== null && typeof hotelId !== 'number') {
+        throw new Error('Hotel ID phải là số hoặc null');
+      }
+      state.hotelId = hotelId;
+    },
     resetSearch: () => initialState
   }
 });
 
-export const { setSearchDates, setGuestCounts, setRoomType, resetSearch } = searchSlice.actions;
+export const { setSearchDates, setGuestCounts, setRoomType, setCity, setHotelId, resetSearch } = searchSlice.actions;
 export default searchSlice.reducer;

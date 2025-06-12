@@ -12,16 +12,6 @@ const transporter = nodemailer.createTransport({
 });
 
 const contactService = {
-  /**
-   * Gửi email liên hệ
-   * 
-   * @param {Object} data - Dữ liệu từ form liên hệ
-   * @param {string} data.name - Tên người gửi
-   * @param {string} data.email - Email người gửi
-   * @param {string} data.subject - Tiêu đề
-   * @param {string} data.message - Nội dung tin nhắn
-   * @returns {Object} Kết quả xử lý
-   */
   sendContactEmail: async (data) => {
     try {
       // Kiểm tra dữ liệu đầu vào

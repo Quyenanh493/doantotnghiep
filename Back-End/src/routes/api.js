@@ -28,7 +28,7 @@ let initApiRoutes = (app) => {
   router.use('/upload-image', uploadRoutes);
   router.use('/payment', paymentRoutes);
   router.use('/contact', contactRoutes);
-  router.use('/hotel', hotelRoutes);
+  router.use('/hotels', hotelRoutes);
   router.use('/bookings', factBookingRoutes);
   router.use('/booking-details', factBookingDetailRoutes);
   router.use('/accounts', accountRoutes);

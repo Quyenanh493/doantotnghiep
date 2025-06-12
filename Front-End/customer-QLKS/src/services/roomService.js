@@ -22,8 +22,8 @@ export const getRoomById = async (roomId) => {
   }
 };
 
-// Tìm kiếm phòng trống theo ngày, loại phòng và số lượng khách
-export const searchAvailableRooms = async (dateIn, dateOut, roomType, guestCount) => {
+// Tìm kiếm phòng trống theo ngày, loại phòng, số lượng khách, thành phố và khách sạn
+export const searchAvailableRooms = async (dateIn, dateOut, roomType, guestCount, city, hotelId) => {
   try {
     // Tạo object chứa các tham số tìm kiếm
     const requestData = { dateIn, dateOut };
@@ -31,6 +31,8 @@ export const searchAvailableRooms = async (dateIn, dateOut, roomType, guestCount
     // Thêm các tham số tùy chọn nếu có
     if (roomType) requestData.roomType = roomType;
     if (guestCount) requestData.guestCount = guestCount;
+    if (city) requestData.city = city;
+    if (hotelId) requestData.hotelId = hotelId;
     
     console.log('Dữ liệu gửi đi:', requestData);
     

@@ -10,13 +10,7 @@ cloudinary.config({
   secure: true
 });
 
-/**
- * Tải một hình ảnh lên Cloudinary
- * @param {Buffer} fileBuffer - Buffer của tệp cần tải lên
- * @param {string} fileName - Tên tệp gốc
- * @param {string} folder - Đường dẫn thư mục trong Cloudinary
- * @returns {Promise<string>} - URL tải xuống của tệp đã tải lên
- */
+
 const uploadImage = async (fileBuffer, fileName, folder = 'images') => {
   try {
     // Chuyển đổi buffer thành base64

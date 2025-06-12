@@ -701,17 +701,18 @@
   justify-content: center;
   margin-top: 40px;
   
+  
   &-btn {
     padding: 0 30px;
     height: 40px;
     font-size: 16px;
     border: none;
-    color: #1890ff;
-    background: transparent;
+    color: #fff;
+    background: #1890ff;
     
     &:hover {
-      color: #40a9ff;
-      background: transparent;
+      color: #fff;
+      background: #40a9ff;
     }
   }
 }

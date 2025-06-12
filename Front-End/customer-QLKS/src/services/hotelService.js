@@ -1,8 +1,9 @@
 import request from '../utils/request';
 
-export const getAllHotels = async (params = {}) => {
+// Lấy tất cả khách sạn
+export const getAllHotels = async () => {
   try {
-    const response = await request.get('/hotel', { params });
+    const response = await request.get('/hotels');
     return response;
   } catch (error) {
     console.error('Lỗi khi lấy danh sách khách sạn:', error);
@@ -10,13 +11,35 @@ export const getAllHotels = async (params = {}) => {
   }
 };
 
-
+// Lấy khách sạn theo ID
 export const getHotelById = async (hotelId) => {
   try {
-    const response = await request.get(`/hotel/${hotelId}`);
+    const response = await request.get(`/hotels/${hotelId}`);
     return response;
   } catch (error) {
     console.error(`Lỗi khi lấy thông tin khách sạn ID ${hotelId}:`, error);
+    throw error;
+  }
+};
+
+// Lấy danh sách thành phố
+export const getCities = async () => {
+  try {
+    const response = await request.get('/hotels/cities');
+    return response;
+  } catch (error) {
+    console.error('Lỗi khi lấy danh sách thành phố:', error);
+    throw error;
+  }
+};
+
+// Lấy danh sách khách sạn theo thành phố
+export const getHotelsByCity = async (city) => {
+  try {
+    const response = await request.get(`/hotels/city/${encodeURIComponent(city)}`);
+    return response;
+  } catch (error) {
+    console.error(`Lỗi khi lấy khách sạn theo thành phố ${city}:`, error);
     throw error;
   }
 };

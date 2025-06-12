@@ -34,6 +34,39 @@ const hotelController = {
         }
     },
 
+    // Lấy danh sách thành phố
+    getCities: async (req, res, next) => {
+        try {
+            let data = await hotelService.getCities();
+            
+            return res.status(200).json({
+                EM: data.EM,
+                EC: data.EC,
+                DT: data.DT
+            });
+        } catch (error) {
+            console.error("Error in getCities:", error);
+            next(error);
+        }
+    },
+
+    // Lấy danh sách khách sạn theo thành phố
+    getHotelsByCity: async (req, res, next) => {
+        try {
+            const city = req.params.city;
+            let data = await hotelService.getHotelsByCity(city);
+            
+            return res.status(200).json({
+                EM: data.EM,
+                EC: data.EC,
+                DT: data.DT
+            });
+        } catch (error) {
+            console.error("Error in getHotelsByCity:", error);
+            next(error);
+        }
+    },
+
     // Tạo khách sạn mới
     createHotel: async (req, res, next) => {
         try {

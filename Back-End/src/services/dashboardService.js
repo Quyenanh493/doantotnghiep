@@ -52,7 +52,6 @@ const dashboardService = {
     }
   },
 
-
   // Số khách hàng đăng ký theo tháng trong năm
   getCustomerRegisterByMonth: async (year) => {
     try {

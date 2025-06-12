@@ -406,14 +406,34 @@ function BookingConfirmation() {
       } else {
         notiApi.error({
           message: 'Đặt phòng thất bại',
-          description: response?.EM || 'Có lỗi xảy ra khi đặt phòng. Vui lòng thử lại sau!'
+          description: response?.EM || 'Có lỗi xảy ra khi đặt phòng. Vui lòng kiểm tra thông tin và thử lại sau!'
         });
       }
     } catch (error) {
       console.error('Lỗi khi đặt phòng:', error);
+      
+      // Xử lý các loại lỗi khác nhau
+      let errorMessage = 'Có lỗi xảy ra khi đặt phòng. Vui lòng thử lại sau!';
+      
+      if (error.response) {
+        // Lỗi từ server
+        const { status } = error.response;
+        if (status === 401) {
+          errorMessage = 'Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.';
+        } else if (status === 400) {
+          errorMessage = 'Thông tin đặt phòng không hợp lệ. Vui lòng kiểm tra lại.';
+        } else if (status === 409) {
+          errorMessage = 'Phòng đã được đặt bởi khách hàng khác. Vui lòng chọn phòng khác.';
+        } else if (status >= 500) {
+          errorMessage = 'Hệ thống đang bảo trì. Vui lòng thử lại sau ít phút.';
+        }
+      } else if (error.request) {
+        errorMessage = 'Không thể kết nối đến máy chủ. Vui lòng kiểm tra kết nối internet.';
+      }
+      
       notiApi.error({
         message: 'Đặt phòng thất bại',
-        description: 'Có lỗi xảy ra khi đặt phòng. Vui lòng thử lại sau!'
+        description: errorMessage
       });
     } finally {
       setLoading(false);

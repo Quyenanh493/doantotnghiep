@@ -349,23 +349,47 @@ const roomAvailabilityService = {
     },
 
     // Tìm kiếm phòng trống theo tiêu chí
-    searchAvailableRooms: async (dateIn, dateOut, roomType, guestCount) => {
+    searchAvailableRooms: async (dateIn, dateOut, roomType, guestCount, city, hotelId) => {
         try {
             // Chuyển đổi chuỗi ngày thành đối tượng Date
             const startDate = new Date(dateIn);
             const endDate = new Date(dateOut);
             
-            // Lấy tất cả phòng
+            // Xây dựng điều kiện where cho Room
+            let roomWhereCondition = {
+                ...(roomType && { roomType: roomType }),
+                ...(guestCount && { maxCustomer: { [Op.gte]: guestCount } }),
+                maxRoom: { [Op.gt]: 0 } // Chỉ lấy phòng còn chỗ trống
+            };
+
+            // Xây dựng điều kiện include cho Hotel
+            let hotelIncludeCondition = {
+                model: db.Hotel
+            };
+
+            // Ưu tiên filter theo city trước, nếu không có city thì filter theo hotelId
+            if (city) {
+                // Nếu có city, filter theo địa chỉ khách sạn chứa tên thành phố
+                hotelIncludeCondition.where = {
+                    address: {
+                        [Op.like]: `%${city}%`
+                    }
+                };
+                
+                // Nếu có cả city và hotelId, thêm điều kiện hotelId
+                if (hotelId) {
+                    hotelIncludeCondition.where.hotelId = hotelId;
+                }
+            } else if (hotelId) {
+                // Nếu chỉ có hotelId (không có city), filter theo hotelId
+                roomWhereCondition.hotelId = hotelId;
+            }
+            
+            // Lấy tất cả phòng theo điều kiện
             let rooms = await db.Room.findAll({
-                where: {
-                    ...(roomType && { roomType: roomType }),
-                    ...(guestCount && { maxCustomer: { [Op.gte]: guestCount } }),
-                    maxRoom: { [Op.gt]: 0 } // Chỉ lấy phòng còn chỗ trống
-                },
+                where: roomWhereCondition,
                 include: [
-                    {
-                        model: db.Hotel
-                    },
+                    hotelIncludeCondition,
                     {
                         model: db.Amenities,
                         as: 'Amenities',
@@ -419,12 +443,12 @@ const roomAvailabilityService = {
             }
 
             return {
-                EM: 'Tìm kiếm phòng trống thành công',
+                EM: `Tìm kiếm phòng trống thành công${city ? ` tại ${city}` : ''}${hotelId ? ' trong khách sạn đã chọn' : ''}`,
                 EC: 0,
                 DT: availableRooms
             };
         } catch (error) {
-            console.log(error);
+            console.log('Error in searchAvailableRooms:', error);
             return {
                 EM: 'Lỗi từ server',
                 EC: -1,

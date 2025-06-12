@@ -16,8 +16,8 @@ function PaymentFailure() {
   const code = queryParams.get('code');
   
   const handleRetry = () => {
-    // Navigate back to the booking confirmation page
-    navigate('/booking-confirmation');
+    // Navigate back to the room search page to start a new booking
+    navigate('/room');
   };
   
   return (

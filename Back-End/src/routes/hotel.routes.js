@@ -4,8 +4,10 @@ import authMiddleware from '../middleware/authMiddleware';
 const router = express.Router();
 
 
-// public 
+// public - Routes cụ thể phải đặt trước routes có parameter
 router.get('/', hotelController.getAllHotels);
+router.get('/cities', hotelController.getCities);
+router.get('/city/:city', hotelController.getHotelsByCity);
 router.get('/:id', hotelController.getHotelById);
 
 

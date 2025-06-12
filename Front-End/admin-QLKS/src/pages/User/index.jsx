@@ -256,7 +256,7 @@ function User() {
   const showRoleModal = (user) => {
     setCurrentUser(user);
     setIsRoleModalVisible(true);
-    roleForm.setFieldsValue({
+    roleForm.setFieldsValue({    
       roleId: user.roleId
     });
   };

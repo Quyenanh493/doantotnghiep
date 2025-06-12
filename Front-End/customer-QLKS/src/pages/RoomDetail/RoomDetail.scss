@@ -36,6 +36,32 @@
     color: #333;
   }
 
+  &__hotel-info {
+    margin: 15px 0;
+    padding: 12px 0;
+    border-bottom: 1px solid #e0e0e0;
+  }
+
+  &__hotel-name {
+    font-size: 20px;
+    font-weight: 600;
+    color: #1890ff;
+    margin: 0 0 8px 0;
+  }
+
+  &__hotel-address {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #666;
+    font-size: 15px;
+  }
+
+  &__location-icon {
+    font-size: 16px;
+    color: #ff4d4f;
+  }
+
   &__meta {
     display: flex;
     justify-content: space-between;

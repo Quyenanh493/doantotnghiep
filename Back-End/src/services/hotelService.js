@@ -1,4 +1,5 @@
 import db from '../models/index';
+import { Op } from 'sequelize';
 
 const hotelService = {
     // Lấy tất cả khách sạn
@@ -63,6 +64,74 @@ const hotelService = {
             };
         } catch (error) {
             console.error("Error in getHotelById service:", error);
+            return {
+                EM: 'Lỗi từ server',
+                EC: -1,
+                DT: []
+            };
+        }
+    },
+
+    // Lấy danh sách thành phố có khách sạn
+    getCities: async () => {
+        try {
+            const hotels = await db.Hotel.findAll({
+                where: {
+                    hotelStatus: true
+                },
+                attributes: ['address'],
+                raw: true
+            });
+            
+            // Trích xuất thành phố từ địa chỉ
+            const cities = new Set();
+            hotels.forEach(hotel => {
+                if (hotel.address) {
+                    // Tách thành phố từ địa chỉ (giả sử định dạng: "địa chỉ, quận, thành phố")
+                    const addressParts = hotel.address.split(',');
+                    if (addressParts.length >= 2) {
+                        const city = addressParts[addressParts.length - 1].trim();
+                        cities.add(city);
+                    }
+                }
+            });
+            
+            return {
+                EM: 'Lấy danh sách thành phố thành công',
+                EC: 0,
+                DT: Array.from(cities).sort()
+            };
+        } catch (error) {
+            console.error("Error in getCities service:", error);
+            return {
+                EM: 'Lỗi từ server',
+                EC: -1,
+                DT: []
+            };
+        }
+    },
+
+    // Lấy danh sách khách sạn theo thành phố
+    getHotelsByCity: async (city) => {
+        try {
+            const hotels = await db.Hotel.findAll({
+                where: {
+                    hotelStatus: true,
+                    address: {
+                        [Op.like]: `%${city}%`
+                    }
+                },
+                attributes: ['hotelId', 'hotelName', 'address', 'hotelType', 'hotelImage'],
+                order: [['hotelName', 'ASC']]
+            });
+            
+            return {
+                EM: 'Lấy danh sách khách sạn theo thành phố thành công',
+                EC: 0,
+                DT: hotels
+            };
+        } catch (error) {
+            console.error("Error in getHotelsByCity service:", error);
             return {
                 EM: 'Lỗi từ server',
                 EC: -1,
